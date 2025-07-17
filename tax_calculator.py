@@ -108,7 +108,7 @@ class TaxCalculator:
         if not coupon_schedule:
             return 0.0
             
-        today = datetime.now()
+        # Calculate total after-tax cash flows without discounting for yield calculation
         total_after_tax_cash_flows = 0.0
         
         for payment in coupon_schedule:
@@ -122,26 +122,18 @@ class TaxCalculator:
             
             # Total after-tax cash flow for this payment
             total_payment = after_tax_coupon + principal_amount
-            
-            # Calculate present value using simple discounting
-            years_to_payment = payment['years_to_payment']
-            # Use a market discount rate for present value calculation
-            discount_rate = 0.04  # 4% discount rate
-            present_value = total_payment / ((1 + discount_rate) ** years_to_payment)
-            
-            total_after_tax_cash_flows += present_value
+            total_after_tax_cash_flows += total_payment
         
         # Calculate yield as percentage return
-        if purchase_price > 0:
+        if purchase_price > 0 and coupon_schedule:
             # Calculate total return
             total_return = total_after_tax_cash_flows / purchase_price
             
             # Annualize the return
-            if coupon_schedule:
-                final_payment_years = max(payment['years_to_payment'] for payment in coupon_schedule)
-                if final_payment_years > 0:
-                    annualized_yield = ((total_return ** (1/final_payment_years)) - 1) * 100
-                    return annualized_yield
+            final_payment_years = max(payment['years_to_payment'] for payment in coupon_schedule)
+            if final_payment_years > 0:
+                annualized_yield = ((total_return ** (1/final_payment_years)) - 1) * 100
+                return annualized_yield
             
             return (total_return - 1) * 100
         
