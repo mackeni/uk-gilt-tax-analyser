@@ -1,0 +1,107 @@
+# UK Gilt Tax Efficiency Analyzer
+
+## Overview
+
+This is a Streamlit web application designed to help UK additional rate taxpayers (45% tax band) analyze the tax efficiency of UK gilt investments compared to savings accounts. The application provides tools to calculate after-tax yields, compare investment options, and visualize tax implications for high-rate taxpayers.
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Frontend Architecture
+- **Framework**: Streamlit - Python-based web framework for data applications
+- **UI Components**: Interactive widgets including sidebars, charts, and data tables
+- **Visualization**: Plotly Express and Plotly Graph Objects for interactive charts
+- **State Management**: Streamlit session state for maintaining user selections and cached data
+
+### Backend Architecture
+- **Language**: Python
+- **Structure**: Modular design with separate components for data fetching, tax calculations, and utilities
+- **Caching**: Streamlit's `@st.cache_resource` decorator for performance optimization
+- **Data Processing**: Pandas for data manipulation and NumPy for numerical computations
+
+## Key Components
+
+### 1. Main Application (`app.py`)
+- **Purpose**: Entry point and UI orchestration
+- **Features**: 
+  - Page configuration and layout management
+  - Session state initialization
+  - User interface components and navigation
+  - Integration of data fetcher and tax calculator
+
+### 2. Gilt Data Fetcher (`gilt_data.py`)
+- **Purpose**: Retrieve UK gilt market data
+- **Data Sources**: 
+  - UK Debt Management Office (DMO) - primary source
+  - Tradeweb - secondary source
+  - DividendData - backup source
+- **Fallback Strategy**: Sample data when real-time data is unavailable
+- **Error Handling**: Graceful degradation with user notifications
+
+### 3. Tax Calculator (`tax_calculator.py`)
+- **Purpose**: Calculate tax implications for gilt investments
+- **Tax Rates**: Current UK tax rates for 2025/26
+  - Additional rate: 45%
+  - Higher rate: 40%
+  - Basic rate: 20%
+  - CGT rates: 20% (higher), 10% (basic)
+- **Features**:
+  - Personal Savings Allowance calculations
+  - After-tax yield computations
+  - Tax efficiency comparisons
+
+### 4. Utilities (`utils.py`)
+- **Purpose**: Common formatting and calculation functions
+- **Functions**:
+  - Currency formatting with appropriate scaling (K, M)
+  - Percentage formatting
+  - Date calculations for maturity periods
+
+## Data Flow
+
+1. **User Input**: Tax settings and preferences via Streamlit sidebar
+2. **Data Fetching**: Gilt data retrieved from external sources or sample data
+3. **Tax Calculations**: After-tax yields computed based on user's tax bracket
+4. **Visualization**: Interactive charts and tables displaying results
+5. **Comparison**: Side-by-side analysis of gilt vs. savings account returns
+
+## External Dependencies
+
+### Data Sources
+- **UK Debt Management Office (DMO)**: Primary source for gilt data
+- **Tradeweb**: Secondary market data source
+- **DividendData**: Backup gilt price and yield information
+
+### Python Libraries
+- **Streamlit**: Web application framework
+- **Pandas**: Data manipulation and analysis
+- **Plotly**: Interactive visualization
+- **NumPy**: Numerical computations
+- **Requests**: HTTP requests for data fetching
+
+## Deployment Strategy
+
+### Development Environment
+- **Platform**: Replit-compatible Python environment
+- **Dependencies**: Managed via requirements.txt (implied)
+- **Local Testing**: Streamlit development server
+
+### Production Considerations
+- **Caching**: Implemented via Streamlit's caching mechanisms
+- **Error Handling**: Graceful fallbacks and user notifications
+- **Performance**: Optimized data fetching and calculation caching
+- **Scalability**: Stateless design with session state management
+
+### Key Architectural Decisions
+
+1. **Modular Design**: Separated concerns into distinct modules for maintainability
+2. **Streamlit Choice**: Selected for rapid prototyping and built-in UI components
+3. **Fallback Data**: Implemented sample data to ensure application functionality
+4. **Tax Focus**: Specifically designed for UK additional rate taxpayers
+5. **Real-time Data**: Attempted integration with live market data sources
+6. **Caching Strategy**: Utilized Streamlit's caching for performance optimization
+
+This architecture prioritizes user experience for UK taxpayers while maintaining flexibility for future enhancements and data source integrations.
