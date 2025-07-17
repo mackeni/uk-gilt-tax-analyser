@@ -237,37 +237,49 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        best_after_tax = filtered_df.loc[filtered_df['After-Tax Yield'].idxmax()]
-        st.metric(
-            "Best After-Tax Yield",
-            f"{best_after_tax['After-Tax Yield']:.3f}%",
-            f"{best_after_tax['Name']}"
-        )
+        if len(filtered_df) > 0:
+            best_after_tax = filtered_df.loc[filtered_df['After-Tax Yield'].idxmax()]
+            st.metric(
+                "Best After-Tax Yield",
+                f"{best_after_tax['After-Tax Yield']:.3f}%",
+                f"{best_after_tax['Name']}"
+            )
+        else:
+            st.metric("Best After-Tax Yield", "N/A", "No gilts found")
     
     with col2:
-        highest_equivalent = filtered_df.loc[filtered_df['Equivalent Savings Rate'].idxmax()]
-        st.metric(
-            "Highest Equivalent Rate",
-            f"{highest_equivalent['Equivalent Savings Rate']:.3f}%",
-            f"{highest_equivalent['Name']}"
-        )
+        if len(filtered_df) > 0:
+            highest_equivalent = filtered_df.loc[filtered_df['Equivalent Savings Rate'].idxmax()]
+            st.metric(
+                "Highest Equivalent Rate",
+                f"{highest_equivalent['Equivalent Savings Rate']:.3f}%",
+                f"{highest_equivalent['Name']}"
+            )
+        else:
+            st.metric("Highest Equivalent Rate", "N/A", "No gilts found")
     
     with col3:
-        shortest_maturity = filtered_df.loc[filtered_df['Years to Maturity'].idxmin()]
-        st.metric(
-            "Shortest Maturity",
-            f"{shortest_maturity['Years to Maturity']:.1f} years",
-            f"{shortest_maturity['Name']}"
-        )
+        if len(filtered_df) > 0:
+            shortest_maturity = filtered_df.loc[filtered_df['Years to Maturity'].idxmin()]
+            st.metric(
+                "Shortest Maturity",
+                f"{shortest_maturity['Years to Maturity']:.1f} years",
+                f"{shortest_maturity['Name']}"
+            )
+        else:
+            st.metric("Shortest Maturity", "N/A", "No gilts found")
     
     with col4:
-        best_advantage = filtered_df['After-Tax Yield'] - (comparison_savings_rate * (1 - 0.45))
-        best_advantage_gilt = filtered_df.loc[best_advantage.idxmax()]
-        st.metric(
-            "Best vs Savings",
-            f"+{best_advantage.max():.3f}%",
-            f"{best_advantage_gilt['Name']}"
-        )
+        if len(filtered_df) > 0:
+            best_advantage = filtered_df['After-Tax Yield'] - (comparison_savings_rate * (1 - 0.45))
+            best_advantage_gilt = filtered_df.loc[best_advantage.idxmax()]
+            st.metric(
+                "Best vs Savings",
+                f"+{best_advantage.max():.3f}%",
+                f"{best_advantage_gilt['Name']}"
+            )
+        else:
+            st.metric("Best vs Savings", "N/A", "No gilts found")
     
     # Gilt selection for comparison
     st.subheader("🔍 Detailed Analysis")
@@ -295,33 +307,69 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                     st.write(f"• Maturity Date: {row['Maturity Date'].strftime('%d %B %Y')}")
                     st.write(f"• Years to Maturity: {row['Years to Maturity']:.1f}")
                     
-                    # Calculate returns for investment amount
-                    annual_income = investment_amount * (row['Coupon Rate'] / 100)
-                    annual_tax = annual_income * 0.45
-                    annual_net_income = annual_income - annual_tax
-                    
-                    st.markdown("**Annual Returns:**")
-                    st.write(f"• Gross Income: {format_currency(annual_income)}")
-                    st.write(f"• Tax (45%): {format_currency(annual_tax)}")
-                    st.write(f"• Net Income: {format_currency(annual_net_income)}")
+                    # Calculate total income using detailed coupon schedule
+                    if coupon_schedule:
+                        after_tax_schedule = coupon_scheduler.calculate_after_tax_cash_flows(
+                            coupon_schedule, tax_rate=0.45
+                        )
+                        schedule_summary = coupon_scheduler.get_schedule_summary(after_tax_schedule)
+                        
+                        # Scale to investment amount
+                        scale_factor = investment_amount / 100
+                        total_gross_income = schedule_summary['total_gross_coupons'] * scale_factor
+                        total_tax = schedule_summary['total_coupon_tax'] * scale_factor
+                        total_net_income = schedule_summary['total_after_tax_coupons'] * scale_factor
+                        total_principal = schedule_summary['total_principal'] * scale_factor
+                        total_return = schedule_summary['total_after_tax_cash_flows'] * scale_factor
+                        
+                        st.markdown("**Total Income Analysis:**")
+                        st.write(f"• Total Gross Income: {format_currency(total_gross_income)}")
+                        st.write(f"• Total Tax (45%): {format_currency(total_tax)}")
+                        st.write(f"• Total Net Income: {format_currency(total_net_income)}")
+                        st.write(f"• Principal Return: {format_currency(total_principal)}")
+                        st.write(f"• **Total Return: {format_currency(total_return)}**")
+                    else:
+                        # Zero-coupon gilt
+                        purchase_cost = investment_amount * (row['Price'] / 100)
+                        capital_gain = investment_amount - purchase_cost
+                        
+                        st.markdown("**Total Income Analysis:**")
+                        st.write(f"• Coupon Income: £0.00 (Zero-coupon)")
+                        st.write(f"• Tax on Coupons: £0.00")
+                        st.write(f"• Capital Gain: {format_currency(capital_gain)}")
+                        st.write(f"• Capital Gains Tax: £0.00 (Exempt)")
+                        st.write(f"• **Total Return: {format_currency(capital_gain)}**")
                 
                 with col2:
                     st.markdown("**Tax Comparison:**")
                     st.write(f"• After-Tax Yield: {row['After-Tax Yield']:.3f}%")
                     st.write(f"• Equivalent Savings Rate: {row['Equivalent Savings Rate']:.3f}%")
                     
-                    # Compare with current savings rate
-                    savings_after_tax = comparison_savings_rate * (1 - 0.45)
-                    advantage = row['After-Tax Yield'] - savings_after_tax
+                    # Compare with current savings rate using total income
+                    savings_gross_income = investment_amount * (comparison_savings_rate / 100) * row['Years to Maturity']
+                    savings_tax = savings_gross_income * 0.45
+                    savings_net_income = savings_gross_income - savings_tax
                     
-                    st.markdown("**vs Current Savings Account:**")
+                    st.markdown("**vs Current Savings Account (Total Income):**")
                     st.write(f"• Savings Rate: {comparison_savings_rate:.1f}%")
-                    st.write(f"• Savings After-Tax: {savings_after_tax:.3f}%")
+                    st.write(f"• Total Gross Income: {format_currency(savings_gross_income)}")
+                    st.write(f"• Total Tax (45%): {format_currency(savings_tax)}")
+                    st.write(f"• Total Net Income: {format_currency(savings_net_income)}")
                     
-                    if advantage > 0:
-                        st.success(f"• Gilt Advantage: +{advantage:.3f}%")
+                    # Compare total returns
+                    if coupon_schedule:
+                        gilt_advantage = total_return - savings_net_income
+                        if gilt_advantage > 0:
+                            st.success(f"• Gilt Advantage: +{format_currency(gilt_advantage)}")
+                        else:
+                            st.error(f"• Gilt Disadvantage: {format_currency(gilt_advantage)}")
                     else:
-                        st.error(f"• Gilt Disadvantage: {advantage:.3f}%")
+                        # Zero-coupon comparison
+                        gilt_advantage = capital_gain - savings_net_income
+                        if gilt_advantage > 0:
+                            st.success(f"• Gilt Advantage: +{format_currency(gilt_advantage)}")
+                        else:
+                            st.error(f"• Gilt Disadvantage: {format_currency(gilt_advantage)}")
         
         # Visual comparison
         st.subheader("📊 Visual Comparison")
