@@ -142,28 +142,12 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
             coupon_schedule = coupon_scheduler.generate_coupon_schedule(gilt_info)
             
             if coupon_schedule:
-                # Calculate after-tax cash flows
-                after_tax_schedule = coupon_scheduler.calculate_after_tax_cash_flows(
-                    coupon_schedule, tax_rate=0.45
-                )
+                # Use schedule-based calculation for accurate analysis
+                purchase_price = row.get('Price', 100)
                 
-                # Convert to datetime objects for tax calculator
-                coupon_dates = [pd.to_datetime(payment['payment_date']) for payment in after_tax_schedule]
-                
-                # Use enhanced calculation with actual coupon schedule
-                dirty_price = row.get('Price', 100)
-                clean_price = row.get('Clean Price', dirty_price)
-                
-                return tax_calc.calculate_after_tax_yield(
-                    row['Current Yield'], 
-                    row['Years to Maturity'], 
-                    row['Coupon Rate'],
-                    taxpayer_type='additional_rate',
-                    next_coupon_date=row.get('Next Coupon Date'),
-                    remaining_coupons=row.get('Remaining Coupons'),
-                    dirty_price=dirty_price,
-                    clean_price=clean_price,
-                    coupon_dates=coupon_dates
+                # Use the new schedule-based yield calculation
+                return tax_calc._calculate_schedule_based_yield(
+                    coupon_schedule, purchase_price, tax_rate=0.45
                 )
             else:
                 # No coupons - use simple calculation
@@ -386,12 +370,12 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         
         st.plotly_chart(fig, use_container_width=True)
         
-        # Summary table
-        st.subheader("📈 Summary Table")
+        # Summary table with schedule-based analysis
+        st.subheader("📈 Summary Table (Schedule-Based Analysis)")
         summary_df = selected_data[['Name', 'Current Yield', 'After-Tax Yield', 'Equivalent Savings Rate']].copy()
         summary_df['Savings Advantage'] = summary_df['After-Tax Yield'] - (comparison_savings_rate * (1 - 0.45))
         
-        # Add tax efficiency ranking
+        # Add tax efficiency ranking based on schedule-based yields
         summary_df['Tax Efficiency Rank'] = summary_df['After-Tax Yield'].rank(ascending=False, method='dense').astype(int)
         
         # Format summary table
@@ -400,26 +384,44 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         
         st.dataframe(summary_df, use_container_width=True, hide_index=True)
         
-        # Best gilt recommendation
-        st.subheader("🏆 Best Gilt Recommendation")
+        # Add note about schedule-based calculations
+        st.info("💡 **Note:** All after-tax yields are calculated using detailed coupon payment schedules with actual payment dates, providing more accurate tax efficiency analysis than simple annual calculations.")
+        
+        # Best gilt recommendation using schedule-based analysis
+        st.subheader("🏆 Best Gilt Recommendation (Schedule-Based Analysis)")
         best_gilt = selected_data.loc[selected_data['After-Tax Yield'].idxmax()]
+        
+        # Generate detailed schedule for best gilt
+        best_gilt_info = {
+            'maturity_date': best_gilt['Maturity Date'],
+            'coupon_rate': best_gilt['Coupon Rate'],
+            'face_value': 100.0
+        }
+        
+        best_coupon_schedule = coupon_scheduler.generate_coupon_schedule(best_gilt_info)
         
         col1, col2 = st.columns(2)
         with col1:
             st.success(f"**Most Tax Efficient:** {best_gilt['Name']}")
-            st.write(f"After-tax yield: {best_gilt['After-Tax Yield']:.3f}%")
+            st.write(f"After-tax yield (schedule-based): {best_gilt['After-Tax Yield']:.3f}%")
             st.write(f"Equivalent savings rate needed: {best_gilt['Equivalent Savings Rate']:.3f}%")
         
         with col2:
-            total_return = tax_calc.calculate_total_return(
-                investment_amount, 
-                best_gilt.to_dict(),
-                'additional_rate'
-            )
-            st.info(f"**Total Return Analysis (£{investment_amount:,.0f})**")
-            st.write(f"Annual net income: {format_currency(total_return['annual_coupon_net'])}")
-            st.write(f"Capital gain at maturity: {format_currency(total_return['capital_gain'])}")
-            st.write(f"Total net return: {format_currency(total_return['total_return_net'])}")
+            if best_coupon_schedule:
+                after_tax_schedule = coupon_scheduler.calculate_after_tax_cash_flows(
+                    best_coupon_schedule, tax_rate=0.45
+                )
+                schedule_summary = coupon_scheduler.get_schedule_summary(after_tax_schedule)
+                
+                scale_factor = investment_amount / 100
+                st.info(f"**Schedule-Based Return Analysis (£{investment_amount:,.0f})**")
+                st.write(f"Total gross coupon income: £{schedule_summary['total_gross_coupons'] * scale_factor:,.2f}")
+                st.write(f"Total tax on coupons: £{schedule_summary['total_coupon_tax'] * scale_factor:,.2f}")
+                st.write(f"Total net coupon income: £{schedule_summary['total_after_tax_coupons'] * scale_factor:,.2f}")
+                st.write(f"Principal repayment: £{schedule_summary['total_principal'] * scale_factor:,.2f}")
+                st.write(f"**Total net return: £{schedule_summary['total_after_tax_cash_flows'] * scale_factor:,.2f}**")
+            else:
+                st.info("Zero-coupon gilt - no coupon income")
         
         # Breakeven analysis
         st.subheader("⚖️ Breakeven Analysis")

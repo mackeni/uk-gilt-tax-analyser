@@ -91,6 +91,62 @@ class TaxCalculator:
         
         return after_tax_yield
     
+    def _calculate_schedule_based_yield(self, coupon_schedule: List[Dict], 
+                                       purchase_price: float, tax_rate: float) -> float:
+        """
+        Calculate after-tax yield using detailed coupon schedule with actual payment dates
+        
+        Args:
+            coupon_schedule: List of coupon payment details with dates and amounts
+            purchase_price: Current purchase price
+            tax_rate: Tax rate to apply to coupon income
+        
+        Returns:
+            After-tax yield percentage
+        """
+        
+        if not coupon_schedule:
+            return 0.0
+            
+        today = datetime.now()
+        total_after_tax_cash_flows = 0.0
+        
+        for payment in coupon_schedule:
+            # Calculate after-tax coupon amount
+            coupon_amount = payment['coupon_amount']
+            coupon_tax = coupon_amount * tax_rate
+            after_tax_coupon = coupon_amount - coupon_tax
+            
+            # Principal is tax-free
+            principal_amount = payment.get('principal_amount', 0)
+            
+            # Total after-tax cash flow for this payment
+            total_payment = after_tax_coupon + principal_amount
+            
+            # Calculate present value using simple discounting
+            years_to_payment = payment['years_to_payment']
+            # Use a market discount rate for present value calculation
+            discount_rate = 0.04  # 4% discount rate
+            present_value = total_payment / ((1 + discount_rate) ** years_to_payment)
+            
+            total_after_tax_cash_flows += present_value
+        
+        # Calculate yield as percentage return
+        if purchase_price > 0:
+            # Calculate total return
+            total_return = total_after_tax_cash_flows / purchase_price
+            
+            # Annualize the return
+            if coupon_schedule:
+                final_payment_years = max(payment['years_to_payment'] for payment in coupon_schedule)
+                if final_payment_years > 0:
+                    annualized_yield = ((total_return ** (1/final_payment_years)) - 1) * 100
+                    return annualized_yield
+            
+            return (total_return - 1) * 100
+        
+        return 0.0
+    
     def _calculate_present_value_after_tax_yield(self, coupon_rate: float, dirty_price: float, 
                                                clean_price: float, coupon_dates: List[datetime], 
                                                tax_rate: float) -> float:

@@ -106,22 +106,34 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### July 17, 2025 - Database Integration and Enhanced Date Handling
-- **Database Integration**: Added PostgreSQL database for persistent gilt data storage
-- **Coupon Payment Tracking**: Implemented detailed coupon payment schedules with actual dates
-- **Enhanced Tax Calculations**: Added precise after-tax yield calculations considering payment timing
-- **Default Maturity Filter**: Set default maximum maturity to 3 years for better focus on tax-efficient options
-- **Improved Error Handling**: Better database error management and fallback mechanisms
+### July 17, 2025 - Schedule-Based Analysis System
+- **Enhanced Coupon Scheduler**: Comprehensive system generating actual UK gilt coupon payment dates
+- **Schedule-Based Tax Calculations**: All yield calculations now use detailed coupon schedules with actual payment dates
+- **Accurate Present Value Analysis**: Present value calculations using actual payment timing
+- **Complete Payment Schedule Display**: Shows every coupon payment date, amount, and tax impact
+- **Investment Scaling**: Accurate projections for any investment amount using schedule-based returns
 
-### Database Schema
-- **Gilts Table**: Stores gilt information with coupon rates, prices, and maturity dates
-- **Coupon Payments Table**: Tracks individual coupon payment dates and amounts
-- **Automated Coupon Schedule**: Generates semi-annual payment dates based on maturity patterns
+### Coupon Scheduler Features
+- **UK Gilt Conventions**: Follows semi-annual payment patterns based on maturity dates
+- **Business Day Adjustments**: Proper handling of weekends and holidays
+- **Tax Timing Effects**: Accounts for when taxes are paid on coupon income
+- **Principal Repayment**: Tracks tax-free principal return at maturity
 
-### Enhanced Features
-- Real-time database updates and management
-- Present value calculations for future coupon payments
-- Tax timing effects on investment returns
-- Remaining coupon payment tracking
+### Schedule-Based Analysis Benefits
+- **Precision**: Uses actual payment dates instead of simplified annual calculations
+- **Accuracy**: Accounts for timing differences in coupon payments
+- **Transparency**: Shows complete breakdown of each payment and tax impact
+- **Scalability**: Accurate projections for any investment amount
 
-This architecture prioritizes user experience for UK taxpayers while maintaining flexibility for future enhancements and data source integrations. The database integration provides persistent storage and accurate coupon payment calculations for precise tax efficiency analysis.
+### Database Integration
+- **PostgreSQL Database**: Persistent storage for gilt data and coupon schedules
+- **Coupon Payment Tracking**: Individual payment dates and amounts
+- **Error Handling**: Graceful fallbacks and data validation
+
+### Technical Implementation
+- **CouponScheduler Class**: Generates detailed payment schedules
+- **Schedule-Based Yield Calculation**: Enhanced tax calculator using actual payment timing
+- **Present Value Analysis**: Discount future cash flows using market rates
+- **Investment Return Projections**: Accurate scaling for different investment amounts
+
+This architecture delivers precise tax efficiency analysis for UK additional rate taxpayers using actual coupon payment schedules, providing significantly more accurate results than simplified annual calculations.
