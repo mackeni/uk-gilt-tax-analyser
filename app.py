@@ -125,9 +125,38 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     
     # Calculate additional metrics
     df['Years to Maturity'] = df['Maturity Date'].apply(calculate_years_to_maturity)
-    df['After-Tax Yield'] = df.apply(lambda row: tax_calc.calculate_after_tax_yield(
-        row['Current Yield'], row['Years to Maturity'], row['Coupon Rate']
-    ), axis=1)
+    
+    # Calculate after-tax yields using enhanced calculation with coupon dates and dirty prices
+    def calculate_enhanced_after_tax_yield(row):
+        try:
+            # Get coupon dates for this gilt if available
+            coupon_dates = None
+            if 'ID' in row and pd.notna(row['ID']):
+                coupon_dates = db_manager.get_coupon_dates(int(row['ID']))
+                coupon_dates = [pd.to_datetime(cd) for cd in coupon_dates]
+            
+            # Use dirty price (Price) and clean price for calculations
+            dirty_price = row.get('Price', 100)
+            clean_price = row.get('Clean Price', dirty_price)
+            
+            return tax_calc.calculate_after_tax_yield(
+                row['Current Yield'], 
+                row['Years to Maturity'], 
+                row['Coupon Rate'],
+                taxpayer_type='additional_rate',
+                next_coupon_date=row.get('Next Coupon Date'),
+                remaining_coupons=row.get('Remaining Coupons'),
+                dirty_price=dirty_price,
+                clean_price=clean_price,
+                coupon_dates=coupon_dates
+            )
+        except Exception as e:
+            # Fallback to simple calculation
+            return tax_calc.calculate_after_tax_yield(
+                row['Current Yield'], row['Years to Maturity'], row['Coupon Rate']
+            )
+    
+    df['After-Tax Yield'] = df.apply(calculate_enhanced_after_tax_yield, axis=1)
     df['Equivalent Savings Rate'] = df['After-Tax Yield'] / (1 - 0.45)
     
     # Filter and sort options

@@ -170,11 +170,12 @@ class DatabaseManager:
             session.close()
     
     def get_gilts_dataframe(self):
-        """Convert gilt data to pandas DataFrame"""
+        """Convert gilt data to pandas DataFrame with coupon schedule details"""
         session = self.get_session()
         try:
             query = """
             SELECT 
+                g.id,
                 g.name,
                 g.epic,
                 g.isin,
@@ -206,6 +207,7 @@ class DatabaseManager:
             
             # Rename columns to match existing code
             df = df.rename(columns={
+                'id': 'ID',
                 'name': 'Name',
                 'epic': 'EPIC',
                 'isin': 'ISIN',
@@ -242,5 +244,18 @@ class DatabaseManager:
             session.rollback()
             logger.error(f"Error updating gilt price: {e}")
             return False
+        finally:
+            session.close()
+    
+    def get_coupon_dates(self, gilt_id: int) -> list:
+        """Get all future coupon payment dates for a gilt"""
+        session = self.get_session()
+        try:
+            coupon_payments = session.query(CouponPayment).filter(
+                CouponPayment.gilt_id == gilt_id,
+                CouponPayment.payment_date >= date.today()
+            ).order_by(CouponPayment.payment_date).all()
+            
+            return [cp.payment_date for cp in coupon_payments]
         finally:
             session.close()

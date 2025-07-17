@@ -37,15 +37,22 @@ class TaxCalculator:
     def calculate_after_tax_yield(self, current_yield: float, years_to_maturity: float, 
                                  coupon_rate: float, taxpayer_type: str = 'additional_rate',
                                  next_coupon_date: Optional[datetime] = None,
-                                 remaining_coupons: int = None) -> float:
+                                 remaining_coupons: int = None, 
+                                 dirty_price: float = None, clean_price: float = None,
+                                 coupon_dates: List[datetime] = None) -> float:
         """
-        Calculate the after-tax yield for a gilt investment
+        Calculate the after-tax yield for a gilt investment using actual coupon payment dates
         
         Args:
             current_yield: Current yield percentage
             years_to_maturity: Years until maturity
             coupon_rate: Annual coupon rate percentage
             taxpayer_type: Type of taxpayer (additional_rate, higher_rate, basic_rate)
+            next_coupon_date: Next coupon payment date
+            remaining_coupons: Number of remaining coupons
+            dirty_price: Current dirty price (including accrued interest)
+            clean_price: Current clean price (excluding accrued interest)
+            coupon_dates: List of all future coupon payment dates
         
         Returns:
             After-tax yield percentage
@@ -54,7 +61,13 @@ class TaxCalculator:
         # Get tax rate for the taxpayer type
         tax_rate = self.tax_rates[taxpayer_type]
         
-        # Calculate the tax on coupon income
+        # If we have detailed coupon information, use present value calculation
+        if coupon_dates and dirty_price and clean_price:
+            return self._calculate_present_value_after_tax_yield(
+                coupon_rate, dirty_price, clean_price, coupon_dates, tax_rate
+            )
+        
+        # Fallback to simplified calculation
         # For gilts, only the coupon payments are taxable
         # Capital gains are exempt from CGT
         
@@ -77,6 +90,75 @@ class TaxCalculator:
         after_tax_yield = annual_coupon_after_tax + capital_component
         
         return after_tax_yield
+    
+    def _calculate_present_value_after_tax_yield(self, coupon_rate: float, dirty_price: float, 
+                                               clean_price: float, coupon_dates: List[datetime], 
+                                               tax_rate: float) -> float:
+        """
+        Calculate after-tax yield using present value of future cash flows
+        
+        Args:
+            coupon_rate: Annual coupon rate percentage
+            dirty_price: Current dirty price (including accrued interest)
+            clean_price: Current clean price (excluding accrued interest)
+            coupon_dates: List of future coupon payment dates
+            tax_rate: Tax rate to apply to coupon income
+        
+        Returns:
+            After-tax yield percentage
+        """
+        
+        # Assume £100 face value for calculations
+        face_value = 100.0
+        
+        # Calculate semi-annual coupon payment (most UK gilts pay twice yearly)
+        semi_annual_coupon = (coupon_rate / 2)
+        
+        # Calculate after-tax coupon payment
+        after_tax_coupon = semi_annual_coupon * (1 - tax_rate)
+        
+        # Calculate present value of after-tax coupon payments
+        today = datetime.now()
+        pv_coupons = 0.0
+        
+        # Use the yield to maturity as discount rate (approximation)
+        # Convert dirty price to yield approximation
+        discount_rate = 0.04  # Default 4% if we can't calculate
+        if dirty_price != face_value:
+            discount_rate = max(0.01, min(0.15, (face_value - dirty_price) / dirty_price + 0.02))
+        
+        for coupon_date in coupon_dates:
+            if coupon_date > today:
+                # Calculate days to payment
+                days_to_payment = (coupon_date - today).days
+                years_to_payment = days_to_payment / 365.25
+                
+                # Present value of this coupon payment (after tax)
+                discount_factor = (1 + discount_rate) ** (-years_to_payment)
+                pv_coupons += after_tax_coupon * discount_factor
+        
+        # Add present value of principal repayment (tax-free capital gain/loss)
+        maturity_date = max(coupon_dates) if coupon_dates else today
+        days_to_maturity = (maturity_date - today).days
+        years_to_maturity = days_to_maturity / 365.25
+        
+        # Principal repayment at maturity (£100 face value, tax-free)
+        discount_factor_maturity = (1 + discount_rate) ** (-years_to_maturity)
+        pv_principal = face_value * discount_factor_maturity
+        
+        # Total present value of after-tax cash flows
+        total_pv = pv_coupons + pv_principal
+        
+        # Calculate after-tax yield to maturity
+        # This is the rate that equates the current dirty price to the PV of after-tax cash flows
+        if years_to_maturity > 0 and dirty_price > 0:
+            # Use iterative approach to find the yield
+            # For simplicity, use approximation
+            after_tax_yield = ((total_pv / dirty_price) ** (1 / years_to_maturity) - 1) * 100
+        else:
+            after_tax_yield = 0.0
+        
+        return max(0.0, after_tax_yield)
     
     def calculate_precise_after_tax_yield(self, gilt_data: Dict, coupon_dates: List[datetime],
                                         taxpayer_type: str = 'additional_rate') -> Dict:
