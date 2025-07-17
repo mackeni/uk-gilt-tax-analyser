@@ -17,6 +17,7 @@ class GiltDataFetcher:
             'tradeweb': 'https://www.tradeweb.com/',
             'dividenddata': 'https://www.dividenddata.co.uk/uk-gilts-prices-yields.py'
         }
+        self.max_years_default = 3  # Default maximum maturity filter
     
     def get_gilt_data(self) -> pd.DataFrame:
         """

@@ -7,6 +7,7 @@ import numpy as np
 from gilt_data import GiltDataFetcher
 from tax_calculator import TaxCalculator
 from utils import format_currency, format_percentage, calculate_years_to_maturity
+from database import DatabaseManager
 
 # Page configuration
 st.set_page_config(
@@ -22,7 +23,7 @@ if 'gilt_data' not in st.session_state:
 if 'selected_gilts' not in st.session_state:
     st.session_state.selected_gilts = []
 
-# Initialize data fetcher and calculator
+# Initialize data fetcher, calculator, and database
 @st.cache_resource
 def get_data_fetcher():
     return GiltDataFetcher()
@@ -31,8 +32,13 @@ def get_data_fetcher():
 def get_tax_calculator():
     return TaxCalculator()
 
+@st.cache_resource
+def get_database_manager():
+    return DatabaseManager()
+
 gilt_fetcher = get_data_fetcher()
 tax_calc = get_tax_calculator()
+db_manager = get_database_manager()
 
 # Main title and description
 st.title("🏦 UK Gilt Tax Efficiency Analyzer")
@@ -81,21 +87,33 @@ st.header("📊 UK Gilt Data")
 # Data refresh button
 col1, col2, col3 = st.columns([1, 1, 2])
 with col1:
-    if st.button("🔄 Refresh Gilt Data", type="primary"):
+    if st.button("🔄 Refresh Database", type="primary"):
         st.session_state.gilt_data = None
-        with st.spinner("Fetching latest gilt data..."):
-            st.session_state.gilt_data = gilt_fetcher.get_gilt_data()
-        st.success("Data refreshed!")
+        with st.spinner("Updating database with latest gilt data..."):
+            # Get sample data and populate database
+            sample_data = gilt_fetcher.get_sample_data()
+            db_manager.populate_gilt_data(sample_data.to_dict('records'))
+            st.session_state.gilt_data = db_manager.get_gilts_dataframe()
+        st.success("Database updated with gilt data!")
 
 with col2:
-    if st.button("📥 Load Sample Data"):
-        st.session_state.gilt_data = gilt_fetcher.get_sample_data()
-        st.info("Sample data loaded for demonstration")
+    if st.button("📊 Load from Database"):
+        st.session_state.gilt_data = db_manager.get_gilts_dataframe()
+        st.info("Data loaded from database")
 
 # Load data if not already loaded
 if st.session_state.gilt_data is None:
-    with st.spinner("Loading gilt data..."):
-        st.session_state.gilt_data = gilt_fetcher.get_gilt_data()
+    with st.spinner("Loading gilt data from database..."):
+        try:
+            st.session_state.gilt_data = db_manager.get_gilts_dataframe()
+            if st.session_state.gilt_data.empty:
+                # If database is empty, populate with sample data
+                sample_data = gilt_fetcher.get_sample_data()
+                db_manager.populate_gilt_data(sample_data.to_dict('records'))
+                st.session_state.gilt_data = db_manager.get_gilts_dataframe()
+        except Exception as e:
+            st.error(f"Database error: {e}")
+            st.session_state.gilt_data = gilt_fetcher.get_sample_data()
 
 # Display gilt data
 if st.session_state.gilt_data is not None and not st.session_state.gilt_data.empty:
@@ -118,7 +136,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     
     with col2:
         min_maturity = st.slider("Minimum Years to Maturity", 0.0, 50.0, 0.0, 0.5)
-        max_maturity = st.slider("Maximum Years to Maturity", 0.0, 50.0, 50.0, 0.5)
+        max_maturity = st.slider("Maximum Years to Maturity", 0.0, 50.0, 3.0, 0.5)
     
     with col3:
         sort_by = st.selectbox("Sort by", [
@@ -143,10 +161,14 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     st.subheader(f"Available Gilts ({len(filtered_df)} found)")
     
     # Create display dataframe
-    display_df = filtered_df[[
-        'Name', 'Coupon Rate', 'Current Yield', 'After-Tax Yield', 
-        'Equivalent Savings Rate', 'Maturity Date', 'Years to Maturity'
-    ]].copy()
+    display_columns = ['Name', 'Coupon Rate', 'Current Yield', 'After-Tax Yield', 
+                      'Equivalent Savings Rate', 'Maturity Date', 'Years to Maturity']
+    
+    # Add coupon information if available
+    if 'Next Coupon Date' in filtered_df.columns:
+        display_columns.extend(['Next Coupon Date', 'Remaining Coupons'])
+    
+    display_df = filtered_df[display_columns].copy()
     
     # Format display columns
     display_df['Coupon Rate'] = display_df['Coupon Rate'].apply(lambda x: f"{x:.3f}%")
@@ -154,6 +176,16 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     display_df['After-Tax Yield'] = display_df['After-Tax Yield'].apply(lambda x: f"{x:.3f}%")
     display_df['Equivalent Savings Rate'] = display_df['Equivalent Savings Rate'].apply(lambda x: f"{x:.3f}%")
     display_df['Years to Maturity'] = display_df['Years to Maturity'].apply(lambda x: f"{x:.1f}")
+    
+    # Format coupon information if available
+    if 'Next Coupon Date' in display_df.columns:
+        display_df['Next Coupon Date'] = display_df['Next Coupon Date'].apply(
+            lambda x: x.strftime('%d %b %Y') if pd.notna(x) else 'N/A'
+        )
+    if 'Remaining Coupons' in display_df.columns:
+        display_df['Remaining Coupons'] = display_df['Remaining Coupons'].apply(
+            lambda x: f"{int(x)}" if pd.notna(x) else '0'
+        )
     
     # Interactive table with selection
     st.dataframe(

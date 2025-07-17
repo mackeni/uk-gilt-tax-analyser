@@ -35,7 +35,9 @@ class TaxCalculator:
         }
     
     def calculate_after_tax_yield(self, current_yield: float, years_to_maturity: float, 
-                                 coupon_rate: float, taxpayer_type: str = 'additional_rate') -> float:
+                                 coupon_rate: float, taxpayer_type: str = 'additional_rate',
+                                 next_coupon_date: Optional[datetime] = None,
+                                 remaining_coupons: int = None) -> float:
         """
         Calculate the after-tax yield for a gilt investment
         
@@ -63,10 +65,94 @@ class TaxCalculator:
         # This is simplified - in reality, would need current price and par value
         capital_component = current_yield - coupon_rate
         
+        # Adjust for timing of coupon payments if provided
+        if next_coupon_date and remaining_coupons:
+            # More accurate calculation considering actual payment timing
+            # This is a simplified version - full implementation would discount each payment
+            days_to_next_coupon = (next_coupon_date - datetime.now()).days
+            coupon_timing_factor = max(0.95, 1 - (days_to_next_coupon / 365) * 0.05)
+            annual_coupon_after_tax *= coupon_timing_factor
+        
         # Total after-tax yield
         after_tax_yield = annual_coupon_after_tax + capital_component
         
         return after_tax_yield
+    
+    def calculate_precise_after_tax_yield(self, gilt_data: Dict, coupon_dates: List[datetime],
+                                        taxpayer_type: str = 'additional_rate') -> Dict:
+        """
+        Calculate precise after-tax yield considering actual coupon payment dates
+        
+        Args:
+            gilt_data: Dictionary containing gilt information
+            coupon_dates: List of future coupon payment dates
+            taxpayer_type: Type of taxpayer
+        
+        Returns:
+            Dictionary with detailed yield calculations
+        """
+        
+        tax_rate = self.tax_rates[taxpayer_type]
+        current_price = gilt_data['Price']
+        coupon_rate = gilt_data['Coupon Rate']
+        maturity_date = gilt_data['Maturity Date']
+        
+        # Calculate present value of after-tax coupon payments
+        coupon_payment = coupon_rate / 2  # Semi-annual payment
+        coupon_after_tax = coupon_payment * (1 - tax_rate)
+        
+        present_value_coupons = 0
+        discount_rate = 0.04  # Risk-free rate for discounting
+        
+        today = datetime.now()
+        
+        for payment_date in coupon_dates:
+            if isinstance(payment_date, datetime):
+                days_to_payment = (payment_date - today).days
+            else:
+                days_to_payment = (datetime.combine(payment_date, datetime.min.time()) - today).days
+            
+            years_to_payment = days_to_payment / 365.25
+            
+            if years_to_payment > 0:
+                # Discount future coupon payments
+                discount_factor = (1 + discount_rate) ** (-years_to_payment)
+                present_value_coupons += coupon_after_tax * discount_factor
+        
+        # Capital gain/loss at maturity (tax-free)
+        if isinstance(maturity_date, datetime):
+            days_to_maturity = (maturity_date - today).days
+        else:
+            days_to_maturity = (datetime.combine(maturity_date, datetime.min.time()) - today).days
+        
+        years_to_maturity = days_to_maturity / 365.25
+        
+        if years_to_maturity > 0:
+            # Assuming redemption at par (100)
+            capital_gain = 100 - current_price
+            discount_factor = (1 + discount_rate) ** (-years_to_maturity)
+            present_value_capital = capital_gain * discount_factor
+        else:
+            present_value_capital = 0
+        
+        # Total present value
+        total_present_value = present_value_coupons + present_value_capital
+        
+        # Calculate yield to maturity after tax
+        if years_to_maturity > 0:
+            after_tax_yield = ((total_present_value / current_price) ** (1/years_to_maturity) - 1) * 100
+        else:
+            after_tax_yield = 0
+        
+        return {
+            'after_tax_yield': after_tax_yield,
+            'present_value_coupons': present_value_coupons,
+            'present_value_capital': present_value_capital,
+            'total_present_value': total_present_value,
+            'years_to_maturity': years_to_maturity,
+            'remaining_coupon_payments': len([d for d in coupon_dates if 
+                                           (d if isinstance(d, datetime) else datetime.combine(d, datetime.min.time())) > today])
+        }
     
     def calculate_equivalent_savings_rate(self, after_tax_yield: float, 
                                         taxpayer_type: str = 'additional_rate') -> float:

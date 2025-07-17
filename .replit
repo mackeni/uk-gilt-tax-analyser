@@ -18,10 +18,10 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Streamlit App"
+args = "Gilt Analyzer"
 
 [[workflows.workflow]]
-name = "Streamlit App"
+name = "Gilt Analyzer"
 author = "agent"
 
 [[workflows.workflow.tasks]]
