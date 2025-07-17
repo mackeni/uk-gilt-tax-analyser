@@ -162,6 +162,44 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         hide_index=True
     )
     
+    # Quick insights section
+    st.subheader("⚡ Quick Insights")
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        best_after_tax = filtered_df.loc[filtered_df['After-Tax Yield'].idxmax()]
+        st.metric(
+            "Best After-Tax Yield",
+            f"{best_after_tax['After-Tax Yield']:.3f}%",
+            f"{best_after_tax['Name']}"
+        )
+    
+    with col2:
+        highest_equivalent = filtered_df.loc[filtered_df['Equivalent Savings Rate'].idxmax()]
+        st.metric(
+            "Highest Equivalent Rate",
+            f"{highest_equivalent['Equivalent Savings Rate']:.3f}%",
+            f"{highest_equivalent['Name']}"
+        )
+    
+    with col3:
+        shortest_maturity = filtered_df.loc[filtered_df['Years to Maturity'].idxmin()]
+        st.metric(
+            "Shortest Maturity",
+            f"{shortest_maturity['Years to Maturity']:.1f} years",
+            f"{shortest_maturity['Name']}"
+        )
+    
+    with col4:
+        best_advantage = filtered_df['After-Tax Yield'] - (comparison_savings_rate * (1 - 0.45))
+        best_advantage_gilt = filtered_df.loc[best_advantage.idxmax()]
+        st.metric(
+            "Best vs Savings",
+            f"+{best_advantage.max():.3f}%",
+            f"{best_advantage_gilt['Name']}"
+        )
+    
     # Gilt selection for comparison
     st.subheader("🔍 Detailed Analysis")
     selected_gilt_names = st.multiselect(
@@ -268,11 +306,65 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         summary_df = selected_data[['Name', 'Current Yield', 'After-Tax Yield', 'Equivalent Savings Rate']].copy()
         summary_df['Savings Advantage'] = summary_df['After-Tax Yield'] - (comparison_savings_rate * (1 - 0.45))
         
+        # Add tax efficiency ranking
+        summary_df['Tax Efficiency Rank'] = summary_df['After-Tax Yield'].rank(ascending=False, method='dense').astype(int)
+        
         # Format summary table
         for col in ['Current Yield', 'After-Tax Yield', 'Equivalent Savings Rate', 'Savings Advantage']:
             summary_df[col] = summary_df[col].apply(lambda x: f"{x:.3f}%")
         
         st.dataframe(summary_df, use_container_width=True, hide_index=True)
+        
+        # Best gilt recommendation
+        st.subheader("🏆 Best Gilt Recommendation")
+        best_gilt = selected_data.loc[selected_data['After-Tax Yield'].idxmax()]
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.success(f"**Most Tax Efficient:** {best_gilt['Name']}")
+            st.write(f"After-tax yield: {best_gilt['After-Tax Yield']:.3f}%")
+            st.write(f"Equivalent savings rate needed: {best_gilt['Equivalent Savings Rate']:.3f}%")
+        
+        with col2:
+            total_return = tax_calc.calculate_total_return(
+                investment_amount, 
+                best_gilt.to_dict(),
+                'additional_rate'
+            )
+            st.info(f"**Total Return Analysis (£{investment_amount:,.0f})**")
+            st.write(f"Annual net income: {format_currency(total_return['annual_coupon_net'])}")
+            st.write(f"Capital gain at maturity: {format_currency(total_return['capital_gain'])}")
+            st.write(f"Total net return: {format_currency(total_return['total_return_net'])}")
+        
+        # Breakeven analysis
+        st.subheader("⚖️ Breakeven Analysis")
+        
+        # Calculate breakeven rates for top 3 gilts
+        top_3_gilts = selected_data.nlargest(3, 'After-Tax Yield')
+        
+        breakeven_data = []
+        for idx, row in top_3_gilts.iterrows():
+            breakeven_rate = tax_calc.calculate_breakeven_savings_rate(
+                row.to_dict(),
+                row['Years to Maturity'],
+                'additional_rate'
+            )
+            breakeven_data.append({
+                'Gilt': row['Name'],
+                'After-Tax Yield': f"{row['After-Tax Yield']:.3f}%",
+                'Breakeven Savings Rate': f"{breakeven_rate:.3f}%",
+                'Current Advantage': f"{breakeven_rate - comparison_savings_rate:.3f}%"
+            })
+        
+        breakeven_df = pd.DataFrame(breakeven_data)
+        st.dataframe(breakeven_df, use_container_width=True, hide_index=True)
+        
+        st.markdown("""
+        **Breakeven Analysis Explanation:**
+        - The breakeven savings rate is the gross interest rate a savings account would need to offer to match the gilt's after-tax return
+        - The current advantage shows how much better each gilt is compared to your specified savings rate
+        - A positive advantage means the gilt is better than the savings account
+        """)
         
         # Export functionality
         st.subheader("📤 Export Analysis")

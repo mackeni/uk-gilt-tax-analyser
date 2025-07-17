@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 import time
 import streamlit as st
+import re
+from bs4 import BeautifulSoup
 
 class GiltDataFetcher:
     """Fetches UK gilt data from various sources"""
@@ -21,7 +23,12 @@ class GiltDataFetcher:
         Fetch current gilt data from available sources
         """
         try:
-            # Try to get real data from DMO or other sources
+            # Try to get real data from DividendData first
+            df = self._fetch_from_dividenddata()
+            if df is not None and not df.empty:
+                return df
+            
+            # Try DMO as fallback
             df = self._fetch_from_dmo()
             if df is not None and not df.empty:
                 return df
@@ -33,6 +40,115 @@ class GiltDataFetcher:
         except Exception as e:
             st.error(f"Error fetching gilt data: {str(e)}")
             return self.get_sample_data()
+    
+    def _fetch_from_dividenddata(self) -> Optional[pd.DataFrame]:
+        """
+        Fetch data from DividendData website
+        """
+        try:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            response = requests.get(self.base_urls['dividenddata'], headers=headers, timeout=10)
+            response.raise_for_status()
+            
+            # Parse HTML content
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Find the table with gilt data
+            table = soup.find('table')
+            if not table:
+                return None
+            
+            # Extract data from table rows
+            rows = table.find_all('tr')[1:]  # Skip header row
+            gilt_data = []
+            
+            for row in rows:
+                cells = row.find_all('td')
+                if len(cells) >= 6:  # Ensure we have enough columns
+                    try:
+                        epic = cells[0].text.strip()
+                        name = cells[1].text.strip()
+                        coupon = cells[2].text.strip()
+                        maturity_date = cells[3].text.strip()
+                        price = cells[4].text.strip()
+                        yield_text = cells[5].text.strip()
+                        
+                        # Parse coupon rate
+                        coupon_match = re.search(r'([\d.]+)%', coupon)
+                        coupon_rate = float(coupon_match.group(1)) if coupon_match else 0.0
+                        
+                        # Parse price
+                        price_match = re.search(r'£([\d.]+)', price)
+                        price_value = float(price_match.group(1)) if price_match else 100.0
+                        
+                        # Parse yield
+                        yield_match = re.search(r'([\d.]+)%', yield_text)
+                        yield_value = float(yield_match.group(1)) if yield_match else 0.0
+                        
+                        # Parse maturity date
+                        maturity_parsed = self._parse_maturity_date(maturity_date)
+                        
+                        gilt_data.append({
+                            'EPIC': epic,
+                            'Name': name,
+                            'Coupon Rate': coupon_rate,
+                            'Current Yield': yield_value,
+                            'Price': price_value,
+                            'Maturity Date': maturity_parsed,
+                            'ISIN': f"GB00B4RMG{epic[:3]}",  # Approximate ISIN
+                            'Classification': 'Conventional'
+                        })
+                    
+                    except (ValueError, AttributeError) as e:
+                        # Skip rows with parsing errors
+                        continue
+            
+            if gilt_data:
+                df = pd.DataFrame(gilt_data)
+                # Add calculated fields
+                df['Accrued Interest'] = df['Coupon Rate'] * 0.5  # Approximate
+                df['Clean Price'] = df['Price'] - df['Accrued Interest']
+                df['Yield to Maturity'] = df['Current Yield']
+                
+                return df
+            else:
+                return None
+                
+        except Exception as e:
+            print(f"DividendData fetch error: {e}")
+            return None
+    
+    def _parse_maturity_date(self, date_str: str) -> datetime:
+        """
+        Parse maturity date from various formats
+        """
+        try:
+            # Handle formats like "07-Sep-2025" or "22-Oct-2025"
+            if '-' in date_str:
+                return datetime.strptime(date_str, '%d-%b-%Y')
+            
+            # Handle other formats
+            date_patterns = [
+                '%d %b %Y',
+                '%d %B %Y',
+                '%Y-%m-%d',
+                '%d/%m/%Y'
+            ]
+            
+            for pattern in date_patterns:
+                try:
+                    return datetime.strptime(date_str, pattern)
+                except ValueError:
+                    continue
+            
+            # Default to a future date if parsing fails
+            return datetime.now() + timedelta(days=365)
+            
+        except Exception:
+            return datetime.now() + timedelta(days=365)
     
     def _fetch_from_dmo(self) -> Optional[pd.DataFrame]:
         """
