@@ -47,11 +47,11 @@ st.title("🏦 UK Gilt Tax Efficiency Analyzer")
 st.markdown("""
 **For Additional Rate Taxpayers (45% Tax Band)**
 
-This tool helps UK additional rate taxpayers analyze the tax efficiency of UK gilts compared to savings accounts.
+This tool helps UK additional rate taxpayers analyze the tax efficiency of UK gilt investments.
 Key advantages of gilts for higher rate taxpayers:
 - **Capital Gains Tax Exempt**: No CGT on gilt price appreciation
 - **Predictable Returns**: Fixed coupon payments and known maturity value
-- **Tax Efficiency**: Often better after-tax returns than savings accounts
+- **Tax Efficiency**: Optimized after-tax returns using actual coupon schedules
 """)
 
 # Sidebar for user inputs
@@ -74,14 +74,7 @@ investment_amount = st.sidebar.number_input(
     help="Amount you plan to invest in gilts"
 )
 
-comparison_savings_rate = st.sidebar.slider(
-    "Current Savings Account Rate (%)",
-    min_value=0.0,
-    max_value=10.0,
-    value=4.5,
-    step=0.1,
-    help="Current gross interest rate on savings accounts for comparison"
-)
+
 
 # Data loading section
 st.header("📊 UK Gilt Data")
@@ -212,6 +205,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     display_df['Current Yield'] = display_df['Current Yield'].apply(lambda x: f"{x:.3f}%")
     display_df['After-Tax Yield'] = display_df['After-Tax Yield'].apply(lambda x: f"{x:.3f}%")
     display_df['Equivalent Savings Rate'] = display_df['Equivalent Savings Rate'].apply(lambda x: f"{x:.3f}%")
+    display_df['Maturity Date'] = display_df['Maturity Date'].apply(lambda x: x.strftime("%d %b %Y"))
     display_df['Years to Maturity'] = display_df['Years to Maturity'].apply(lambda x: f"{x:.1f}")
     
     # Format coupon information if available
@@ -251,12 +245,12 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         if len(filtered_df) > 0:
             highest_equivalent = filtered_df.loc[filtered_df['Equivalent Savings Rate'].idxmax()]
             st.metric(
-                "Highest Equivalent Rate",
+                "Best Equivalent Savings Rate",
                 f"{highest_equivalent['Equivalent Savings Rate']:.3f}%",
                 f"{highest_equivalent['Name']}"
             )
         else:
-            st.metric("Highest Equivalent Rate", "N/A", "No gilts found")
+            st.metric("Best Equivalent Savings Rate", "N/A", "No gilts found")
     
     with col3:
         if len(filtered_df) > 0:
@@ -271,15 +265,14 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     
     with col4:
         if len(filtered_df) > 0:
-            best_advantage = filtered_df['After-Tax Yield'] - (comparison_savings_rate * (1 - 0.45))
-            best_advantage_gilt = filtered_df.loc[best_advantage.idxmax()]
+            avg_maturity = filtered_df['Years to Maturity'].mean()
             st.metric(
-                "Best vs Savings",
-                f"+{best_advantage.max():.3f}%",
-                f"{best_advantage_gilt['Name']}"
+                "Average Maturity",
+                f"{avg_maturity:.1f} years",
+                f"{len(filtered_df)} gilts"
             )
         else:
-            st.metric("Best vs Savings", "N/A", "No gilts found")
+            st.metric("Average Maturity", "N/A", "No gilts found")
     
     # Gilt selection for comparison
     st.subheader("🔍 Detailed Analysis")
@@ -350,35 +343,25 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         st.write(f"• **Total Return: {format_currency(capital_gain)}**")
                 
                 with col2:
-                    st.markdown("**Tax Comparison:**")
+                    st.markdown("**Tax Analysis:**")
                     st.write(f"• After-Tax Yield: {row['After-Tax Yield']:.3f}%")
                     st.write(f"• Equivalent Savings Rate: {row['Equivalent Savings Rate']:.3f}%")
                     
-                    # Compare with current savings rate using total income
-                    savings_gross_income = investment_amount * (comparison_savings_rate / 100) * row['Years to Maturity']
-                    savings_tax = savings_gross_income * 0.45
-                    savings_net_income = savings_gross_income - savings_tax
+                    # Calculate tax efficiency metrics
+                    gross_yield = row['Current Yield']
+                    tax_on_yield = gross_yield * 0.45
+                    st.write(f"• Tax on Yield (45%): {tax_on_yield:.3f}%")
+                    st.write(f"• Tax Efficiency: {(row['After-Tax Yield'] / gross_yield * 100):.1f}%")
                     
-                    st.markdown("**vs Current Savings Account (Total Income):**")
-                    st.write(f"• Savings Rate: {comparison_savings_rate:.1f}%")
-                    st.write(f"• Total Gross Income: {format_currency(savings_gross_income)}")
-                    st.write(f"• Total Tax (45%): {format_currency(savings_tax)}")
-                    st.write(f"• Total Net Income: {format_currency(savings_net_income)}")
-                    
-                    # Compare total returns
+                    # Investment scaling information
                     if coupon_schedule:
-                        gilt_advantage = total_return - savings_net_income
-                        if gilt_advantage > 0:
-                            st.success(f"• Gilt Advantage: +{format_currency(gilt_advantage)}")
-                        else:
-                            st.error(f"• Gilt Disadvantage: {format_currency(gilt_advantage)}")
+                        st.markdown("**Investment Scaling:**")
+                        st.write(f"• Total Return: {format_currency(total_return)}")
+                        st.write(f"• Annualized Return: {(total_return / investment_amount / row['Years to Maturity'] * 100):.3f}%")
                     else:
-                        # Zero-coupon comparison
-                        gilt_advantage = capital_gain - savings_net_income
-                        if gilt_advantage > 0:
-                            st.success(f"• Gilt Advantage: +{format_currency(gilt_advantage)}")
-                        else:
-                            st.error(f"• Gilt Disadvantage: {format_currency(gilt_advantage)}")
+                        st.markdown("**Investment Scaling:**")
+                        st.write(f"• Capital Gain: {format_currency(capital_gain)}")
+                        st.write(f"• Annualized Return: {(capital_gain / investment_amount / row['Years to Maturity'] * 100):.3f}%")
         
         # Visual comparison
         st.subheader("📊 Visual Comparison")
@@ -408,14 +391,6 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
             y=chart_data['Equivalent Savings Rate'],
             marker_color='orange'
         ))
-        
-        # Add horizontal line for current savings rate
-        fig.add_hline(
-            y=comparison_savings_rate,
-            line_dash="dash",
-            line_color="red",
-            annotation_text=f"Current Savings Rate: {comparison_savings_rate:.1f}%"
-        )
         
         fig.update_layout(
             title="Gilt Yield Comparison",
