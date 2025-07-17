@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import numpy as np
 from gilt_data import GiltDataFetcher
 from tax_calculator import TaxCalculator
+from coupon_scheduler import CouponScheduler
 from utils import format_currency, format_percentage, calculate_years_to_maturity
 from database import DatabaseManager
 
@@ -39,6 +40,7 @@ def get_database_manager():
 gilt_fetcher = get_data_fetcher()
 tax_calc = get_tax_calculator()
 db_manager = get_database_manager()
+coupon_scheduler = CouponScheduler()
 
 # Main title and description
 st.title("🏦 UK Gilt Tax Efficiency Analyzer")
@@ -126,30 +128,48 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     # Calculate additional metrics
     df['Years to Maturity'] = df['Maturity Date'].apply(calculate_years_to_maturity)
     
-    # Calculate after-tax yields using enhanced calculation with coupon dates and dirty prices
+    # Calculate after-tax yields using detailed coupon schedules
     def calculate_enhanced_after_tax_yield(row):
         try:
-            # Get coupon dates for this gilt if available
-            coupon_dates = None
-            if 'ID' in row and pd.notna(row['ID']):
-                coupon_dates = db_manager.get_coupon_dates(int(row['ID']))
-                coupon_dates = [pd.to_datetime(cd) for cd in coupon_dates]
+            # Create gilt info for coupon scheduler
+            gilt_info = {
+                'maturity_date': row['Maturity Date'],
+                'coupon_rate': row['Coupon Rate'],
+                'face_value': 100.0
+            }
             
-            # Use dirty price (Price) and clean price for calculations
-            dirty_price = row.get('Price', 100)
-            clean_price = row.get('Clean Price', dirty_price)
+            # Generate detailed coupon schedule
+            coupon_schedule = coupon_scheduler.generate_coupon_schedule(gilt_info)
             
-            return tax_calc.calculate_after_tax_yield(
-                row['Current Yield'], 
-                row['Years to Maturity'], 
-                row['Coupon Rate'],
-                taxpayer_type='additional_rate',
-                next_coupon_date=row.get('Next Coupon Date'),
-                remaining_coupons=row.get('Remaining Coupons'),
-                dirty_price=dirty_price,
-                clean_price=clean_price,
-                coupon_dates=coupon_dates
-            )
+            if coupon_schedule:
+                # Calculate after-tax cash flows
+                after_tax_schedule = coupon_scheduler.calculate_after_tax_cash_flows(
+                    coupon_schedule, tax_rate=0.45
+                )
+                
+                # Convert to datetime objects for tax calculator
+                coupon_dates = [pd.to_datetime(payment['payment_date']) for payment in after_tax_schedule]
+                
+                # Use enhanced calculation with actual coupon schedule
+                dirty_price = row.get('Price', 100)
+                clean_price = row.get('Clean Price', dirty_price)
+                
+                return tax_calc.calculate_after_tax_yield(
+                    row['Current Yield'], 
+                    row['Years to Maturity'], 
+                    row['Coupon Rate'],
+                    taxpayer_type='additional_rate',
+                    next_coupon_date=row.get('Next Coupon Date'),
+                    remaining_coupons=row.get('Remaining Coupons'),
+                    dirty_price=dirty_price,
+                    clean_price=clean_price,
+                    coupon_dates=coupon_dates
+                )
+            else:
+                # No coupons - use simple calculation
+                return tax_calc.calculate_after_tax_yield(
+                    row['Current Yield'], row['Years to Maturity'], row['Coupon Rate']
+                )
         except Exception as e:
             # Fallback to simple calculation
             return tax_calc.calculate_after_tax_yield(
@@ -430,6 +450,124 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         - The current advantage shows how much better each gilt is compared to your specified savings rate
         - A positive advantage means the gilt is better than the savings account
         """)
+        
+        # Detailed Coupon Schedule Analysis
+        st.subheader("💰 Detailed Coupon Schedule Analysis")
+        
+        # Select gilt for detailed analysis
+        gilt_names = selected_data['Name'].tolist()
+        selected_gilt_name = st.selectbox(
+            "Select gilt for detailed coupon schedule analysis:",
+            gilt_names,
+            key="detailed_analysis_gilt"
+        )
+        
+        if selected_gilt_name:
+            selected_gilt_row = selected_data[selected_data['Name'] == selected_gilt_name].iloc[0]
+            
+            # Generate detailed coupon schedule
+            gilt_info = {
+                'maturity_date': selected_gilt_row['Maturity Date'],
+                'coupon_rate': selected_gilt_row['Coupon Rate'],
+                'face_value': 100.0
+            }
+            
+            coupon_schedule = coupon_scheduler.generate_coupon_schedule(gilt_info)
+            
+            if coupon_schedule:
+                # Calculate after-tax cash flows
+                after_tax_schedule = coupon_scheduler.calculate_after_tax_cash_flows(
+                    coupon_schedule, tax_rate=0.45
+                )
+                
+                # Get schedule summary
+                schedule_summary = coupon_scheduler.get_schedule_summary(after_tax_schedule)
+                
+                # Display schedule overview
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("Total Payments", schedule_summary['number_of_payments'])
+                with col2:
+                    st.metric("First Payment", schedule_summary['first_payment_date'].strftime('%d %b %Y'))
+                with col3:
+                    st.metric("Final Payment", schedule_summary['final_payment_date'].strftime('%d %b %Y'))
+                with col4:
+                    st.metric("Total After-Tax Return", f"£{schedule_summary['total_after_tax_cash_flows']:.2f}")
+                
+                # Detailed payment schedule table
+                st.subheader("📅 Complete Payment Schedule")
+                
+                # Create DataFrame for display
+                schedule_df = pd.DataFrame(after_tax_schedule)
+                schedule_df['payment_date'] = schedule_df['payment_date'].apply(lambda x: x.strftime('%d %b %Y'))
+                
+                # Format amounts for display
+                display_schedule = schedule_df[[
+                    'payment_date', 'days_to_payment', 'coupon_amount', 
+                    'coupon_tax', 'after_tax_coupon', 'principal_amount', 'after_tax_total'
+                ]].copy()
+                
+                display_schedule.columns = [
+                    'Payment Date', 'Days to Payment', 'Gross Coupon (£)', 
+                    'Tax Paid (£)', 'Net Coupon (£)', 'Principal (£)', 'Total Net (£)'
+                ]
+                
+                # Format currency columns
+                currency_cols = ['Gross Coupon (£)', 'Tax Paid (£)', 'Net Coupon (£)', 'Principal (£)', 'Total Net (£)']
+                for col in currency_cols:
+                    display_schedule[col] = display_schedule[col].apply(lambda x: f"£{x:.2f}")
+                
+                st.dataframe(display_schedule, use_container_width=True, hide_index=True)
+                
+                # Tax analysis summary
+                st.subheader("📊 Tax Analysis Summary")
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.write("**Income Tax Analysis:**")
+                    st.write(f"Total Gross Coupon Income: £{schedule_summary['total_gross_coupons']:.2f}")
+                    st.write(f"Total Tax Paid (45%): £{schedule_summary['total_coupon_tax']:.2f}")
+                    st.write(f"Total Net Coupon Income: £{schedule_summary['total_after_tax_coupons']:.2f}")
+                    st.write(f"Effective Tax Rate: {(schedule_summary['total_coupon_tax'] / schedule_summary['total_gross_coupons'] * 100):.1f}%")
+                
+                with col2:
+                    st.write("**Capital Gains Analysis:**")
+                    purchase_price = selected_gilt_row.get('Price', 100)
+                    capital_gain = schedule_summary['total_principal'] - purchase_price
+                    st.write(f"Purchase Price: £{purchase_price:.2f}")
+                    st.write(f"Redemption Value: £{schedule_summary['total_principal']:.2f}")
+                    st.write(f"Capital Gain/Loss: £{capital_gain:.2f}")
+                    st.write(f"Capital Gains Tax: £0.00 (Exempt)")
+                
+                # Investment scaling
+                st.subheader("💷 Investment Scaling")
+                scale_factor = investment_amount / 100
+                
+                scaled_summary = {
+                    'investment_amount': investment_amount,
+                    'total_gross_coupons': schedule_summary['total_gross_coupons'] * scale_factor,
+                    'total_coupon_tax': schedule_summary['total_coupon_tax'] * scale_factor,
+                    'total_after_tax_coupons': schedule_summary['total_after_tax_coupons'] * scale_factor,
+                    'total_principal': schedule_summary['total_principal'] * scale_factor,
+                    'total_return': schedule_summary['total_after_tax_cash_flows'] * scale_factor
+                }
+                
+                st.write(f"**For £{investment_amount:,.0f} investment:**")
+                st.write(f"Total Gross Coupon Income: £{scaled_summary['total_gross_coupons']:,.2f}")
+                st.write(f"Total Tax Paid: £{scaled_summary['total_coupon_tax']:,.2f}")
+                st.write(f"Total Net Coupon Income: £{scaled_summary['total_after_tax_coupons']:,.2f}")
+                st.write(f"Principal Repayment: £{scaled_summary['total_principal']:,.2f}")
+                st.write(f"**Total After-Tax Return: £{scaled_summary['total_return']:,.2f}**")
+                
+                # Annualized return
+                years_to_maturity = (schedule_summary['final_payment_date'] - pd.Timestamp.now().date()).days / 365.25
+                if years_to_maturity > 0:
+                    total_return_pct = (scaled_summary['total_return'] / investment_amount - 1) * 100
+                    annualized_return = ((scaled_summary['total_return'] / investment_amount) ** (1/years_to_maturity) - 1) * 100
+                    st.write(f"Total Return: {total_return_pct:.2f}%")
+                    st.write(f"Annualized After-Tax Return: {annualized_return:.2f}%")
+            else:
+                st.info("No coupon payments scheduled for this gilt (zero-coupon bond)")
         
         # Export functionality
         st.subheader("📤 Export Analysis")
