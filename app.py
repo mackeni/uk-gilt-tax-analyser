@@ -298,6 +298,15 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         
         for idx, row in selected_data.iterrows():
             with st.expander(f"📋 {row['Name']} - Detailed Analysis"):
+                # Generate detailed coupon schedule for this gilt
+                gilt_info = {
+                    'maturity_date': row['Maturity Date'],
+                    'coupon_rate': row['Coupon Rate'],
+                    'face_value': 100.0
+                }
+                
+                coupon_schedule = coupon_scheduler.generate_coupon_schedule(gilt_info)
+                
                 col1, col2 = st.columns(2)
                 
                 with col1:
