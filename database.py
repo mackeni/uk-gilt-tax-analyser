@@ -114,7 +114,7 @@ class DatabaseManager:
             session.close()
     
     def _generate_coupon_dates(self, maturity_date, coupon_rate):
-        """Generate coupon payment dates for a gilt"""
+        """Generate coupon payment dates for a gilt based on actual UK gilt conventions"""
         if coupon_rate == 0:
             return []  # No coupons for zero-coupon bonds
         
@@ -139,8 +139,19 @@ class DatabaseManager:
         for year in range(current_year, maturity_year + 1):
             for month in payment_months:
                 # Use the day from maturity date for consistency
-                payment_date = date(year, month, maturity_date.day)
+                try:
+                    payment_date = date(year, month, maturity_date.day)
+                except ValueError:
+                    # Handle edge case where day doesn't exist in month (e.g., Feb 31)
+                    # Use last day of month instead
+                    if month == 2:
+                        payment_date = date(year, month, 28 if year % 4 != 0 else 29)
+                    elif month in [4, 6, 9, 11]:
+                        payment_date = date(year, month, 30)
+                    else:
+                        payment_date = date(year, month, 31)
                 
+                # Only include future dates up to maturity
                 if payment_date <= maturity_date and payment_date >= date.today():
                     payment_dates.append(payment_date)
         

@@ -95,7 +95,7 @@ class TaxCalculator:
                                                clean_price: float, coupon_dates: List[datetime], 
                                                tax_rate: float) -> float:
         """
-        Calculate after-tax yield using present value of future cash flows
+        Calculate after-tax yield using present value of future cash flows with actual coupon dates
         
         Args:
             coupon_rate: Annual coupon rate percentage
@@ -108,57 +108,187 @@ class TaxCalculator:
             After-tax yield percentage
         """
         
+        if not coupon_dates:
+            return 0.0
+            
         # Assume £100 face value for calculations
         face_value = 100.0
+        today = datetime.now()
         
         # Calculate semi-annual coupon payment (most UK gilts pay twice yearly)
         semi_annual_coupon = (coupon_rate / 2)
-        
-        # Calculate after-tax coupon payment
         after_tax_coupon = semi_annual_coupon * (1 - tax_rate)
         
-        # Calculate present value of after-tax coupon payments
-        today = datetime.now()
-        pv_coupons = 0.0
+        # Sort coupon dates to ensure chronological order
+        future_coupon_dates = [cd for cd in coupon_dates if cd > today]
+        future_coupon_dates.sort()
         
-        # Use the yield to maturity as discount rate (approximation)
-        # Convert dirty price to yield approximation
-        discount_rate = 0.04  # Default 4% if we can't calculate
-        if dirty_price != face_value:
-            discount_rate = max(0.01, min(0.15, (face_value - dirty_price) / dirty_price + 0.02))
+        if not future_coupon_dates:
+            return 0.0
+            
+        # Calculate total after-tax cash flows
+        total_after_tax_coupons = 0.0
         
-        for coupon_date in coupon_dates:
-            if coupon_date > today:
-                # Calculate days to payment
-                days_to_payment = (coupon_date - today).days
-                years_to_payment = days_to_payment / 365.25
-                
-                # Present value of this coupon payment (after tax)
-                discount_factor = (1 + discount_rate) ** (-years_to_payment)
-                pv_coupons += after_tax_coupon * discount_factor
+        # Sum all future coupon payments (after tax)
+        for coupon_date in future_coupon_dates:
+            total_after_tax_coupons += after_tax_coupon
         
-        # Add present value of principal repayment (tax-free capital gain/loss)
-        maturity_date = max(coupon_dates) if coupon_dates else today
+        # Principal repayment at maturity (tax-free)
+        maturity_date = max(future_coupon_dates)
+        principal_repayment = face_value  # Tax-free return of capital
+        
+        # Total after-tax cash flows
+        total_after_tax_cash_flows = total_after_tax_coupons + principal_repayment
+        
+        # Calculate years to maturity
         days_to_maturity = (maturity_date - today).days
         years_to_maturity = days_to_maturity / 365.25
         
-        # Principal repayment at maturity (£100 face value, tax-free)
-        discount_factor_maturity = (1 + discount_rate) ** (-years_to_maturity)
-        pv_principal = face_value * discount_factor_maturity
-        
-        # Total present value of after-tax cash flows
-        total_pv = pv_coupons + pv_principal
-        
-        # Calculate after-tax yield to maturity
-        # This is the rate that equates the current dirty price to the PV of after-tax cash flows
+        # Calculate after-tax yield to maturity using IRR method with actual payment dates
         if years_to_maturity > 0 and dirty_price > 0:
-            # Use iterative approach to find the yield
-            # For simplicity, use approximation
-            after_tax_yield = ((total_pv / dirty_price) ** (1 / years_to_maturity) - 1) * 100
+            # Use Newton-Raphson method to find IRR (Internal Rate of Return)
+            # This gives us the exact yield considering actual coupon payment timing
+            
+            def npv_function(rate):
+                """Calculate NPV for a given discount rate"""
+                npv = -dirty_price  # Initial investment (negative cash flow)
+                
+                # Add present value of each coupon payment
+                for coupon_date in future_coupon_dates:
+                    days_to_payment = (coupon_date - today).days
+                    years_to_payment = days_to_payment / 365.25
+                    
+                    if years_to_payment > 0:
+                        pv_coupon = after_tax_coupon / ((1 + rate) ** years_to_payment)
+                        npv += pv_coupon
+                
+                # Add present value of principal repayment
+                pv_principal = principal_repayment / ((1 + rate) ** years_to_maturity)
+                npv += pv_principal
+                
+                return npv
+            
+            def npv_derivative(rate):
+                """Calculate derivative of NPV function"""
+                derivative = 0.0
+                
+                # Derivative of coupon payments
+                for coupon_date in future_coupon_dates:
+                    days_to_payment = (coupon_date - today).days
+                    years_to_payment = days_to_payment / 365.25
+                    
+                    if years_to_payment > 0:
+                        derivative -= (years_to_payment * after_tax_coupon) / ((1 + rate) ** (years_to_payment + 1))
+                
+                # Derivative of principal repayment
+                derivative -= (years_to_maturity * principal_repayment) / ((1 + rate) ** (years_to_maturity + 1))
+                
+                return derivative
+            
+            # Newton-Raphson method to find IRR
+            rate = 0.05  # Initial guess (5%)
+            tolerance = 1e-6
+            max_iterations = 100
+            
+            for i in range(max_iterations):
+                npv = npv_function(rate)
+                if abs(npv) < tolerance:
+                    break
+                
+                derivative = npv_derivative(rate)
+                if abs(derivative) < tolerance:
+                    break
+                
+                rate = rate - npv / derivative
+                
+                # Keep rate within reasonable bounds
+                rate = max(-0.5, min(0.5, rate))
+            
+            after_tax_yield = rate * 100
         else:
             after_tax_yield = 0.0
         
         return max(0.0, after_tax_yield)
+    
+    def get_detailed_cash_flow_breakdown(self, coupon_rate: float, dirty_price: float, 
+                                       coupon_dates: List[datetime], 
+                                       taxpayer_type: str = 'additional_rate') -> dict:
+        """
+        Get detailed breakdown of cash flows and tax calculations
+        
+        Args:
+            coupon_rate: Annual coupon rate percentage
+            dirty_price: Current dirty price
+            coupon_dates: List of future coupon payment dates
+            taxpayer_type: Type of taxpayer
+            
+        Returns:
+            Dictionary with detailed cash flow breakdown
+        """
+        
+        tax_rate = self.tax_rates[taxpayer_type]
+        face_value = 100.0
+        today = datetime.now()
+        
+        # Calculate coupon payments
+        semi_annual_coupon = coupon_rate / 2
+        after_tax_coupon = semi_annual_coupon * (1 - tax_rate)
+        
+        # Future coupon dates
+        future_coupon_dates = [cd for cd in coupon_dates if cd > today]
+        future_coupon_dates.sort()
+        
+        # Build cash flow breakdown
+        cash_flows = []
+        total_gross_coupons = 0
+        total_tax_paid = 0
+        total_net_coupons = 0
+        
+        for coupon_date in future_coupon_dates:
+            days_to_payment = (coupon_date - today).days
+            years_to_payment = days_to_payment / 365.25
+            
+            gross_coupon = semi_annual_coupon
+            tax_on_coupon = gross_coupon * tax_rate
+            net_coupon = gross_coupon - tax_on_coupon
+            
+            total_gross_coupons += gross_coupon
+            total_tax_paid += tax_on_coupon
+            total_net_coupons += net_coupon
+            
+            cash_flows.append({
+                'date': coupon_date,
+                'days_to_payment': days_to_payment,
+                'years_to_payment': years_to_payment,
+                'gross_coupon': gross_coupon,
+                'tax_paid': tax_on_coupon,
+                'net_coupon': net_coupon
+            })
+        
+        # Principal repayment
+        maturity_date = max(future_coupon_dates) if future_coupon_dates else today
+        days_to_maturity = (maturity_date - today).days
+        years_to_maturity = days_to_maturity / 365.25
+        
+        # Capital gain/loss (tax-free)
+        capital_gain_loss = face_value - dirty_price
+        
+        return {
+            'purchase_price': dirty_price,
+            'face_value': face_value,
+            'coupon_rate': coupon_rate,
+            'tax_rate': tax_rate * 100,
+            'cash_flows': cash_flows,
+            'total_gross_coupons': total_gross_coupons,
+            'total_tax_paid': total_tax_paid,
+            'total_net_coupons': total_net_coupons,
+            'principal_repayment': face_value,
+            'capital_gain_loss': capital_gain_loss,
+            'capital_gain_tax': 0.0,  # Gilts are CGT-exempt
+            'total_net_return': total_net_coupons + capital_gain_loss,
+            'years_to_maturity': years_to_maturity,
+            'number_of_coupons': len(cash_flows)
+        }
     
     def calculate_precise_after_tax_yield(self, gilt_data: Dict, coupon_dates: List[datetime],
                                         taxpayer_type: str = 'additional_rate') -> Dict:
