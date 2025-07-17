@@ -90,11 +90,15 @@ with col1:
     if st.button("🔄 Refresh Database", type="primary"):
         st.session_state.gilt_data = None
         with st.spinner("Updating database with latest gilt data..."):
-            # Get sample data and populate database
-            sample_data = gilt_fetcher.get_sample_data()
-            db_manager.populate_gilt_data(sample_data.to_dict('records'))
-            st.session_state.gilt_data = db_manager.get_gilts_dataframe()
-        st.success("Database updated with gilt data!")
+            try:
+                # Get sample data and populate database
+                sample_data = gilt_fetcher.get_sample_data()
+                db_manager.populate_gilt_data(sample_data.to_dict('records'))
+                st.session_state.gilt_data = db_manager.get_gilts_dataframe()
+                st.success("Database updated with gilt data!")
+            except Exception as e:
+                st.error(f"Database update failed: {str(e)}")
+                st.session_state.gilt_data = gilt_fetcher.get_sample_data()
 
 with col2:
     if st.button("📊 Load from Database"):

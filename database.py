@@ -17,7 +17,7 @@ class Gilt(Base):
     
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
-    epic = Column(String(10), unique=True, nullable=False)
+    epic = Column(String(20), nullable=True)
     isin = Column(String(12), unique=True, nullable=False)
     coupon_rate = Column(Float, nullable=False)
     current_yield = Column(Float, nullable=False)
@@ -67,11 +67,15 @@ class DatabaseManager:
             # Clear existing data
             session.query(CouponPayment).delete()
             session.query(Gilt).delete()
+            session.commit()  # Commit the deletions first
             
             for gilt_data in gilt_data_list:
+                # Generate EPIC from name (allow duplicates)
+                epic = gilt_data.get('EPIC', gilt_data['Name'][:15].replace(' ', '_'))
+                
                 gilt = Gilt(
                     name=gilt_data['Name'],
-                    epic=gilt_data.get('EPIC', gilt_data['Name'][:10]),
+                    epic=epic,
                     isin=gilt_data['ISIN'],
                     coupon_rate=gilt_data['Coupon Rate'],
                     current_yield=gilt_data['Current Yield'],

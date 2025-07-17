@@ -124,7 +124,7 @@ class GiltDataFetcher:
                 'Current Yield': 4.136,
                 'Price': 99.70,
                 'Maturity Date': datetime(2025, 9, 7),
-                'ISIN': 'GB00B4RMG977',
+                'ISIN': 'GB00B4RMG901',
                 'Classification': 'Conventional'
             },
             {
@@ -133,7 +133,7 @@ class GiltDataFetcher:
                 'Current Yield': 4.173,
                 'Price': 99.82,
                 'Maturity Date': datetime(2025, 10, 22),
-                'ISIN': 'GB00B4RMG984',
+                'ISIN': 'GB00B4RMG902',
                 'Classification': 'Conventional'
             },
             {
@@ -142,7 +142,7 @@ class GiltDataFetcher:
                 'Current Yield': 3.256,
                 'Price': 98.35,
                 'Maturity Date': datetime(2026, 1, 30),
-                'ISIN': 'GB00B4RMG991',
+                'ISIN': 'GB00B4RMG903',
                 'Classification': 'Conventional'
             },
             {
@@ -151,7 +151,7 @@ class GiltDataFetcher:
                 'Current Yield': 3.783,
                 'Price': 97.75,
                 'Maturity Date': datetime(2026, 7, 22),
-                'ISIN': 'GB00B4RMG998',
+                'ISIN': 'GB00B4RMG904',
                 'Classification': 'Conventional'
             },
             {

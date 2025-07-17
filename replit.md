@@ -104,4 +104,24 @@ Preferred communication style: Simple, everyday language.
 5. **Real-time Data**: Attempted integration with live market data sources
 6. **Caching Strategy**: Utilized Streamlit's caching for performance optimization
 
-This architecture prioritizes user experience for UK taxpayers while maintaining flexibility for future enhancements and data source integrations.
+## Recent Changes
+
+### July 17, 2025 - Database Integration and Enhanced Date Handling
+- **Database Integration**: Added PostgreSQL database for persistent gilt data storage
+- **Coupon Payment Tracking**: Implemented detailed coupon payment schedules with actual dates
+- **Enhanced Tax Calculations**: Added precise after-tax yield calculations considering payment timing
+- **Default Maturity Filter**: Set default maximum maturity to 3 years for better focus on tax-efficient options
+- **Improved Error Handling**: Better database error management and fallback mechanisms
+
+### Database Schema
+- **Gilts Table**: Stores gilt information with coupon rates, prices, and maturity dates
+- **Coupon Payments Table**: Tracks individual coupon payment dates and amounts
+- **Automated Coupon Schedule**: Generates semi-annual payment dates based on maturity patterns
+
+### Enhanced Features
+- Real-time database updates and management
+- Present value calculations for future coupon payments
+- Tax timing effects on investment returns
+- Remaining coupon payment tracking
+
+This architecture prioritizes user experience for UK taxpayers while maintaining flexibility for future enhancements and data source integrations. The database integration provides persistent storage and accurate coupon payment calculations for precise tax efficiency analysis.
