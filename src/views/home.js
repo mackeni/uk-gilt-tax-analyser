@@ -208,9 +208,17 @@ export async function renderHomePage(request, env) {
             margin-top: 10px;
         }
         
-        .range-container input[type="range"] {
-            flex: 1;
-            max-width: 200px;
+        .range-container input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .range-container input[type="number"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
         }
         
         .range-info {
@@ -415,11 +423,12 @@ export async function renderHomePage(request, env) {
                     <div class="form-group">
                         <label for="durationRange">Filter by Duration (Years to Maturity):</label>
                         <div class="range-container">
-                            <input type="range" id="durationMin" min="0" max="45" value="0" step="0.5">
-                            <span id="durationMinValue">0</span> years
-                            <span style="margin: 0 10px;">to</span>
-                            <input type="range" id="durationMax" min="0" max="45" value="45" step="0.5">
-                            <span id="durationMaxValue">45</span> years
+                            <label for="durationMin" style="margin-right: 10px;">Min:</label>
+                            <input type="number" id="durationMin" min="0" max="45" value="0" step="0.5" style="width: 80px;">
+                            <span style="margin: 0 15px;">to</span>
+                            <label for="durationMax" style="margin-right: 10px;">Max:</label>
+                            <input type="number" id="durationMax" min="0" max="45" value="45" step="0.5" style="width: 80px;">
+                            <span style="margin-left: 10px;">years</span>
                         </div>
                         <div class="range-info">
                             <small>Showing <span id="filteredCount">0</span> of <span id="totalCount">0</span> gilts</small>
@@ -510,30 +519,30 @@ export async function renderHomePage(request, env) {
         }
         
         function updateDurationFilter() {
-            const minSlider = document.getElementById('durationMin');
-            const maxSlider = document.getElementById('durationMax');
-            const minValue = parseFloat(minSlider.value);
-            const maxValue = parseFloat(maxSlider.value);
+            const minInput = document.getElementById('durationMin');
+            const maxInput = document.getElementById('durationMax');
+            let minValue = parseFloat(minInput.value) || 0;
+            let maxValue = parseFloat(maxInput.value) || 45;
+            
+            // Ensure values are within bounds
+            minValue = Math.max(0, Math.min(45, minValue));
+            maxValue = Math.max(0, Math.min(45, maxValue));
             
             // Ensure min doesn't exceed max
             if (minValue > maxValue) {
-                minSlider.value = maxValue;
-                durationFilter.min = maxValue;
-            } else {
-                durationFilter.min = minValue;
+                minValue = maxValue;
+                minInput.value = minValue;
             }
             
             // Ensure max doesn't go below min
             if (maxValue < minValue) {
-                maxSlider.value = minValue;
-                durationFilter.max = minValue;
-            } else {
-                durationFilter.max = maxValue;
+                maxValue = minValue;
+                maxInput.value = maxValue;
             }
             
-            // Update display values
-            document.getElementById('durationMinValue').textContent = durationFilter.min;
-            document.getElementById('durationMaxValue').textContent = durationFilter.max;
+            // Update filter values
+            durationFilter.min = minValue;
+            durationFilter.max = maxValue;
             
             // Apply filter if we have results
             if (currentResults.length > 0) {
