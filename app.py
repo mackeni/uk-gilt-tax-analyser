@@ -209,7 +209,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     display_df['Equivalent Savings Rate'] = display_df['Equivalent Savings Rate'].apply(lambda x: f"{x:.3f}%")
     display_df['Maturity Date'] = display_df['Maturity Date'].apply(lambda x: x.strftime("%d %b %Y"))
     display_df['Years to Maturity'] = display_df['Years to Maturity'].apply(lambda x: f"{x:.1f}")
-    display_df['Dirty Price'] = display_df['Dirty Price'].apply(lambda x: f"£{x:.2f}")
+    display_df['Dirty Price'] = display_df['Dirty Price'].apply(lambda x: f"£{x:.6f}")
     
     # Format coupon information if available
     if 'Next Coupon Date' in display_df.columns:
@@ -351,11 +351,11 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         schedule_summary = coupon_scheduler.get_schedule_summary(after_tax_schedule)
                         
                         st.markdown("**Coupon Schedule Analysis (per £100 nominal):**")
-                        st.write(f"• Total Gross Coupons: £{schedule_summary['total_gross_coupons']:.2f}")
-                        st.write(f"• Total Coupon Tax (45%): £{schedule_summary['total_coupon_tax']:.2f}")
-                        st.write(f"• Total After-Tax Coupons: £{schedule_summary['total_after_tax_coupons']:.2f}")
-                        st.write(f"• Principal Return: £{schedule_summary['total_principal']:.2f}")
-                        st.write(f"• **Total After-Tax Return: £{schedule_summary['total_after_tax_cash_flows']:.2f}**")
+                        st.write(f"• Total Gross Coupons: £{schedule_summary['total_gross_coupons']:.6f}")
+                        st.write(f"• Total Coupon Tax (45%): £{schedule_summary['total_coupon_tax']:.6f}")
+                        st.write(f"• Total After-Tax Coupons: £{schedule_summary['total_after_tax_coupons']:.6f}")
+                        st.write(f"• Principal Return: £{schedule_summary['total_principal']:.6f}")
+                        st.write(f"• **Total After-Tax Return: £{schedule_summary['total_after_tax_cash_flows']:.6f}**")
                         
                         # Show detailed payment schedule
                         st.markdown("**Payment Schedule:**")
@@ -367,9 +367,9 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                             principal = payment.get('principal_amount', 0)
                             
                             if principal > 0:
-                                st.write(f"• {payment_date}: £{coupon_amount:.2f} coupon - £{tax_amount:.2f} tax = £{net_amount:.2f} + £{principal:.2f} principal")
+                                st.write(f"• {payment_date}: £{coupon_amount:.6f} coupon - £{tax_amount:.6f} tax = £{net_amount:.6f} + £{principal:.6f} principal")
                             else:
-                                st.write(f"• {payment_date}: £{coupon_amount:.2f} coupon - £{tax_amount:.2f} tax = £{net_amount:.2f}")
+                                st.write(f"• {payment_date}: £{coupon_amount:.6f} coupon - £{tax_amount:.6f} tax = £{net_amount:.6f}")
                         
                         if len(coupon_schedule) > 5:
                             st.write(f"• ... and {len(coupon_schedule) - 5} more payments")
@@ -379,11 +379,11 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         capital_gain_per_100 = 100 - purchase_price
                         
                         st.markdown("**Zero-Coupon Analysis (per £100 nominal):**")
-                        st.write(f"• Purchase Price: £{purchase_price:.2f}")
-                        st.write(f"• Maturity Value: £100.00")
-                        st.write(f"• Capital Gain: £{capital_gain_per_100:.2f}")
-                        st.write(f"• Capital Gains Tax: £0.00 (Exempt)")
-                        st.write(f"• **Total Return: £{capital_gain_per_100:.2f}**")
+                        st.write(f"• Purchase Price: £{purchase_price:.6f}")
+                        st.write(f"• Maturity Value: £100.000000")
+                        st.write(f"• Capital Gain: £{capital_gain_per_100:.6f}")
+                        st.write(f"• Capital Gains Tax: £0.000000 (Exempt)")
+                        st.write(f"• **Total Return: £{capital_gain_per_100:.6f}**")
                 
                 with col2:
                     st.markdown("**Tax Analysis:**")
@@ -408,24 +408,24 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         years_to_maturity = row['Years to Maturity']
                         
                         st.markdown("**Step 1: Calculate Total After-Tax Cash Flows**")
-                        st.write(f"• Clean Price: £{clean_price:.2f}")
-                        st.write(f"• Accrued Interest: £{accrued_interest:.2f}")
-                        st.write(f"• **Dirty Price (Total Purchase Cost): £{dirty_price:.2f}**")
-                        st.write(f"• Total Gross Coupons: £{schedule_summary['total_gross_coupons']:.2f}")
-                        st.write(f"• Tax on Coupons (45%): £{schedule_summary['total_coupon_tax']:.2f}")
-                        st.write(f"• Net Coupons: £{schedule_summary['total_after_tax_coupons']:.2f}")
-                        st.write(f"• Principal Return: £{schedule_summary['total_principal']:.2f}")
-                        st.write(f"• **Total After-Tax Return: £{total_after_tax_return:.2f}**")
+                        st.write(f"• Clean Price: £{clean_price:.6f}")
+                        st.write(f"• Accrued Interest: £{accrued_interest:.6f}")
+                        st.write(f"• **Dirty Price (Total Purchase Cost): £{dirty_price:.6f}**")
+                        st.write(f"• Total Gross Coupons: £{schedule_summary['total_gross_coupons']:.6f}")
+                        st.write(f"• Tax on Coupons (45%): £{schedule_summary['total_coupon_tax']:.6f}")
+                        st.write(f"• Net Coupons: £{schedule_summary['total_after_tax_coupons']:.6f}")
+                        st.write(f"• Principal Return: £{schedule_summary['total_principal']:.6f}")
+                        st.write(f"• **Total After-Tax Return: £{total_after_tax_return:.6f}**")
                         
                         st.markdown("**Step 2: Calculate Total Return Ratio (Using Dirty Price)**")
                         total_return_ratio = total_after_tax_return / dirty_price
-                        st.write(f"• Total Return Ratio = £{total_after_tax_return:.2f} ÷ £{dirty_price:.2f} = {total_return_ratio:.4f}")
+                        st.write(f"• Total Return Ratio = £{total_after_tax_return:.6f} ÷ £{dirty_price:.6f} = {total_return_ratio:.6f}")
                         
                         st.markdown("**Step 3: Annualize the Return**")
-                        st.write(f"• Years to Maturity: {years_to_maturity:.2f}")
+                        st.write(f"• Years to Maturity: {years_to_maturity:.6f}")
                         st.write(f"• Formula: ((Total Return Ratio)^(1/Years) - 1) × 100")
                         annualized_yield = ((total_return_ratio ** (1/years_to_maturity)) - 1) * 100
-                        st.write(f"• Calculation: (({total_return_ratio:.4f})^(1/{years_to_maturity:.2f}) - 1) × 100")
+                        st.write(f"• Calculation: (({total_return_ratio:.6f})^(1/{years_to_maturity:.6f}) - 1) × 100")
                         st.write(f"• **After-Tax Yield: {annualized_yield:.3f}%**")
                         
                         # Show equivalent savings rate calculation
@@ -443,17 +443,17 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         capital_gain_per_100 = 100 - dirty_price
                         
                         st.markdown("**Step 1: Calculate Capital Gain (Using Dirty Price)**")
-                        st.write(f"• Clean Price: £{clean_price:.2f}")
-                        st.write(f"• Accrued Interest: £{accrued_interest:.2f}")
-                        st.write(f"• **Dirty Price (Total Purchase Cost): £{dirty_price:.2f}**")
-                        st.write(f"• Maturity Value: £100.00")
-                        st.write(f"• Capital Gain: £100.00 - £{dirty_price:.2f} = £{capital_gain_per_100:.2f}")
-                        st.write(f"• Tax on Capital Gain: £0.00 (Gilts are CGT exempt)")
+                        st.write(f"• Clean Price: £{clean_price:.6f}")
+                        st.write(f"• Accrued Interest: £{accrued_interest:.6f}")
+                        st.write(f"• **Dirty Price (Total Purchase Cost): £{dirty_price:.6f}**")
+                        st.write(f"• Maturity Value: £100.000000")
+                        st.write(f"• Capital Gain: £100.000000 - £{dirty_price:.6f} = £{capital_gain_per_100:.6f}")
+                        st.write(f"• Tax on Capital Gain: £0.000000 (Gilts are CGT exempt)")
                         
                         st.markdown("**Step 2: Calculate Annualized Yield**")
-                        st.write(f"• Years to Maturity: {row['Years to Maturity']:.2f}")
+                        st.write(f"• Years to Maturity: {row['Years to Maturity']:.6f}")
                         capital_gain_yield = (capital_gain_per_100 / dirty_price / row['Years to Maturity']) * 100
-                        st.write(f"• Simple Annualized Yield: £{capital_gain_per_100:.2f} ÷ £{dirty_price:.2f} ÷ {row['Years to Maturity']:.2f} × 100")
+                        st.write(f"• Simple Annualized Yield: £{capital_gain_per_100:.6f} ÷ £{dirty_price:.6f} ÷ {row['Years to Maturity']:.6f} × 100")
                         st.write(f"• **After-Tax Yield: {capital_gain_yield:.3f}%**")
                         
                         # Show equivalent savings rate calculation
@@ -546,11 +546,11 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 schedule_summary = coupon_scheduler.get_schedule_summary(after_tax_schedule)
                 
                 st.info("**Schedule-Based Return Analysis (per £100 nominal)**")
-                st.write(f"Total gross coupon income: £{schedule_summary['total_gross_coupons']:,.2f}")
-                st.write(f"Total tax on coupons: £{schedule_summary['total_coupon_tax']:,.2f}")
-                st.write(f"Total net coupon income: £{schedule_summary['total_after_tax_coupons']:,.2f}")
-                st.write(f"Principal repayment: £{schedule_summary['total_principal']:,.2f}")
-                st.write(f"**Total net return: £{schedule_summary['total_after_tax_cash_flows']:,.2f}**")
+                st.write(f"Total gross coupon income: £{schedule_summary['total_gross_coupons']:,.6f}")
+                st.write(f"Total tax on coupons: £{schedule_summary['total_coupon_tax']:,.6f}")
+                st.write(f"Total net coupon income: £{schedule_summary['total_after_tax_coupons']:,.6f}")
+                st.write(f"Principal repayment: £{schedule_summary['total_principal']:,.6f}")
+                st.write(f"**Total net return: £{schedule_summary['total_after_tax_cash_flows']:,.6f}**")
             else:
                 st.info("Zero-coupon gilt - no coupon income")
         
@@ -625,7 +625,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 with col3:
                     st.metric("Final Payment", schedule_summary['final_payment_date'].strftime('%d %b %Y'))
                 with col4:
-                    st.metric("Total After-Tax Return", f"£{schedule_summary['total_after_tax_cash_flows']:.2f}")
+                    st.metric("Total After-Tax Return", f"£{schedule_summary['total_after_tax_cash_flows']:.6f}")
                 
                 # Detailed payment schedule table
                 st.subheader("📅 Complete Payment Schedule")
@@ -648,7 +648,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 # Format currency columns
                 currency_cols = ['Gross Coupon (£)', 'Tax Paid (£)', 'Net Coupon (£)', 'Principal (£)', 'Total Net (£)']
                 for col in currency_cols:
-                    display_schedule[col] = display_schedule[col].apply(lambda x: f"£{x:.2f}")
+                    display_schedule[col] = display_schedule[col].apply(lambda x: f"£{x:.6f}")
                 
                 st.dataframe(display_schedule, use_container_width=True, hide_index=True)
                 
@@ -658,29 +658,29 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 
                 with col1:
                     st.write("**Income Tax Analysis:**")
-                    st.write(f"Total Gross Coupon Income: £{schedule_summary['total_gross_coupons']:.2f}")
-                    st.write(f"Total Tax Paid (45%): £{schedule_summary['total_coupon_tax']:.2f}")
-                    st.write(f"Total Net Coupon Income: £{schedule_summary['total_after_tax_coupons']:.2f}")
+                    st.write(f"Total Gross Coupon Income: £{schedule_summary['total_gross_coupons']:.6f}")
+                    st.write(f"Total Tax Paid (45%): £{schedule_summary['total_coupon_tax']:.6f}")
+                    st.write(f"Total Net Coupon Income: £{schedule_summary['total_after_tax_coupons']:.6f}")
                     st.write(f"Effective Tax Rate: {(schedule_summary['total_coupon_tax'] / schedule_summary['total_gross_coupons'] * 100):.1f}%")
                 
                 with col2:
                     st.write("**Capital Gains Analysis:**")
                     purchase_price = selected_gilt_row.get('Price', 100)
                     capital_gain = schedule_summary['total_principal'] - purchase_price
-                    st.write(f"Purchase Price: £{purchase_price:.2f}")
-                    st.write(f"Redemption Value: £{schedule_summary['total_principal']:.2f}")
-                    st.write(f"Capital Gain/Loss: £{capital_gain:.2f}")
-                    st.write(f"Capital Gains Tax: £0.00 (Exempt)")
+                    st.write(f"Purchase Price: £{purchase_price:.6f}")
+                    st.write(f"Redemption Value: £{schedule_summary['total_principal']:.6f}")
+                    st.write(f"Capital Gain/Loss: £{capital_gain:.6f}")
+                    st.write(f"Capital Gains Tax: £0.000000 (Exempt)")
                 
                 # Yield calculation details
                 st.subheader("💷 Yield Calculation Details")
                 
                 st.write(f"**Per £100 Nominal Investment:**")
-                st.write(f"Total Gross Coupon Income: £{schedule_summary['total_gross_coupons']:,.2f}")
-                st.write(f"Total Tax Paid: £{schedule_summary['total_coupon_tax']:,.2f}")
-                st.write(f"Total Net Coupon Income: £{schedule_summary['total_after_tax_coupons']:,.2f}")
-                st.write(f"Principal Repayment: £{schedule_summary['total_principal']:,.2f}")
-                st.write(f"**Total After-Tax Return: £{schedule_summary['total_after_tax_cash_flows']:,.2f}**")
+                st.write(f"Total Gross Coupon Income: £{schedule_summary['total_gross_coupons']:,.6f}")
+                st.write(f"Total Tax Paid: £{schedule_summary['total_coupon_tax']:,.6f}")
+                st.write(f"Total Net Coupon Income: £{schedule_summary['total_after_tax_coupons']:,.6f}")
+                st.write(f"Principal Repayment: £{schedule_summary['total_principal']:,.6f}")
+                st.write(f"**Total After-Tax Return: £{schedule_summary['total_after_tax_cash_flows']:,.6f}**")
                 
                 # Annualized return
                 years_to_maturity = (schedule_summary['final_payment_date'] - pd.Timestamp.now().date()).days / 365.25
@@ -688,8 +688,8 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                     purchase_price = selected_gilt_row.get('Price', 100)
                     total_return_pct = (schedule_summary['total_after_tax_cash_flows'] / purchase_price - 1) * 100
                     annualized_return = ((schedule_summary['total_after_tax_cash_flows'] / purchase_price) ** (1/years_to_maturity) - 1) * 100
-                    st.write(f"Total Return: {total_return_pct:.2f}%")
-                    st.write(f"Annualized After-Tax Return: {annualized_return:.2f}%")
+                    st.write(f"Total Return: {total_return_pct:.6f}%")
+                    st.write(f"Annualized After-Tax Return: {annualized_return:.6f}%")
             else:
                 st.info("No coupon payments scheduled for this gilt (zero-coupon bond)")
         
