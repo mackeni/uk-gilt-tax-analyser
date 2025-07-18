@@ -108,7 +108,7 @@ Preferred communication style: Simple, everyday language.
 
 ### July 18, 2025 - Display Formatting Enhancement
 
-- **Optimized Decimal Display**: Currency values display with 2 decimal places, coupon rates with 3 decimal places
+- **Optimized Decimal Display**: Currency values display with 2 decimal places, coupon rates with maximum 3 decimal places (trailing zeros removed)
 - **Maintained Calculation Precision**: Underlying calculations retain 6 decimal place precision for accuracy
 - **Consistent Formatting**: Applied comma separators and standardized display throughout
 - **User-Friendly Interface**: Cleaner monetary and percentage displays while preserving calculation accuracy

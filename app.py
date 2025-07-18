@@ -301,7 +301,12 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     display_df = filtered_df[display_columns].copy()
     
     # Format display columns
-    display_df['Coupon Rate'] = display_df['Coupon Rate'].apply(lambda x: f"{x:.3f}%")
+    # Helper function to format coupon rate with max 3 decimal places
+    def format_coupon_rate(x):
+        formatted = f"{x:.3f}".rstrip('0').rstrip('.')
+        return f"{formatted}%"
+    
+    display_df['Coupon Rate'] = display_df['Coupon Rate'].apply(format_coupon_rate)
     display_df['Current Yield'] = display_df['Current Yield'].apply(lambda x: f"{x:.2f}%")
     display_df['After-Tax Yield'] = display_df['After-Tax Yield'].apply(lambda x: f"{x:.2f}%")
     display_df['Equivalent Savings Rate'] = display_df['Equivalent Savings Rate'].apply(lambda x: f"{x:.2f}%")
@@ -473,7 +478,8 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 
                 with col1:
                     st.markdown("**Gilt Details:**")
-                    st.write(f"• Coupon Rate: {row['Coupon Rate']:.3f}%")
+                    coupon_rate_formatted = f"{row['Coupon Rate']:.3f}".rstrip('0').rstrip('.')
+                    st.write(f"• Coupon Rate: {coupon_rate_formatted}%")
                     st.write(f"• Current Yield: {row['Current Yield']:.2f}%")
                     st.write(f"• Maturity Date: {row['Maturity Date'].strftime('%d %B %Y')}")
                     st.write(f"• Years to Maturity: {row['Years to Maturity']:.1f}")
@@ -600,7 +606,8 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                                 
                                 # Show the calculation logic
                                 st.write("**UK Gilt Accrued Interest Calculation:**")
-                                st.write(f"• Coupon Rate: {coupon_rate:.3f}%")
+                                coupon_rate_formatted = f"{coupon_rate:.3f}".rstrip('0').rstrip('.')
+                                st.write(f"• Coupon Rate: {coupon_rate_formatted}%")
                                 # Scale coupon to investment amount
                                 units_owned = investment_amount / row['Dirty Price'] * 100
                                 semi_annual_coupon_total = (coupon_rate/2) * (units_owned / 100)
