@@ -156,12 +156,16 @@ Preferred communication style: Simple, everyday language.
 - **Streamlined Interface**: Removed unnecessary summary metrics and improved data refresh functionality
 - **Performance Optimizations**: Added caching decorators and LRU caching for faster calculations
 
-### July 18, 2025 - Principal Repayment Calculation Corrections
+### July 18, 2025 - Comprehensive Calculation Consistency Fixes
 - **Fixed Redemption Amount Logic**: Corrected principal repayment calculations throughout payment schedules
-- **Accurate Nominal Value Calculations**: Principal now correctly shows nominal value of units owned (not investment amount)
+- **Accurate Nominal Value Calculations**: Principal now correctly shows nominal value of units owned (not investment amount)  
 - **Consistent Unit Calculations**: All redemption values now use `units_owned = investment_amount / dirty_price * 100`
 - **Payment Schedule Accuracy**: Final payment now shows correct principal repayment amount at maturity
 - **UK Gilt Convention Compliance**: Redemption at £100 per £100 nominal regardless of purchase price
+- **Eliminated Duplicate Calculations**: Removed redundant `dirty_price`, `units_owned` and `scaling_factor` calculations
+- **Standardized Price References**: Consistent use of 'Dirty Price' vs 'Price' throughout the application
+- **Precision Display Consistency**: All monetary displays use 2 decimal places while calculations retain 6-decimal precision
+- **Calculation Consolidation**: Merged duplicate calculation blocks to improve maintainability and consistency
 
 ### July 18, 2025 - Precision Enhancements and Accurate Dirty Price Implementation
 - **6 Decimal Place Precision**: All money calculations now display with 6 decimal places for enhanced accuracy
