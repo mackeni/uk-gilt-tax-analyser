@@ -211,33 +211,6 @@ export async function renderHomePage(request, env) {
         .range-container input[type="range"] {
             flex: 1;
             max-width: 200px;
-            height: 8px;
-            border-radius: 5px;
-            background: #ddd;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        
-        .range-container input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #3498db;
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        
-        .range-container input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #3498db;
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
         .range-info {
@@ -354,83 +327,31 @@ export async function renderHomePage(request, env) {
             font-size: 14px;
         }
         
-        table th:nth-child(2), table td:nth-child(2) {
-            min-width: 100px; /* Coupon column - increased for better display */
-            width: 100px; /* Fixed width to prevent compression */
-        }
-        
-        table th:nth-child(3), table td:nth-child(3) {
-            min-width: 80px; /* Current yield column */
-        }
-        
-        table th:nth-child(4), table td:nth-child(4) {
-            min-width: 90px; /* After-tax column */
-        }
-        
-        table th:nth-child(5), table td:nth-child(5) {
-            min-width: 90px; /* Equivalent column */
-        }
-        
-        table th:nth-child(6), table td:nth-child(6) {
-            min-width: 60px; /* Years column */
-        }
-        
-        /* Prevent text wrapping in numeric columns */
-        table th:nth-child(2), table td:nth-child(2),
-        table th:nth-child(3), table td:nth-child(3),
-        table th:nth-child(4), table td:nth-child(4),
-        table th:nth-child(5), table td:nth-child(5),
-        table th:nth-child(6), table td:nth-child(6) {
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
-        }
-        
-        /* Specific styling for coupon column to prevent compression */
-        table th:nth-child(2), table td:nth-child(2) {
-            flex-shrink: 0;
-            max-width: none;
-        }
-        
         @media (max-width: 768px) {
             table {
                 font-size: 12px;
-                table-layout: fixed; /* Ensure fixed layout to maintain column widths */
             }
             
             th, td {
-                padding: 8px 6px; /* Increased padding to prevent truncation */
+                padding: 8px 4px;
             }
             
             .table-container {
                 margin: 10px -5px;
-            }
-            
-            /* Maintain coupon column width on tablet */
-            table th:nth-child(2), table td:nth-child(2) {
-                width: 90px !important;
-                min-width: 90px !important;
             }
         }
         
         @media (max-width: 480px) {
             table {
                 font-size: 11px;
-                table-layout: fixed;
             }
             
             th, td {
-                padding: 6px 4px; /* Still provide adequate padding */
+                padding: 6px 3px;
             }
             
             .table-container {
                 margin: 10px -10px;
-            }
-            
-            /* Maintain coupon column width on mobile */
-            table th:nth-child(2), table td:nth-child(2) {
-                width: 80px !important;
-                min-width: 80px !important;
             }
         }
         
@@ -494,10 +415,10 @@ export async function renderHomePage(request, env) {
                     <div class="form-group">
                         <label for="durationRange">Filter by Duration (Years to Maturity):</label>
                         <div class="range-container">
-                            <input type="range" id="durationMin" min="0" max="45" value="0" step="1">
+                            <input type="range" id="durationMin" min="0" max="45" value="0" step="0.5">
                             <span id="durationMinValue">0</span> years
                             <span style="margin: 0 10px;">to</span>
-                            <input type="range" id="durationMax" min="0" max="45" value="45" step="1">
+                            <input type="range" id="durationMax" min="0" max="45" value="45" step="0.5">
                             <span id="durationMaxValue">45</span> years
                         </div>
                         <div class="range-info">
@@ -523,15 +444,6 @@ export async function renderHomePage(request, env) {
             savingsRate: 4.5
         };
         let durationFilter = { min: 0, max: 45 };
-        
-        // Format coupon rate with max 3 decimal places, remove trailing zeros
-        function formatCouponRate(rate) {
-            if (typeof rate !== 'number') return '0';
-            let formatted = rate.toFixed(3);
-            // Remove trailing zeros and decimal point if not needed
-            formatted = formatted.replace(/\.?0+$/, '');
-            return formatted;
-        }
         
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -745,7 +657,7 @@ export async function renderHomePage(request, env) {
                             \${sortedResults.map(gilt => \`
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
                                     <td style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500;">\${gilt.name}</td>
-                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${formatCouponRate(gilt.couponRate)}%</td>
+                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.couponRate.toFixed(2)}%</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.currentYield.toFixed(2)}%</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${gilt.afterTaxYield.toFixed(2)}%</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.equivalentSavingsRate.toFixed(2)}%</td>
