@@ -193,6 +193,31 @@ export async function renderHomePage(request, env) {
             margin-top: 5px;
         }
         
+        .filter-controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .range-container input[type="range"] {
+            flex: 1;
+            max-width: 200px;
+        }
+        
+        .range-info {
+            margin-top: 10px;
+            color: #7f8c8d;
+        }
+        
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .main-content {
@@ -385,6 +410,23 @@ export async function renderHomePage(request, env) {
             
             <main class="gilt-table">
                 <h3>📊 Available Gilts</h3>
+                
+                <div id="filterControls" class="filter-controls" style="display: none;">
+                    <div class="form-group">
+                        <label for="durationRange">Filter by Duration (Years to Maturity):</label>
+                        <div class="range-container">
+                            <input type="range" id="durationMin" min="0" max="45" value="0" step="0.5">
+                            <span id="durationMinValue">0</span> years
+                            <span style="margin: 0 10px;">to</span>
+                            <input type="range" id="durationMax" min="0" max="45" value="45" step="0.5">
+                            <span id="durationMaxValue">45</span> years
+                        </div>
+                        <div class="range-info">
+                            <small>Showing <span id="filteredCount">0</span> of <span id="totalCount">0</span> gilts</small>
+                        </div>
+                    </div>
+                </div>
+                
                 <div id="loading" class="loading">Loading gilt data...</div>
                 <div id="error" class="error" style="display: none;"></div>
                 <div id="giltData" style="display: none;"></div>
@@ -395,11 +437,13 @@ export async function renderHomePage(request, env) {
     
     <script>
         let currentGiltData = [];
+        let currentResults = [];
         let currentSettings = {
             taxBracket: 'additional_rate',
             investmentAmount: 10000,
             savingsRate: 4.5
         };
+        let durationFilter = { min: 0, max: 45 };
         
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -412,6 +456,10 @@ export async function renderHomePage(request, env) {
             document.getElementById('investmentAmount').addEventListener('input', updateInvestmentAmount);
             document.getElementById('savingsRate').addEventListener('input', updateSavingsRate);
             document.getElementById('refreshData').addEventListener('click', loadGiltData);
+            
+            // Duration filter listeners
+            document.getElementById('durationMin').addEventListener('input', updateDurationFilter);
+            document.getElementById('durationMax').addEventListener('input', updateDurationFilter);
         }
         
         function updateTaxSettings() {
@@ -450,6 +498,38 @@ export async function renderHomePage(request, env) {
             }
         }
         
+        function updateDurationFilter() {
+            const minSlider = document.getElementById('durationMin');
+            const maxSlider = document.getElementById('durationMax');
+            const minValue = parseFloat(minSlider.value);
+            const maxValue = parseFloat(maxSlider.value);
+            
+            // Ensure min doesn't exceed max
+            if (minValue > maxValue) {
+                minSlider.value = maxValue;
+                durationFilter.min = maxValue;
+            } else {
+                durationFilter.min = minValue;
+            }
+            
+            // Ensure max doesn't go below min
+            if (maxValue < minValue) {
+                maxSlider.value = minValue;
+                durationFilter.max = minValue;
+            } else {
+                durationFilter.max = maxValue;
+            }
+            
+            // Update display values
+            document.getElementById('durationMinValue').textContent = durationFilter.min;
+            document.getElementById('durationMaxValue').textContent = durationFilter.max;
+            
+            // Apply filter if we have results
+            if (currentResults.length > 0) {
+                displayResults(currentResults);
+            }
+        }
+        
         async function loadGiltData() {
             const loadingDiv = document.getElementById('loading');
             const errorDiv = document.getElementById('error');
@@ -473,6 +553,7 @@ export async function renderHomePage(request, env) {
                 loadingDiv.style.display = 'none';
                 dataDiv.style.display = 'block';
                 metricsDiv.style.display = 'block';
+                document.getElementById('filterControls').style.display = 'block';
                 
                 calculateTaxEfficiency();
                 
@@ -503,6 +584,7 @@ export async function renderHomePage(request, env) {
                 }
                 
                 const results = await response.json();
+                currentResults = results;
                 displayResults(results);
                 
             } catch (error) {
@@ -514,9 +596,30 @@ export async function renderHomePage(request, env) {
             const dataDiv = document.getElementById('giltData');
             const metricsDiv = document.getElementById('metrics');
             
-            // Display metrics
-            const bestGilt = results.reduce((best, gilt) => 
-                gilt.afterTaxYield > best.afterTaxYield ? gilt : best, results[0]);
+            // Filter results by duration
+            const filteredResults = results.filter(gilt => 
+                gilt.yearsToMaturity >= durationFilter.min && 
+                gilt.yearsToMaturity <= durationFilter.max
+            );
+            
+            // Sort by years to maturity (increasing duration)
+            const sortedResults = filteredResults.sort((a, b) => 
+                a.yearsToMaturity - b.yearsToMaturity
+            );
+            
+            // Update filter count display
+            document.getElementById('filteredCount').textContent = sortedResults.length;
+            document.getElementById('totalCount').textContent = results.length;
+            
+            // Display metrics (from filtered results)
+            if (sortedResults.length === 0) {
+                metricsDiv.innerHTML = '<div class="metric-card"><div class="metric-label">No gilts match your duration filter</div></div>';
+                dataDiv.innerHTML = '<p style="text-align: center; padding: 20px; color: #7f8c8d;">No gilts found within the selected duration range. Adjust the filter above.</p>';
+                return;
+            }
+            
+            const bestGilt = sortedResults.reduce((best, gilt) => 
+                gilt.afterTaxYield > best.afterTaxYield ? gilt : best, sortedResults[0]);
             
             metricsDiv.innerHTML = \`
                 <div class="metric-card">
@@ -551,7 +654,7 @@ export async function renderHomePage(request, env) {
                             </tr>
                         </thead>
                         <tbody>
-                            \${results.map(gilt => \`
+                            \${sortedResults.map(gilt => \`
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
                                     <td style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500;">\${gilt.name}</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.couponRate.toFixed(2)}%</td>
