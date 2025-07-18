@@ -126,12 +126,12 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
             coupon_schedule = coupon_scheduler.generate_coupon_schedule(gilt_info)
             
             if coupon_schedule:
-                # Use schedule-based calculation for accurate analysis
-                purchase_price = row.get('Price', 100)
+                # Use schedule-based calculation for accurate analysis with dirty price
+                dirty_price = row.get('Dirty Price', row.get('Price', 100))
                 
-                # Use the new schedule-based yield calculation
+                # Use the new schedule-based yield calculation with dirty price
                 return tax_calc._calculate_schedule_based_yield(
-                    coupon_schedule, purchase_price, tax_rate=0.45
+                    coupon_schedule, dirty_price, tax_rate=0.45
                 )
             else:
                 # No coupons - use simple calculation
@@ -183,7 +183,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     
     # Create display dataframe
     display_columns = ['Name', 'Coupon Rate', 'Current Yield', 'After-Tax Yield', 
-                      'Equivalent Savings Rate', 'Maturity Date', 'Years to Maturity']
+                      'Equivalent Savings Rate', 'Maturity Date', 'Years to Maturity', 'Dirty Price']
     
     # Add coupon information if available
     if 'Next Coupon Date' in filtered_df.columns:
@@ -198,6 +198,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     display_df['Equivalent Savings Rate'] = display_df['Equivalent Savings Rate'].apply(lambda x: f"{x:.3f}%")
     display_df['Maturity Date'] = display_df['Maturity Date'].apply(lambda x: x.strftime("%d %b %Y"))
     display_df['Years to Maturity'] = display_df['Years to Maturity'].apply(lambda x: f"{x:.1f}")
+    display_df['Dirty Price'] = display_df['Dirty Price'].apply(lambda x: f"£{x:.2f}")
     
     # Format coupon information if available
     if 'Next Coupon Date' in display_df.columns:
@@ -288,14 +289,20 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
             1. **Generate Actual Payment Schedule**: Create detailed coupon payment dates based on UK gilt conventions
             2. **Calculate Tax on Each Payment**: Apply 45% tax rate to each coupon payment
             3. **Sum After-Tax Cash Flows**: Total all net coupons plus tax-free principal repayment
-            4. **Calculate Total Return Ratio**: Divide total after-tax return by purchase price
+            4. **Calculate Total Return Ratio**: Divide total after-tax return by **dirty price** (includes accrued interest)
             5. **Annualize the Return**: Use compound annual growth rate formula: ((Total Return Ratio)^(1/Years) - 1) × 100
             
             **Why This Method Is More Accurate:**
             - Uses actual payment dates rather than simplified annual calculations
+            - **Uses dirty price** (clean price + accrued interest) for true purchase cost
             - Accounts for precise timing of tax payments
             - Includes capital gains tax exemption for gilts
             - Provides exact equivalent savings rate needed to match gilt returns
+            
+            **Dirty Price vs Clean Price:**
+            - **Clean Price**: Quoted price excluding accrued interest
+            - **Dirty Price**: Actual purchase cost including accrued interest
+            - **Why Dirty Price**: Reflects true cost of investment for accurate yield calculation
             
             **Tax Assumptions for Additional Rate Taxpayers:**
             - Income tax rate: 45%
@@ -382,22 +389,26 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                     st.markdown("**After-Tax Yield Calculation Method:**")
                     
                     if coupon_schedule:
-                        # Schedule-based yield calculation with detailed steps
-                        purchase_price = row.get('Price', 100)
+                        # Schedule-based yield calculation with detailed steps using dirty price
+                        dirty_price = row.get('Dirty Price', row.get('Price', 100))
+                        clean_price = row.get('Clean Price', row.get('Price', 100))
+                        accrued_interest = row.get('Accrued Interest', 0)
                         total_after_tax_return = schedule_summary['total_after_tax_cash_flows']
                         years_to_maturity = row['Years to Maturity']
                         
                         st.markdown("**Step 1: Calculate Total After-Tax Cash Flows**")
-                        st.write(f"• Purchase Price: £{purchase_price:.2f}")
+                        st.write(f"• Clean Price: £{clean_price:.2f}")
+                        st.write(f"• Accrued Interest: £{accrued_interest:.2f}")
+                        st.write(f"• **Dirty Price (Total Purchase Cost): £{dirty_price:.2f}**")
                         st.write(f"• Total Gross Coupons: £{schedule_summary['total_gross_coupons']:.2f}")
                         st.write(f"• Tax on Coupons (45%): £{schedule_summary['total_coupon_tax']:.2f}")
                         st.write(f"• Net Coupons: £{schedule_summary['total_after_tax_coupons']:.2f}")
                         st.write(f"• Principal Return: £{schedule_summary['total_principal']:.2f}")
                         st.write(f"• **Total After-Tax Return: £{total_after_tax_return:.2f}**")
                         
-                        st.markdown("**Step 2: Calculate Total Return Ratio**")
-                        total_return_ratio = total_after_tax_return / purchase_price
-                        st.write(f"• Total Return Ratio = £{total_after_tax_return:.2f} ÷ £{purchase_price:.2f} = {total_return_ratio:.4f}")
+                        st.markdown("**Step 2: Calculate Total Return Ratio (Using Dirty Price)**")
+                        total_return_ratio = total_after_tax_return / dirty_price
+                        st.write(f"• Total Return Ratio = £{total_after_tax_return:.2f} ÷ £{dirty_price:.2f} = {total_return_ratio:.4f}")
                         
                         st.markdown("**Step 3: Annualize the Return**")
                         st.write(f"• Years to Maturity: {years_to_maturity:.2f}")
@@ -414,20 +425,24 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         st.write(f"• **Equivalent Savings Rate: {equivalent_rate:.3f}%**")
                         
                     else:
-                        # Zero-coupon yield calculation with detailed steps
-                        purchase_price = row.get('Price', 100)
-                        capital_gain_per_100 = 100 - purchase_price
+                        # Zero-coupon yield calculation with detailed steps using dirty price
+                        dirty_price = row.get('Dirty Price', row.get('Price', 100))
+                        clean_price = row.get('Clean Price', row.get('Price', 100))
+                        accrued_interest = row.get('Accrued Interest', 0)
+                        capital_gain_per_100 = 100 - dirty_price
                         
-                        st.markdown("**Step 1: Calculate Capital Gain**")
-                        st.write(f"• Purchase Price: £{purchase_price:.2f}")
+                        st.markdown("**Step 1: Calculate Capital Gain (Using Dirty Price)**")
+                        st.write(f"• Clean Price: £{clean_price:.2f}")
+                        st.write(f"• Accrued Interest: £{accrued_interest:.2f}")
+                        st.write(f"• **Dirty Price (Total Purchase Cost): £{dirty_price:.2f}**")
                         st.write(f"• Maturity Value: £100.00")
-                        st.write(f"• Capital Gain: £100.00 - £{purchase_price:.2f} = £{capital_gain_per_100:.2f}")
+                        st.write(f"• Capital Gain: £100.00 - £{dirty_price:.2f} = £{capital_gain_per_100:.2f}")
                         st.write(f"• Tax on Capital Gain: £0.00 (Gilts are CGT exempt)")
                         
                         st.markdown("**Step 2: Calculate Annualized Yield**")
                         st.write(f"• Years to Maturity: {row['Years to Maturity']:.2f}")
-                        capital_gain_yield = (capital_gain_per_100 / purchase_price / row['Years to Maturity']) * 100
-                        st.write(f"• Simple Annualized Yield: £{capital_gain_per_100:.2f} ÷ £{purchase_price:.2f} ÷ {row['Years to Maturity']:.2f} × 100")
+                        capital_gain_yield = (capital_gain_per_100 / dirty_price / row['Years to Maturity']) * 100
+                        st.write(f"• Simple Annualized Yield: £{capital_gain_per_100:.2f} ÷ £{dirty_price:.2f} ÷ {row['Years to Maturity']:.2f} × 100")
                         st.write(f"• **After-Tax Yield: {capital_gain_yield:.3f}%**")
                         
                         # Show equivalent savings rate calculation

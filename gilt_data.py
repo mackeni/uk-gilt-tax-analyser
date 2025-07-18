@@ -312,11 +312,24 @@ class GiltDataFetcher:
         df = pd.DataFrame(sample_gilts)
         
         # Add calculated fields
-        df['Accrued Interest'] = df['Coupon Rate'] * 0.5  # Approximate accrued interest
-        df['Clean Price'] = df['Price'] - df['Accrued Interest']
+        df['Accrued Interest'] = df.apply(lambda row: self._calculate_accrued_interest(row), axis=1)
+        df['Dirty Price'] = df['Price'] + df['Accrued Interest']  # Price is clean price, dirty = clean + accrued
+        df['Clean Price'] = df['Price']  # Store original price as clean price
         df['Yield to Maturity'] = df['Current Yield']  # Simplified for demonstration
         
         return df
+    
+    def _calculate_accrued_interest(self, row):
+        """Calculate accrued interest based on days since last coupon payment"""
+        try:
+            # Simplified calculation - assumes we're halfway through coupon period
+            # In practice, this would calculate exact days since last coupon payment
+            semi_annual_coupon = row['Coupon Rate'] / 2
+            # Assume we're approximately 3 months into a 6-month period
+            accrued_fraction = 0.5  # 50% of the way through the period
+            return semi_annual_coupon * accrued_fraction
+        except:
+            return 0.0
     
     def get_gilt_details(self, isin: str) -> Dict:
         """
