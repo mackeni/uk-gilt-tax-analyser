@@ -8,18 +8,11 @@ import { formatCurrency, formatPercentage, formatCouponRate } from '../lib/utils
 export async function renderHomePage(request, env) {
   const html = `
 <!DOCTYPE html>
-<html lang="en-GB">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💷 UK Gilt Tax Efficiency Analyser</title>
-    <meta name="description" content="Analyse the tax efficiency of UK gilt investments for different tax brackets with comprehensive calculations and comparisons">
-    <meta name="keywords" content="UK gilts, tax efficiency, additional rate taxpayer, investment analysis, British pounds">
-    <meta name="author" content="UK Gilt Tax Efficiency Analyser">
-    
-    <!-- Accessibility meta tags -->
-    <meta name="theme-color" content="#3498db">
-    <meta name="color-scheme" content="light">
     <style>
         * {
             margin: 0;
@@ -167,145 +160,6 @@ export async function renderHomePage(request, env) {
             cursor: not-allowed;
         }
         
-        /* Accessibility enhancements */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-        
-        .skip-link {
-            position: absolute;
-            top: -40px;
-            left: 6px;
-            background: #000;
-            color: #fff;
-            padding: 8px;
-            text-decoration: none;
-            border-radius: 4px;
-            z-index: 1000;
-            transition: top 0.3s;
-        }
-        
-        .skip-link:focus {
-            top: 6px;
-        }
-        
-        /* Focus indicators */
-        .form-group select:focus,
-        .form-group input:focus,
-        .btn:focus {
-            outline: 3px solid #3498db;
-            outline-offset: 2px;
-        }
-        
-        /* High contrast mode support */
-        @media (prefers-contrast: high) {
-            .btn {
-                border: 2px solid #000;
-            }
-            
-            .metric-card {
-                border: 2px solid #000;
-            }
-        }
-        
-        /* Reduced motion support */
-        @media (prefers-reduced-motion: reduce) {
-            .btn {
-                transition: none;
-            }
-        }
-        
-        /* Dark mode support */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: #1a1a1a;
-                color: #e0e0e0;
-            }
-            
-            .header,
-            .sidebar,
-            .gilt-table,
-            .metric-card {
-                background: #2d2d2d;
-                color: #e0e0e0;
-            }
-            
-            .form-group select,
-            .form-group input {
-                background: #3d3d3d;
-                color: #e0e0e0;
-                border-color: #555;
-            }
-        }
-        
-        /* Focus management for screen readers */
-        .loading[aria-live="polite"] {
-            /* Ensure screen readers announce loading state */
-        }
-        
-        /* Table accessibility */
-        .data-table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        
-        .data-table th,
-        .data-table td {
-            border: 1px solid #e0e0e0;
-            padding: 12px;
-            text-align: left;
-        }
-        
-        .data-table th {
-            background: #f8f9fa;
-            font-weight: 600;
-        }
-        
-        /* Error state accessibility */
-        .error {
-            border: 2px solid #e74c3c;
-            border-radius: 4px;
-        }
-        
-        /* Loading state accessibility */
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .loading::before {
-            content: "";
-            width: 20px;
-            height: 20px;
-            border: 3px solid #e0e0e0;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Ensure interactive elements are large enough */
-        .btn,
-        .form-group select,
-        .form-group input {
-            min-height: 44px;
-            min-width: 44px;
-        }
-        
         .metrics {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -355,102 +209,52 @@ export async function renderHomePage(request, env) {
     </style>
 </head>
 <body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    
     <div class="container">
-        <header class="header" role="banner">
-            <h1 id="main-title">💷 UK Gilt Tax Efficiency Analyser</h1>
-            <p id="app-description">Analyse the tax efficiency of UK gilt investments for your specific tax situation</p>
+        <header class="header">
+            <h1>💷 UK Gilt Tax Efficiency Analyser</h1>
+            <p>Analyse the tax efficiency of UK gilt investments for your specific tax situation</p>
         </header>
         
         <div class="main-content">
-            <aside class="sidebar" role="complementary" aria-labelledby="settings-heading">
-                <h3 id="settings-heading">💷 Tax Settings</h3>
-                <form role="form" aria-label="Tax calculation settings">
-                    <div class="form-group">
-                        <label for="taxBracket">Select Your Tax Bracket</label>
-                        <select id="taxBracket" aria-describedby="tax-bracket-help" aria-required="true">
-                            <option value="basic_rate">Basic Rate (20%)</option>
-                            <option value="higher_rate">Higher Rate (40%)</option>
-                            <option value="additional_rate" selected>Additional Rate (45%)</option>
-                        </select>
-                        <div id="tax-bracket-help" class="sr-only">Choose your marginal income tax rate for accurate calculations</div>
+            <aside class="sidebar">
+                <h3>💷 Tax Settings</h3>
+                <div class="form-group">
+                    <label for="taxBracket">Select Your Tax Bracket</label>
+                    <select id="taxBracket">
+                        <option value="basic_rate">Basic Rate (20%)</option>
+                        <option value="higher_rate">Higher Rate (40%)</option>
+                        <option value="additional_rate" selected>Additional Rate (45%)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="investmentAmount">Investment Amount (£)</label>
+                    <input type="number" id="investmentAmount" value="10000" min="100" max="10000000" step="1000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="savingsRate">Current Savings Rate (%)</label>
+                    <input type="number" id="savingsRate" value="4.5" min="0" max="20" step="0.1">
+                </div>
+                
+                <div class="tax-info" id="taxInfo">
+                    <h4>Your Tax Settings:</h4>
+                    <div id="taxDetails">
+                        <p><strong>Income Tax Rate:</strong> 45%</p>
+                        <p><strong>Personal Savings Allowance:</strong> £0</p>
+                        <p><strong>Capital Gains Tax on Gilts:</strong> 0% (exempt)</p>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="investmentAmount">Investment Amount (£)</label>
-                        <input type="number" 
-                               id="investmentAmount" 
-                               value="10000" 
-                               min="100" 
-                               max="10000000" 
-                               step="1000"
-                               aria-describedby="investment-help"
-                               aria-required="true">
-                        <div id="investment-help" class="sr-only">Enter the amount you want to invest in pounds sterling</div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="savingsRate">Current Savings Rate (%)</label>
-                        <input type="number" 
-                               id="savingsRate" 
-                               value="4.5" 
-                               min="0" 
-                               max="20" 
-                               step="0.1"
-                               aria-describedby="savings-help"
-                               aria-required="true">
-                        <div id="savings-help" class="sr-only">Enter your current savings account interest rate for comparison</div>
-                    </div>
-                    
-                    <div class="tax-info" id="taxInfo" role="region" aria-labelledby="tax-info-heading">
-                        <h4 id="tax-info-heading">Your Tax Settings:</h4>
-                        <div id="taxDetails" aria-live="polite">
-                            <p><strong>Income Tax Rate:</strong> <span id="current-tax-rate">45%</span></p>
-                            <p><strong>Personal Savings Allowance:</strong> <span id="current-psa">£0</span></p>
-                            <p><strong>Capital Gains Tax on Gilts:</strong> <span id="current-cgt">0% (exempt)</span></p>
-                        </div>
-                    </div>
-                    
-                    <button class="btn" 
-                            id="refreshData" 
-                            type="button"
-                            aria-describedby="refresh-help">
-                        <span aria-hidden="true">🔄</span> Refresh Data
-                    </button>
-                    <div id="refresh-help" class="sr-only">Click to refresh gilt market data</div>
-                </form>
+                </div>
+                
+                <button class="btn" id="refreshData">🔄 Refresh Data</button>
             </aside>
             
-            <main class="gilt-table" id="main-content" role="main" aria-labelledby="results-heading">
-                <h2 id="results-heading">📊 Available Gilts</h2>
-                <div id="loading" 
-                     class="loading" 
-                     role="status" 
-                     aria-live="polite" 
-                     aria-label="Loading gilt data">
-                    <span class="sr-only">Loading gilt market data, please wait...</span>
-                    Loading gilt data...
-                </div>
-                <div id="error" 
-                     class="error" 
-                     role="alert" 
-                     aria-live="assertive" 
-                     style="display: none;">
-                </div>
-                <div id="giltData" 
-                     style="display: none;" 
-                     role="region" 
-                     aria-labelledby="data-table-heading">
-                    <h3 id="data-table-heading" class="sr-only">Gilt investment data table</h3>
-                </div>
-                <div id="metrics" 
-                     class="metrics" 
-                     style="display: none;" 
-                     role="region" 
-                     aria-labelledby="metrics-heading">
-                    <h3 id="metrics-heading" class="sr-only">Key investment metrics</h3>
-                </div>
+            <main class="gilt-table">
+                <h3>📊 Available Gilts</h3>
+                <div id="loading" class="loading">Loading gilt data...</div>
+                <div id="error" class="error" style="display: none;"></div>
+                <div id="giltData" style="display: none;"></div>
+                <div id="metrics" class="metrics" style="display: none;"></div>
             </main>
         </div>
     </div>
@@ -474,69 +278,6 @@ export async function renderHomePage(request, env) {
             document.getElementById('investmentAmount').addEventListener('input', updateInvestmentAmount);
             document.getElementById('savingsRate').addEventListener('input', updateSavingsRate);
             document.getElementById('refreshData').addEventListener('click', loadGiltData);
-            
-            // Keyboard navigation support
-            document.addEventListener('keydown', handleKeyboardNavigation);
-            
-            // Form validation and accessibility
-            const inputs = document.querySelectorAll('input[type="number"], select');
-            inputs.forEach(input => {
-                input.addEventListener('invalid', handleInvalidInput);
-                input.addEventListener('blur', validateInput);
-            });
-            
-            // Announce page readiness to screen readers
-            announceToScreenReader('Page loaded. Use the settings on the left to configure your tax bracket and investment amount.');
-        }
-        
-        function handleKeyboardNavigation(event) {
-            // Allow Escape key to close error messages
-            if (event.key === 'Escape') {
-                const errorDiv = document.getElementById('error');
-                if (errorDiv.style.display !== 'none') {
-                    errorDiv.style.display = 'none';
-                    announceToScreenReader('Error message dismissed');
-                }
-            }
-        }
-        
-        function handleInvalidInput(event) {
-            const input = event.target;
-            const errorMsg = getValidationMessage(input);
-            input.setAttribute('aria-invalid', 'true');
-            input.setAttribute('aria-describedby', input.id + '-error');
-            announceToScreenReader('Input error: ' + errorMsg);
-        }
-        
-        function validateInput(event) {
-            const input = event.target;
-            if (input.checkValidity()) {
-                input.removeAttribute('aria-invalid');
-                input.removeAttribute('aria-describedby');
-            }
-        }
-        
-        function getValidationMessage(input) {
-            if (input.id === 'investmentAmount') {
-                return 'Investment amount must be between £100 and £10,000,000';
-            } else if (input.id === 'savingsRate') {
-                return 'Savings rate must be between 0% and 20%';
-            }
-            return 'Please enter a valid value';
-        }
-        
-        function announceToScreenReader(message) {
-            const announcement = document.createElement('div');
-            announcement.setAttribute('aria-live', 'polite');
-            announcement.setAttribute('aria-atomic', 'true');
-            announcement.className = 'sr-only';
-            announcement.textContent = message;
-            document.body.appendChild(announcement);
-            
-            // Remove after announcement
-            setTimeout(() => {
-                document.body.removeChild(announcement);
-            }, 1000);
         }
         
         function updateTaxSettings() {
@@ -544,20 +285,17 @@ export async function renderHomePage(request, env) {
             currentSettings.taxBracket = taxBracket;
             
             const taxInfo = {
-                'basic_rate': { rate: 20, psa: 1000, name: 'Basic Rate' },
-                'higher_rate': { rate: 40, psa: 500, name: 'Higher Rate' },
-                'additional_rate': { rate: 45, psa: 0, name: 'Additional Rate' }
+                'basic_rate': { rate: 20, psa: 1000 },
+                'higher_rate': { rate: 40, psa: 500 },
+                'additional_rate': { rate: 45, psa: 0 }
             };
             
             const info = taxInfo[taxBracket];
-            
-            // Update individual elements for screen readers
-            document.getElementById('current-tax-rate').textContent = info.rate + '%';
-            document.getElementById('current-psa').textContent = '£' + info.psa.toLocaleString();
-            document.getElementById('current-cgt').textContent = '0% (exempt)';
-            
-            // Announce the change to screen readers
-            announceToScreenReader(\`Tax bracket updated to \${info.name} with \${info.rate}% income tax rate and £\${info.psa.toLocaleString()} Personal Savings Allowance\`);
+            document.getElementById('taxDetails').innerHTML = \`
+                <p><strong>Income Tax Rate:</strong> \${info.rate}%</p>
+                <p><strong>Personal Savings Allowance:</strong> £\${info.psa.toLocaleString()}</p>
+                <p><strong>Capital Gains Tax on Gilts:</strong> 0% (exempt)</p>
+            \`;
             
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
@@ -565,43 +303,16 @@ export async function renderHomePage(request, env) {
         }
         
         function updateInvestmentAmount() {
-            const input = document.getElementById('investmentAmount');
-            const value = parseFloat(input.value);
-            
-            if (value >= 100 && value <= 10000000) {
-                currentSettings.investmentAmount = value;
-                input.removeAttribute('aria-invalid');
-                
-                if (currentGiltData.length > 0) {
-                    calculateTaxEfficiency();
-                }
-                
-                // Announce significant changes
-                if (value >= 100000) {
-                    announceToScreenReader(\`Investment amount updated to £\${value.toLocaleString()}\`);
-                }
-            } else {
-                input.setAttribute('aria-invalid', 'true');
-                announceToScreenReader('Please enter a valid investment amount between £100 and £10,000,000');
+            currentSettings.investmentAmount = parseFloat(document.getElementById('investmentAmount').value);
+            if (currentGiltData.length > 0) {
+                calculateTaxEfficiency();
             }
         }
         
         function updateSavingsRate() {
-            const input = document.getElementById('savingsRate');
-            const value = parseFloat(input.value);
-            
-            if (value >= 0 && value <= 20) {
-                currentSettings.savingsRate = value;
-                input.removeAttribute('aria-invalid');
-                
-                if (currentGiltData.length > 0) {
-                    calculateTaxEfficiency();
-                }
-                
-                announceToScreenReader(\`Savings rate updated to \${value}%\`);
-            } else {
-                input.setAttribute('aria-invalid', 'true');
-                announceToScreenReader('Please enter a valid savings rate between 0% and 20%');
+            currentSettings.savingsRate = parseFloat(document.getElementById('savingsRate').value);
+            if (currentGiltData.length > 0) {
+                calculateTaxEfficiency();
             }
         }
         
@@ -610,34 +321,19 @@ export async function renderHomePage(request, env) {
             const errorDiv = document.getElementById('error');
             const dataDiv = document.getElementById('giltData');
             const metricsDiv = document.getElementById('metrics');
-            const refreshBtn = document.getElementById('refreshData');
             
-            // Update button state
-            refreshBtn.disabled = true;
-            refreshBtn.setAttribute('aria-busy', 'true');
-            refreshBtn.textContent = 'Loading...';
-            
-            // Show loading state
             loadingDiv.style.display = 'block';
             errorDiv.style.display = 'none';
             dataDiv.style.display = 'none';
             metricsDiv.style.display = 'none';
             
-            // Announce loading to screen readers
-            announceToScreenReader('Loading gilt market data, please wait...');
-            
             try {
                 const response = await fetch('/api/gilt-data');
                 if (!response.ok) {
-                    throw new Error(\`Failed to fetch gilt data: \${response.status} \${response.statusText}\`);
+                    throw new Error('Failed to fetch gilt data');
                 }
                 
                 const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
                 currentGiltData = data;
                 
                 loadingDiv.style.display = 'none';
@@ -646,22 +342,10 @@ export async function renderHomePage(request, env) {
                 
                 calculateTaxEfficiency();
                 
-                // Announce success
-                announceToScreenReader(\`Gilt data loaded successfully. Found \${data.length} gilts available for analysis.\`);
-                
             } catch (error) {
                 loadingDiv.style.display = 'none';
                 errorDiv.style.display = 'block';
                 errorDiv.textContent = \`Error loading gilt data: \${error.message}\`;
-                errorDiv.setAttribute('role', 'alert');
-                
-                // Announce error to screen readers
-                announceToScreenReader(\`Error loading data: \${error.message}\`);
-            } finally {
-                // Reset button state
-                refreshBtn.disabled = false;
-                refreshBtn.removeAttribute('aria-busy');
-                refreshBtn.innerHTML = '<span aria-hidden="true">🔄</span> Refresh Data';
             }
         }
         
