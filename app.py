@@ -804,7 +804,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
             if coupon_schedule:
                 # Calculate after-tax cash flows
                 after_tax_schedule = coupon_scheduler.calculate_after_tax_cash_flows(
-                    coupon_schedule, tax_rate=0.45
+                    coupon_schedule, tax_rate=tax_rate
                 )
                 
                 # Get schedule summary
@@ -930,7 +930,7 @@ with st.expander("💡 Tax Advantages of Gilts for Additional Rate Taxpayers"):
     - Gilts often provide better after-tax returns than savings accounts
     
     ### Important Considerations:
-    - Interest payments are fully taxable at your marginal rate (45%)
+    - Interest payments are fully taxable at your marginal rate
     - No CGT exemption applies to gilt funds or ETFs
     - Consider ISA allowances first (£20,000 annual limit)
     - Gilt prices can fluctuate before maturity
@@ -943,16 +943,16 @@ with st.expander("🧮 How the Calculations Work"):
     **For Gilts:**
     - Coupon income is taxed at 45%
     - Capital gains/losses are tax-free
-    - After-tax yield = Coupon rate × (1 - 0.45) + Capital appreciation
+    - After-tax yield = Coupon rate × (1 - tax_rate) + Capital appreciation
     
     **For Savings Accounts:**
     - All interest is taxed at 45%
     - No Personal Savings Allowance for additional rate taxpayers
-    - After-tax yield = Gross rate × (1 - 0.45)
+    - After-tax yield = Gross rate × (1 - tax_rate)
     
     **Equivalent Savings Rate:**
     - The gross savings rate needed to match the gilt's after-tax return
-    - Calculation: Gilt after-tax yield ÷ (1 - 0.45)
+    - Calculation: Gilt after-tax yield ÷ (1 - tax_rate)
     
     ### Example:
     A gilt yielding 4% with 3 years to maturity:
