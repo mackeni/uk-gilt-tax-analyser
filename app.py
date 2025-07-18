@@ -444,6 +444,63 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         
                         st.markdown("**Step 1: Calculate Capital Gain (Using Dirty Price)**")
                         st.write(f"• Clean Price: £{clean_price:.6f}")
+                        
+                        # Show accrued interest calculation details
+                        with st.expander("🔍 Accrued Interest Calculation Details"):
+                            try:
+                                # Get the accrued interest calculation breakdown
+                                coupon_rate = row['Coupon Rate']
+                                maturity_date = row['Maturity Date']
+                                
+                                from datetime import datetime, timedelta
+                                today = datetime.now().date()
+                                maturity_date_obj = maturity_date.date() if isinstance(maturity_date, datetime) else maturity_date
+                                
+                                # Show the calculation logic
+                                st.write("**UK Gilt Accrued Interest Calculation:**")
+                                st.write(f"• Coupon Rate: {coupon_rate:.6f}%")
+                                st.write(f"• Semi-Annual Coupon: {coupon_rate/2:.6f}%")
+                                st.write(f"• Maturity Date: {maturity_date_obj.strftime('%d %b %Y')}")
+                                st.write(f"• Today's Date: {today.strftime('%d %b %Y')}")
+                                
+                                # Calculate coupon dates (simplified approximation)
+                                # UK gilts typically pay on the same day and month as maturity
+                                year = today.year
+                                month = maturity_date_obj.month
+                                day = maturity_date_obj.day
+                                
+                                # Find approximate last coupon date
+                                try:
+                                    # Try 6 months before maturity date in current year
+                                    if month <= 6:
+                                        last_coupon_approx = datetime(year - 1, month + 6, day).date()
+                                    else:
+                                        last_coupon_approx = datetime(year, month - 6, day).date()
+                                    
+                                    if last_coupon_approx > today:
+                                        # Go back another 6 months
+                                        if month <= 6:
+                                            last_coupon_approx = datetime(year - 1, month, day).date()
+                                        else:
+                                            last_coupon_approx = datetime(year - 1, month - 6, day).date()
+                                    
+                                    days_since_last = (today - last_coupon_approx).days
+                                    days_in_period = 182  # Approximate 6 months
+                                    accrued_fraction = days_since_last / days_in_period
+                                    
+                                    st.write(f"• Approximate Last Coupon Date: {last_coupon_approx.strftime('%d %b %Y')}")
+                                    st.write(f"• Days Since Last Coupon: {days_since_last}")
+                                    st.write(f"• Days in Coupon Period: {days_in_period}")
+                                    st.write(f"• Accrued Fraction: {accrued_fraction:.6f}")
+                                    st.write(f"• **Accrued Interest: {coupon_rate/2:.6f}% × {accrued_fraction:.6f} = {accrued_interest:.6f}%**")
+                                    
+                                except Exception as e:
+                                    st.write(f"• Calculation uses simplified approximation")
+                                    st.write(f"• Estimated accrued interest: {accrued_interest:.6f}%")
+                                    
+                            except Exception as e:
+                                st.write(f"• Accrued Interest: {accrued_interest:.6f}% (estimated)")
+                        
                         st.write(f"• Accrued Interest: £{accrued_interest:.6f}")
                         st.write(f"• **Dirty Price (Total Purchase Cost): £{dirty_price:.6f}**")
                         st.write(f"• Maturity Value: £100.000000")

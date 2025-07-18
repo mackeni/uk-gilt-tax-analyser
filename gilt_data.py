@@ -322,14 +322,105 @@ class GiltDataFetcher:
     def _calculate_accrued_interest(self, row):
         """Calculate accrued interest based on days since last coupon payment"""
         try:
-            # Simplified calculation - assumes we're halfway through coupon period
-            # In practice, this would calculate exact days since last coupon payment
-            semi_annual_coupon = row['Coupon Rate'] / 2
-            # Assume we're approximately 3 months into a 6-month period
-            accrued_fraction = 0.5  # 50% of the way through the period
+            coupon_rate = row['Coupon Rate']
+            maturity_date = row['Maturity Date']
+            
+            # UK gilts typically pay semi-annually
+            # Calculate the last coupon date before today
+            today = datetime.now().date()
+            maturity_date_obj = maturity_date.date() if isinstance(maturity_date, datetime) else maturity_date
+            
+            # Find the last coupon payment date
+            # UK gilts typically pay on the same day and month as maturity, 6 months earlier
+            last_coupon_date = self._get_last_coupon_date(maturity_date_obj, today)
+            next_coupon_date = self._get_next_coupon_date(maturity_date_obj, today)
+            
+            # Calculate days since last coupon payment
+            days_since_last_coupon = (today - last_coupon_date).days
+            days_in_coupon_period = (next_coupon_date - last_coupon_date).days
+            
+            # Calculate accrued interest using actual day count
+            # UK gilts use Actual/Actual day count convention
+            accrued_fraction = days_since_last_coupon / days_in_coupon_period
+            semi_annual_coupon = coupon_rate / 2
+            
             return semi_annual_coupon * accrued_fraction
-        except:
-            return 0.0
+            
+        except Exception as e:
+            # Fallback to simplified calculation if date parsing fails
+            return (row['Coupon Rate'] / 2) * 0.25  # Conservative estimate
+    
+    def _get_last_coupon_date(self, maturity_date, today):
+        """Get the last coupon payment date before today"""
+        # UK gilts typically pay on the same day and month as maturity
+        year = today.year
+        month = maturity_date.month
+        day = maturity_date.day
+        
+        # Try current year first
+        try:
+            candidate_date = datetime(year, month, day).date()
+            if candidate_date <= today:
+                return candidate_date
+        except ValueError:
+            # Handle cases like Feb 29 in non-leap years
+            candidate_date = datetime(year, month, min(day, 28)).date()
+            if candidate_date <= today:
+                return candidate_date
+        
+        # Try 6 months earlier
+        try:
+            if month <= 6:
+                candidate_date = datetime(year - 1, month + 6, day).date()
+            else:
+                candidate_date = datetime(year, month - 6, day).date()
+            if candidate_date <= today:
+                return candidate_date
+        except ValueError:
+            candidate_date = datetime(year if month > 6 else year - 1, 
+                                    (month - 6) if month > 6 else (month + 6), 
+                                    min(day, 28)).date()
+            if candidate_date <= today:
+                return candidate_date
+        
+        # Fallback: 3 months ago
+        return today - timedelta(days=90)
+    
+    def _get_next_coupon_date(self, maturity_date, today):
+        """Get the next coupon payment date after today"""
+        # UK gilts typically pay on the same day and month as maturity
+        year = today.year
+        month = maturity_date.month
+        day = maturity_date.day
+        
+        # Try current year first
+        try:
+            candidate_date = datetime(year, month, day).date()
+            if candidate_date > today:
+                return candidate_date
+        except ValueError:
+            # Handle cases like Feb 29 in non-leap years
+            candidate_date = datetime(year, month, min(day, 28)).date()
+            if candidate_date > today:
+                return candidate_date
+        
+        # Try 6 months later
+        try:
+            if month <= 6:
+                candidate_date = datetime(year, month + 6, day).date()
+            else:
+                candidate_date = datetime(year + 1, month - 6, day).date()
+            if candidate_date > today:
+                return candidate_date
+        except ValueError:
+            candidate_date = datetime(year + 1 if month > 6 else year, 
+                                    (month + 6) if month <= 6 else (month - 6), 
+                                    min(day, 28)).date()
+            if candidate_date > today:
+                return candidate_date
+        
+        # Fallback: 3 months from now
+        return today + timedelta(days=90)
     
     def get_gilt_details(self, isin: str) -> Dict:
         """
