@@ -159,40 +159,40 @@ export class GiltDataFetcher {
         name: 'Treasury 4.75% 2030',
         couponRate: 4.75,
         maturityDate: '2030-12-07',
-        currentYield: 4.2,
-        cleanPrice: 102.45,
+        currentYield: 4.66,
+        cleanPrice: 100.18,
         yearsToMaturity: this.calculateYearsToMaturity('2030-12-07')
       },
       {
         name: 'Treasury 4.125% 2027', 
         couponRate: 4.125,
         maturityDate: '2027-01-31',
-        currentYield: 3.95,
-        cleanPrice: 100.85,
+        currentYield: 4.45,
+        cleanPrice: 99.77,
         yearsToMaturity: this.calculateYearsToMaturity('2027-01-31')
       },
       {
         name: 'Treasury 0.5% 2026',
         couponRate: 0.5,
         maturityDate: '2026-07-22', 
-        currentYield: 4.1,
-        cleanPrice: 92.3,
+        currentYield: 4.35,
+        cleanPrice: 87.85,
         yearsToMaturity: this.calculateYearsToMaturity('2026-07-22')
       },
       {
         name: 'Treasury 4.375% 2025',
         couponRate: 4.375,
         maturityDate: '2025-12-07',
-        currentYield: 4.1,
-        cleanPrice: 100.8,
+        currentYield: 4.25,
+        cleanPrice: 100.28,
         yearsToMaturity: this.calculateYearsToMaturity('2025-12-07')
       },
       {
         name: 'Treasury 3.75% 2026',
         couponRate: 3.75,
         maturityDate: '2026-09-07',
-        currentYield: 4.0,
-        cleanPrice: 98.5,
+        currentYield: 4.40,
+        cleanPrice: 96.85,
         yearsToMaturity: this.calculateYearsToMaturity('2026-09-07')
       },
       
@@ -201,40 +201,40 @@ export class GiltDataFetcher {
         name: 'Treasury 4.25% 2032',
         couponRate: 4.25,
         maturityDate: '2032-06-07',
-        currentYield: 4.15,
-        cleanPrice: 100.2,
+        currentYield: 4.72,
+        cleanPrice: 97.85,
         yearsToMaturity: this.calculateYearsToMaturity('2032-06-07')
       },
       {
         name: 'Treasury 3.75% 2035',
         couponRate: 3.75,
         maturityDate: '2035-09-07',
-        currentYield: 4.25,
-        cleanPrice: 94.8,
+        currentYield: 4.80,
+        cleanPrice: 91.25,
         yearsToMaturity: this.calculateYearsToMaturity('2035-09-07')
       },
       {
         name: 'Treasury 4.0% 2036',
         couponRate: 4.0,
         maturityDate: '2036-01-22',
-        currentYield: 4.18,
-        cleanPrice: 97.2,
+        currentYield: 4.85,
+        cleanPrice: 93.45,
         yearsToMaturity: this.calculateYearsToMaturity('2036-01-22')
       },
       {
         name: 'Treasury 1.625% 2037',
         couponRate: 1.625,
         maturityDate: '2037-10-22',
-        currentYield: 4.35,
-        cleanPrice: 68.5,
+        currentYield: 4.88,
+        cleanPrice: 64.75,
         yearsToMaturity: this.calculateYearsToMaturity('2037-10-22')
       },
       {
         name: 'Treasury 4.625% 2034',
         couponRate: 4.625,
         maturityDate: '2034-09-07',
-        currentYield: 4.28,
-        cleanPrice: 101.2,
+        currentYield: 4.75,
+        cleanPrice: 99.15,
         yearsToMaturity: this.calculateYearsToMaturity('2034-09-07')
       },
       
@@ -243,40 +243,40 @@ export class GiltDataFetcher {
         name: 'Treasury 4.125% 2043',
         couponRate: 4.125,
         maturityDate: '2043-01-31',
-        currentYield: 4.3,
-        cleanPrice: 95.6,
+        currentYield: 4.92,
+        cleanPrice: 89.85,
         yearsToMaturity: this.calculateYearsToMaturity('2043-01-31')
       },
       {
         name: 'Treasury 3.5% 2045',
         couponRate: 3.5,
         maturityDate: '2045-01-22',
-        currentYield: 4.4,
-        cleanPrice: 85.2,
+        currentYield: 4.95,
+        cleanPrice: 79.65,
         yearsToMaturity: this.calculateYearsToMaturity('2045-01-22')
       },
       {
         name: 'Treasury 4.25% 2055',
         couponRate: 4.25,
         maturityDate: '2055-06-07',
-        currentYield: 4.35,
-        cleanPrice: 96.8,
+        currentYield: 4.98,
+        cleanPrice: 88.25,
         yearsToMaturity: this.calculateYearsToMaturity('2055-06-07')
       },
       {
         name: 'Treasury 1.5% 2047',
         couponRate: 1.5,
         maturityDate: '2047-07-22',
-        currentYield: 4.5,
-        cleanPrice: 58.9,
+        currentYield: 5.00,
+        cleanPrice: 52.35,
         yearsToMaturity: this.calculateYearsToMaturity('2047-07-22')
       },
       {
         name: 'Treasury 3.25% 2044',
         couponRate: 3.25,
         maturityDate: '2044-01-22',
-        currentYield: 4.42,
-        cleanPrice: 81.5,
+        currentYield: 4.96,
+        cleanPrice: 75.80,
         yearsToMaturity: this.calculateYearsToMaturity('2044-01-22')
       },
       

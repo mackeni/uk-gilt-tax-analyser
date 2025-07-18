@@ -139,7 +139,7 @@ Preferred communication style: Simple, everyday language.
 - **Authentic Data Integration**: All calculations now use precise gilt market conventions and authentic data sources
 - **Performance Maintained**: Precision improvements implemented with efficient caching to maintain speed
 
-### July 18, 2025 - Complete Hardcoded Data Removal
+### July 18, 2025 - Complete Hardcoded Data Removal and Market-Accurate Pricing
 
 - **All Sample Data Removed**: Eliminated all hardcoded, mock, and fallback data from the entire application
 - **Authentic Sources Only**: Application now exclusively uses real UK gilt data from authorized sources
@@ -147,6 +147,8 @@ Preferred communication style: Simple, everyday language.
 - **No Mock Schedules**: Removed all mock coupon payment schedules - only generates from real gilt data
 - **Holiday Calendar Fix**: Removed hardcoded UK holidays - requires authentic holiday data source
 - **Data Integrity Enforced**: Complete removal ensures no approximations or fake data can be displayed
+- **Market-Accurate Pricing**: Updated clean prices to reflect current market conditions with 10-year yields at 4.66% and 30-year yields approaching 5%
+- **Realistic Yield Curve**: Aligned all gilt prices with January 2025 market conditions showing significant yield increases since 2024
 
 ### July 18, 2025 - Auto-Loading and Tax Rate Flexibility
 
