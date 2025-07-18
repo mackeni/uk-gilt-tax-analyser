@@ -106,6 +106,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 18, 2025 - Precision Enhancements and Accurate Dirty Price Implementation
+- **6 Decimal Place Precision**: All money calculations now display with 6 decimal places for enhanced accuracy
+- **Corrected Accrued Interest Calculation**: Implemented proper UK gilt accrued interest methodology
+  - Uses actual day count convention (Actual/Actual)
+  - Calculates exact days since last coupon payment
+  - Applies proper semi-annual coupon payment schedule
+  - Returns monetary amounts (£X.XXXXXX per £100) instead of percentages
+- **Accurate Dirty Price Calculations**: Clean price + accrued interest = dirty price with proper mathematical implementation
+- **Enhanced Calculation Transparency**: Detailed breakdown shows coupon dates, accrued fractions, and step-by-step calculations
+- **Realistic Market Values**: Accrued interest values now reflect actual gilt market conditions
+
 ### July 17, 2025 - Schedule-Based Analysis System
 - **Enhanced Coupon Scheduler**: Comprehensive system generating actual UK gilt coupon payment dates
 - **Schedule-Based Tax Calculations**: All yield calculations now use detailed coupon schedules with actual payment dates
