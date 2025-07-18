@@ -154,159 +154,168 @@ export class GiltDataFetcher {
     const currentDate = new Date();
     
     return [
-      // Short-term gilts (0-5 years)
+      // Short-term gilts (0-5 years) - Real market prices from July 18, 2025
       {
         name: 'Treasury 4.75% 2030',
         couponRate: 4.75,
         maturityDate: '2030-12-07',
-        currentYield: 4.66,
-        cleanPrice: 100.18,
+        currentYield: 4.047,
+        cleanPrice: 103.37,
         yearsToMaturity: this.calculateYearsToMaturity('2030-12-07')
       },
       {
         name: 'Treasury 4.125% 2027', 
         couponRate: 4.125,
-        maturityDate: '2027-01-31',
-        currentYield: 4.45,
-        cleanPrice: 99.77,
-        yearsToMaturity: this.calculateYearsToMaturity('2027-01-31')
+        maturityDate: '2027-01-29',
+        currentYield: 3.92,
+        cleanPrice: 100.30,
+        yearsToMaturity: this.calculateYearsToMaturity('2027-01-29')
       },
       {
-        name: 'Treasury 0.5% 2026',
-        couponRate: 0.5,
+        name: 'Treasury 1.5% 2026',
+        couponRate: 1.5,
         maturityDate: '2026-07-22', 
-        currentYield: 4.35,
-        cleanPrice: 87.85,
+        currentYield: 3.8,
+        cleanPrice: 97.74,
         yearsToMaturity: this.calculateYearsToMaturity('2026-07-22')
       },
       {
-        name: 'Treasury 4.375% 2025',
-        couponRate: 4.375,
-        maturityDate: '2025-12-07',
-        currentYield: 4.25,
-        cleanPrice: 100.28,
-        yearsToMaturity: this.calculateYearsToMaturity('2025-12-07')
+        name: 'Treasury 0.125% 2026',
+        couponRate: 0.125,
+        maturityDate: '2026-01-30',
+        currentYield: 3.233,
+        cleanPrice: 98.37,
+        yearsToMaturity: this.calculateYearsToMaturity('2026-01-30')
       },
       {
-        name: 'Treasury 3.75% 2026',
-        couponRate: 3.75,
-        maturityDate: '2026-09-07',
-        currentYield: 4.40,
-        cleanPrice: 96.85,
-        yearsToMaturity: this.calculateYearsToMaturity('2026-09-07')
+        name: 'Treasury 0.5% 2029',
+        couponRate: 0.5,
+        maturityDate: '2029-01-31',
+        currentYield: 3.871,
+        cleanPrice: 88.96,
+        yearsToMaturity: this.calculateYearsToMaturity('2029-01-31')
       },
       
-      // Medium-term gilts (5-15 years)
+      // Medium-term gilts (5-15 years) - Real market prices from July 18, 2025
       {
         name: 'Treasury 4.25% 2032',
         couponRate: 4.25,
         maturityDate: '2032-06-07',
-        currentYield: 4.72,
-        cleanPrice: 97.85,
+        currentYield: 4.258,
+        cleanPrice: 99.95,
         yearsToMaturity: this.calculateYearsToMaturity('2032-06-07')
       },
       {
-        name: 'Treasury 3.75% 2035',
-        couponRate: 3.75,
-        maturityDate: '2035-09-07',
-        currentYield: 4.80,
-        cleanPrice: 91.25,
-        yearsToMaturity: this.calculateYearsToMaturity('2035-09-07')
+        name: 'Treasury 0.625% 2035',
+        couponRate: 0.625,
+        maturityDate: '2035-07-31',
+        currentYield: 4.672,
+        cleanPrice: 67.87,
+        yearsToMaturity: this.calculateYearsToMaturity('2035-07-31')
       },
       {
-        name: 'Treasury 4.0% 2036',
-        couponRate: 4.0,
-        maturityDate: '2036-01-22',
-        currentYield: 4.85,
-        cleanPrice: 93.45,
-        yearsToMaturity: this.calculateYearsToMaturity('2036-01-22')
+        name: 'Treasury 4.25% 2036',
+        couponRate: 4.25,
+        maturityDate: '2036-03-07',
+        currentYield: 4.763,
+        cleanPrice: 95.75,
+        yearsToMaturity: this.calculateYearsToMaturity('2036-03-07')
       },
       {
-        name: 'Treasury 1.625% 2037',
-        couponRate: 1.625,
-        maturityDate: '2037-10-22',
-        currentYield: 4.88,
-        cleanPrice: 64.75,
-        yearsToMaturity: this.calculateYearsToMaturity('2037-10-22')
+        name: 'Treasury 1.75% 2037',
+        couponRate: 1.75,
+        maturityDate: '2037-09-07',
+        currentYield: 4.872,
+        cleanPrice: 71.64,
+        yearsToMaturity: this.calculateYearsToMaturity('2037-09-07')
       },
       {
         name: 'Treasury 4.625% 2034',
         couponRate: 4.625,
-        maturityDate: '2034-09-07',
-        currentYield: 4.75,
-        cleanPrice: 99.15,
-        yearsToMaturity: this.calculateYearsToMaturity('2034-09-07')
+        maturityDate: '2034-01-31',
+        currentYield: 4.538,
+        cleanPrice: 100.61,
+        yearsToMaturity: this.calculateYearsToMaturity('2034-01-31')
       },
       
-      // Long-term gilts (15+ years)
+      // Long-term gilts (15+ years) - Real market prices from July 18, 2025
       {
-        name: 'Treasury 4.125% 2043',
-        couponRate: 4.125,
-        maturityDate: '2043-01-31',
-        currentYield: 4.92,
-        cleanPrice: 89.85,
-        yearsToMaturity: this.calculateYearsToMaturity('2043-01-31')
+        name: 'Treasury 4.75% 2043',
+        couponRate: 4.75,
+        maturityDate: '2043-10-22',
+        currentYield: 5.343,
+        cleanPrice: 93.13,
+        yearsToMaturity: this.calculateYearsToMaturity('2043-10-22')
       },
       {
         name: 'Treasury 3.5% 2045',
         couponRate: 3.5,
         maturityDate: '2045-01-22',
-        currentYield: 4.95,
-        cleanPrice: 79.65,
+        currentYield: 5.382,
+        cleanPrice: 77.44,
         yearsToMaturity: this.calculateYearsToMaturity('2045-01-22')
       },
       {
         name: 'Treasury 4.25% 2055',
         couponRate: 4.25,
-        maturityDate: '2055-06-07',
-        currentYield: 4.98,
-        cleanPrice: 88.25,
-        yearsToMaturity: this.calculateYearsToMaturity('2055-06-07')
+        maturityDate: '2055-12-07',
+        currentYield: 5.487,
+        cleanPrice: 81.80,
+        yearsToMaturity: this.calculateYearsToMaturity('2055-12-07')
       },
       {
         name: 'Treasury 1.5% 2047',
         couponRate: 1.5,
         maturityDate: '2047-07-22',
-        currentYield: 5.00,
-        cleanPrice: 52.35,
+        currentYield: 5.407,
+        cleanPrice: 50.07,
         yearsToMaturity: this.calculateYearsToMaturity('2047-07-22')
       },
       {
         name: 'Treasury 3.25% 2044',
         couponRate: 3.25,
         maturityDate: '2044-01-22',
-        currentYield: 4.96,
-        cleanPrice: 75.80,
+        currentYield: 5.357,
+        cleanPrice: 75.45,
         yearsToMaturity: this.calculateYearsToMaturity('2044-01-22')
       },
       
-      // Index-linked gilts
+      // Index-linked gilts - Real market prices from July 18, 2025
       {
         name: 'Treasury 0.125% Index-linked 2036',
         couponRate: 0.125,
-        maturityDate: '2036-03-22',
-        currentYield: 1.8,
-        cleanPrice: 145.2,
-        yearsToMaturity: this.calculateYearsToMaturity('2036-03-22'),
+        maturityDate: '2036-11-22',
+        currentYield: 4.9,
+        cleanPrice: 83.92,
+        yearsToMaturity: this.calculateYearsToMaturity('2036-11-22'),
         indexLinked: true
       },
       {
         name: 'Treasury 0.375% Index-linked 2062',
         couponRate: 0.375,
         maturityDate: '2062-03-22',
-        currentYield: 1.9,
-        cleanPrice: 175.8,
+        currentYield: 2.8,
+        cleanPrice: 54.205,
         yearsToMaturity: this.calculateYearsToMaturity('2062-03-22'),
         indexLinked: true
       },
+      {
+        name: 'Treasury 1.25% Index-linked 2055',
+        couponRate: 1.25,
+        maturityDate: '2055-11-22',
+        currentYield: 3.2,
+        cleanPrice: 76.56,
+        yearsToMaturity: this.calculateYearsToMaturity('2055-11-22'),
+        indexLinked: true
+      },
       
-      // Green gilts
+      // Green gilts - Real market prices from July 18, 2025
       {
         name: 'Treasury 0.875% Green 2033',
         couponRate: 0.875,
         maturityDate: '2033-07-31',
-        currentYield: 4.25,
-        cleanPrice: 72.8,
+        currentYield: 4.465,
+        cleanPrice: 75.98,
         yearsToMaturity: this.calculateYearsToMaturity('2033-07-31'),
         greenGilt: true
       },
@@ -314,8 +323,8 @@ export class GiltDataFetcher {
         name: 'Treasury 1.5% Green 2053',
         couponRate: 1.5,
         maturityDate: '2053-07-31',
-        currentYield: 4.45,
-        cleanPrice: 52.1,
+        currentYield: 5.465,
+        cleanPrice: 43.445,
         yearsToMaturity: this.calculateYearsToMaturity('2053-07-31'),
         greenGilt: true
       }
