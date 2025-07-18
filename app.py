@@ -112,6 +112,17 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     # Calculate additional metrics
     df['Years to Maturity'] = df['Maturity Date'].apply(calculate_years_to_maturity)
     
+    # Ensure Dirty Price column exists
+    if 'Dirty Price' not in df.columns:
+        # Calculate dirty price from clean price and accrued interest
+        if 'Clean Price' in df.columns and 'Accrued Interest' in df.columns:
+            df['Dirty Price'] = df['Clean Price'] + df['Accrued Interest']
+        else:
+            # Fallback: estimate accrued interest and calculate dirty price
+            df['Accrued Interest'] = df['Coupon Rate'] * 0.25  # Rough estimate
+            df['Clean Price'] = df['Price']
+            df['Dirty Price'] = df['Price'] + df['Accrued Interest']
+    
     # Calculate after-tax yields using detailed coupon schedules
     def calculate_enhanced_after_tax_yield(row):
         try:

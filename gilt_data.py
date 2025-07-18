@@ -313,8 +313,8 @@ class GiltDataFetcher:
         
         # Add calculated fields
         df['Accrued Interest'] = df.apply(lambda row: self._calculate_accrued_interest(row), axis=1)
-        df['Dirty Price'] = df['Price'] + df['Accrued Interest']  # Price is clean price, dirty = clean + accrued
         df['Clean Price'] = df['Price']  # Store original price as clean price
+        df['Dirty Price'] = df['Price'] + df['Accrued Interest']  # Price is clean price, dirty = clean + accrued
         df['Yield to Maturity'] = df['Current Yield']  # Simplified for demonstration
         
         return df
