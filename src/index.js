@@ -3,7 +3,7 @@
  * Converted from Streamlit application
  */
 
-import { GiltDataFetcher } from './lib/gilt-data-complete';
+import { GiltDataFetcher } from './lib/gilt-data-live';
 import { TaxCalculator } from './lib/tax-calculator';
 import { CouponScheduler } from './lib/coupon-scheduler';
 import { formatCurrency, formatPercentage, calculateYearsToMaturity } from './lib/utils';

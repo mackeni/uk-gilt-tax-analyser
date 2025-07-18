@@ -1,41 +1,34 @@
-// Complete UK Gilt Data Fetcher - ALL UK gilts with close-of-business prices
-// Data sourced from UK DMO, DividendData, Hargreaves Lansdown, and AJ Bell as of July 17, 2025
+// UK Gilt Data Fetcher - Live data from DividendData close-of-business prices
+// Data sourced exclusively from DividendData previous working day close
 
 export class GiltDataFetcher {
   constructor() {
     this.cache = new Map();
-    this.cacheExpiry = 1000 * 60 * 30; // 30 minutes
+    this.cacheExpiry = 1000 * 60 * 15; // 15 minutes cache
   }
 
   async fetchGiltData() {
     try {
-      // Try to fetch from multiple authentic sources with fallback strategy
-      let data = await this.fetchFromDividendData();
+      // Always fetch fresh data from DividendData
+      const data = await this.fetchFromDividendData();
       if (!data) {
-        data = await this.fetchFromTradeweb();
-      }
-      if (!data) {
-        data = await this.fetchFromDMO();
-      }
-      if (!data) {
-        // Use close-of-business authentic data if all sources fail
-        data = this.getWorkingGiltData();
+        throw new Error('Failed to fetch gilt data from DividendData');
       }
       
       return this.calculateGiltMetrics(data);
     } catch (error) {
       console.error('Error fetching gilt data:', error);
-      // Return authentic close-of-business data as final fallback
-      return this.calculateGiltMetrics(this.getWorkingGiltData());
+      throw error; // Don't use fallback data - always require authentic data
     }
   }
 
   async fetchFromDividendData() {
     try {
-      const response = await fetch('https://www.dividenddata.co.uk/giltprices.py');
+      console.log('Fetching gilt data from DividendData...');
+      const response = await fetch('https://www.dividenddata.co.uk/uk-gilts-prices-yields.py');
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`DividendData HTTP error! status: ${response.status}`);
       }
       
       const html = await response.text();
@@ -43,41 +36,104 @@ export class GiltDataFetcher {
       
     } catch (error) {
       console.error('DividendData fetch error:', error);
-      return null;
-    }
-  }
-
-  async fetchFromTradeweb() {
-    try {
-      // Tradeweb requires specific authentication for real-time data
-      // This would be implemented with proper API credentials
-      throw new Error('Tradeweb API implementation required for authentic data');
-    } catch (error) {
-      console.error('Tradeweb fetch error:', error);
-      return null;
-    }
-  }
-
-  async fetchFromDMO() {
-    try {
-      // DMO doesn't provide a direct API for current prices
-      // This would need to be implemented based on their specific endpoints
-      throw new Error('DMO API implementation required for authentic data');
-    } catch (error) {
-      console.error('DMO fetch error:', error);
-      return null;
+      throw error;
     }
   }
 
   parseGiltHTML(html) {
     try {
-      return this.getWorkingGiltData();
+      // Parse the HTML table from DividendData
+      const giltData = [];
+      
+      // Extract table rows using regex patterns
+      const tableRowPattern = /<tr[^>]*>.*?<\/tr>/gi;
+      const rows = html.match(tableRowPattern) || [];
+      
+      for (const row of rows) {
+        const cells = this.extractTableCells(row);
+        if (cells.length >= 7 && cells[0] && cells[1] && cells[5] && cells[6]) {
+          const epic = cells[0].trim();
+          const name = cells[1].trim();
+          const couponStr = cells[2].trim();
+          const maturityStr = cells[3].trim();
+          const priceStr = cells[5].trim();
+          const yieldStr = cells[6].trim();
+          
+          // Skip header rows and invalid data
+          if (epic === 'EPIC' || !priceStr.includes('£') || !yieldStr.includes('%')) {
+            continue;
+          }
+          
+          // Parse data
+          const couponRate = this.parsePercentage(couponStr);
+          const cleanPrice = this.parsePrice(priceStr);
+          const currentYield = this.parsePercentage(yieldStr);
+          const maturityDate = this.parseMaturityDate(maturityStr);
+          
+          if (couponRate !== null && cleanPrice !== null && currentYield !== null && maturityDate) {
+            giltData.push({
+              name: this.standardizeName(name),
+              couponRate: couponRate,
+              maturityDate: maturityDate,
+              cleanPrice: cleanPrice,
+              currentYield: currentYield,
+              indexLinked: name.toLowerCase().includes('index'),
+              greenGilt: name.toLowerCase().includes('green')
+            });
+          }
+        }
+      }
+      
+      console.log(`Parsed ${giltData.length} gilts from DividendData`);
+      return giltData.length > 0 ? giltData : null;
+      
     } catch (error) {
-      throw new Error('Failed to parse gilt data from authentic source: ' + error.message);
+      console.error('Error parsing gilt HTML:', error);
+      throw error;
     }
   }
 
-  getWorkingGiltData() {
+  extractTableCells(row) {
+    const cellPattern = /<t[dh][^>]*>(.*?)<\/t[dh]>/gi;
+    const cells = [];
+    let match;
+    
+    while ((match = cellPattern.exec(row)) !== null) {
+      // Remove HTML tags and decode entities
+      let cellContent = match[1]
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .trim();
+      cells.push(cellContent);
+    }
+    
+    return cells;
+  }
+
+  parsePercentage(str) {
+    if (!str) return null;
+    const match = str.match(/([\d.]+)%?/);
+    return match ? parseFloat(match[1]) : null;
+  }
+
+  parsePrice(str) {
+    if (!str) return null;
+    const match = str.match(/£([\d,.]+)/);
+    return match ? parseFloat(match[1].replace(/,/g, '')) : null;
+  }
+
+  standardizeName(name) {
+    // Standardize gilt names for consistency
+    return name
+      .replace(/Treasury\s+/i, 'Treasury ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  parseMaturityDate(dateStr) {
     // Complete UK gilt database with close-of-business prices from July 17, 2025
     // Data sourced from UK DMO, DividendData, Hargreaves Lansdown, and AJ Bell
     return [
