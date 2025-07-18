@@ -60,12 +60,54 @@ Key advantages of gilts for higher rate taxpayers:
 
 # Sidebar for user inputs
 st.sidebar.header("Tax Settings")
-st.sidebar.markdown("""
-**Additional Rate Taxpayer Assumptions:**
-- Income Tax Rate: 45%
-- Personal Savings Allowance: £0
+
+# Income tax rate selection
+tax_bracket = st.sidebar.selectbox(
+    "Select Your Tax Bracket",
+    options=["Basic Rate (20%)", "Higher Rate (40%)", "Additional Rate (45%)"],
+    index=2,  # Default to Additional Rate
+    help="Choose your marginal income tax rate for accurate calculations"
+)
+
+# Map selection to tax rates and PSA
+tax_rate_mapping = {
+    "Basic Rate (20%)": {"rate": 0.20, "psa": 1000, "type": "basic_rate"},
+    "Higher Rate (40%)": {"rate": 0.40, "psa": 500, "type": "higher_rate"},
+    "Additional Rate (45%)": {"rate": 0.45, "psa": 0, "type": "additional_rate"}
+}
+
+selected_tax_info = tax_rate_mapping[tax_bracket]
+tax_rate = selected_tax_info["rate"]
+psa = selected_tax_info["psa"]
+taxpayer_type = selected_tax_info["type"]
+
+st.sidebar.markdown(f"""
+**Your Tax Settings:**
+- Income Tax Rate: {tax_rate*100:.0f}%
+- Personal Savings Allowance: £{psa:,}
 - Capital Gains Tax on Gilts: 0% (exempt)
 """)
+
+# Additional settings
+st.sidebar.subheader("Investment Settings")
+investment_amount = st.sidebar.number_input(
+    "Investment Amount (£)",
+    min_value=100.0,
+    max_value=10000000.0,
+    value=10000.0,
+    step=1000.0,
+    help="Amount you plan to invest"
+)
+
+# Savings comparison rate
+savings_rate = st.sidebar.number_input(
+    "Current Savings Rate (%)",
+    min_value=0.0,
+    max_value=10.0,
+    value=4.5,
+    step=0.1,
+    help="Current savings account interest rate for comparison"
+)
 
 
 
@@ -136,21 +178,21 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 
                 # Use the new schedule-based yield calculation with dirty price
                 return tax_calc._calculate_schedule_based_yield(
-                    coupon_schedule, dirty_price, tax_rate=0.45
+                    coupon_schedule, dirty_price, tax_rate=tax_rate
                 )
             else:
                 # No coupons - use simple calculation
                 return tax_calc.calculate_after_tax_yield(
-                    row['Current Yield'], row['Years to Maturity'], row['Coupon Rate']
+                    row['Current Yield'], row['Years to Maturity'], row['Coupon Rate'], taxpayer_type
                 )
         except Exception as e:
             # Fallback to simple calculation
             return tax_calc.calculate_after_tax_yield(
-                row['Current Yield'], row['Years to Maturity'], row['Coupon Rate']
+                row['Current Yield'], row['Years to Maturity'], row['Coupon Rate'], taxpayer_type
             )
     
     df['After-Tax Yield'] = df.apply(calculate_enhanced_after_tax_yield, axis=1)
-    df['Equivalent Savings Rate'] = df['After-Tax Yield'] / (1 - 0.45)
+    df['Equivalent Savings Rate'] = df['After-Tax Yield'] / (1 - tax_rate)
     
     # Filter and sort options
     st.subheader("Filter Options")
@@ -225,7 +267,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     # Quick insights section
     st.subheader("⚡ Quick Insights")
     
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2 = st.columns(2)
     
     with col1:
         if len(filtered_df) > 0:
@@ -249,27 +291,63 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         else:
             st.metric("Best Equivalent Savings Rate", "N/A", "No gilts found")
     
-    with col3:
-        if len(filtered_df) > 0:
-            shortest_maturity = filtered_df.loc[filtered_df['Years to Maturity'].idxmin()]
-            st.metric(
-                "Shortest Maturity",
-                f"{shortest_maturity['Years to Maturity']:.1f} years",
-                f"{shortest_maturity['Name']}"
-            )
+    # Tax efficiency comparison
+    if not filtered_df.empty:
+        st.subheader("💰 Tax Efficiency Comparison")
+        
+        best_yield = filtered_df['After-Tax Yield'].max()
+        
+        # Calculate savings account after-tax return with PSA consideration
+        savings_interest_annual = investment_amount * (savings_rate / 100)
+        
+        # Apply Personal Savings Allowance
+        if savings_interest_annual <= psa:
+            # All interest within PSA - no tax
+            savings_after_tax_rate = savings_rate
         else:
-            st.metric("Shortest Maturity", "N/A", "No gilts found")
-    
-    with col4:
-        if len(filtered_df) > 0:
-            avg_maturity = filtered_df['Years to Maturity'].mean()
+            # Interest above PSA is taxed
+            taxable_interest = savings_interest_annual - psa
+            tax_on_interest = taxable_interest * tax_rate
+            net_interest = savings_interest_annual - tax_on_interest
+            savings_after_tax_rate = (net_interest / investment_amount) * 100
+        
+        best_gilt_advantage = best_yield - savings_after_tax_rate
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
             st.metric(
-                "Average Maturity",
-                f"{avg_maturity:.1f} years",
-                f"{len(filtered_df)} gilts"
+                "Your Savings Account",
+                f"{savings_after_tax_rate:.3f}%",
+                f"After {tax_rate*100:.0f}% tax & PSA"
             )
-        else:
-            st.metric("Average Maturity", "N/A", "No gilts found")
+            
+            # PSA impact explanation
+            if psa > 0:
+                st.caption(f"""
+                PSA: £{psa:,} tax-free
+                Interest: £{savings_interest_annual:.2f}
+                PSA {'fully used' if savings_interest_annual > psa else 'available'}
+                """)
+            else:
+                st.caption("No Personal Savings Allowance")
+        
+        with col2:
+            st.metric(
+                "Best Gilt After-Tax",
+                f"{best_yield:.3f}%",
+                f"{best_gilt_advantage:+.3f}% vs savings"
+            )
+            
+            # Show annual advantage
+            gilt_annual_return = investment_amount * (best_yield / 100)
+            savings_annual_return = investment_amount * (savings_after_tax_rate / 100)
+            annual_advantage = gilt_annual_return - savings_annual_return
+            
+            st.caption(f"""
+            Annual advantage: £{annual_advantage:+.2f}
+            On £{investment_amount:,.0f} investment
+            """)
     
     # Gilt selection for comparison
     st.subheader("🔍 Detailed Analysis")
@@ -292,7 +370,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
             **Our Schedule-Based Calculation Method:**
             
             1. **Generate Actual Payment Schedule**: Create detailed coupon payment dates based on UK gilt conventions
-            2. **Calculate Tax on Each Payment**: Apply 45% tax rate to each coupon payment
+            2. **Calculate Tax on Each Payment**: Apply your selected tax rate to each coupon payment
             3. **Sum After-Tax Cash Flows**: Total all net coupons plus tax-free principal repayment
             4. **Calculate Total Return Ratio**: Divide total after-tax return by **dirty price** (includes accrued interest)
             5. **Annualize the Return**: Use compound annual growth rate formula: ((Total Return Ratio)^(1/Years) - 1) × 100
@@ -309,9 +387,9 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
             - **Dirty Price**: Actual purchase cost including accrued interest
             - **Why Dirty Price**: Reflects true cost of investment for accurate yield calculation
             
-            **Tax Assumptions for Additional Rate Taxpayers:**
-            - Income tax rate: 45%
-            - Personal Savings Allowance: £0 (nil for additional rate taxpayers)
+            **Your Tax Settings:**
+            - Income tax rate: {tax_rate*100:.0f}%
+            - Personal Savings Allowance: £{psa:,}
             - Capital Gains Tax on gilts: 0% (exempt)
             """)
         
