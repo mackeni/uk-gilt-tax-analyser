@@ -26,8 +26,8 @@ class CouponScheduler:
         if coupon_rate == 0:
             return []
         
-        # Calculate semi-annual coupon amount
-        semi_annual_coupon = (coupon_rate / 2.0) * (face_value / 100.0)
+        # Calculate semi-annual coupon amount per £100 nominal
+        semi_annual_coupon = (coupon_rate / 2.0)
         
         # Generate payment dates
         payment_dates = self._generate_payment_dates(maturity_date)
@@ -44,8 +44,8 @@ class CouponScheduler:
                 payment_info = {
                     'payment_date': payment_date,
                     'coupon_amount': semi_annual_coupon,
-                    'principal_amount': face_value if is_final_payment else 0.0,
-                    'total_payment': semi_annual_coupon + (face_value if is_final_payment else 0.0),
+                    'principal_amount': 100.0 if is_final_payment else 0.0,  # Per £100 nominal
+                    'total_payment': semi_annual_coupon + (100.0 if is_final_payment else 0.0),
                     'days_to_payment': (payment_date - today).days,
                     'period_number': i + 1,
                     'is_final': is_final_payment

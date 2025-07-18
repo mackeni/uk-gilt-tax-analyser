@@ -106,6 +106,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 18, 2025 - Investment Amount Integration and Real Money Calculations
+
+- **Investment Amount Scaling**: All calculations now use the user's actual investment amount instead of notional £100
+- **Real Money Display**: Every monetary value shown reflects the user's specific investment amount
+- **Accurate Unit Calculations**: Proper calculation of units owned per £100 nominal for precise scaling
+- **Complete Payment Schedules**: All coupon payments and taxes scaled to actual investment amounts
+- **Enhanced User Experience**: Clear differentiation between per-£100-nominal values and actual investment amounts
+
 ### July 18, 2025 - Approximation Removal and Precision Enhancement
 
 - **Eliminated All Approximations**: Removed all approximations, estimates, and simplified calculations throughout the codebase
