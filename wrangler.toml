@@ -1,6 +1,7 @@
 name = "uk-gilt-tax-analyser"
 main = "src/index.js"
 compatibility_date = "2024-07-01"
+account_id = "a04d937ed3a449227c48f7edb1b750fe"
 
 [vars]
 ENVIRONMENT = "production"
