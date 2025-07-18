@@ -2,6 +2,7 @@ import pandas as pd
 from datetime import datetime, date, timedelta
 from typing import List, Dict, Tuple
 import calendar
+from functools import lru_cache
 
 class CouponScheduler:
     """
@@ -16,6 +17,44 @@ class CouponScheduler:
             'business_day_convention': 'Modified Following'
         }
     
+    @lru_cache(maxsize=64)
+    def _generate_coupon_schedule_cached(self, maturity_date_str: str, coupon_rate: float, face_value: float) -> List[Dict]:
+        """Cached version of coupon schedule generation"""
+        maturity_date = datetime.fromisoformat(maturity_date_str).date()
+        
+        # No coupons for zero-coupon gilts
+        if coupon_rate == 0:
+            return []
+        
+        # Calculate semi-annual coupon amount
+        semi_annual_coupon = (coupon_rate / 2.0) * (face_value / 100.0)
+        
+        # Generate payment dates
+        payment_dates = self._generate_payment_dates(maturity_date)
+        
+        # Create detailed schedule
+        schedule = []
+        today = date.today()
+        
+        for i, payment_date in enumerate(payment_dates):
+            if payment_date >= today:
+                # Check if this is the final payment (includes principal)
+                is_final_payment = payment_date == maturity_date
+                
+                payment_info = {
+                    'payment_date': payment_date,
+                    'coupon_amount': semi_annual_coupon,
+                    'principal_amount': face_value if is_final_payment else 0.0,
+                    'total_payment': semi_annual_coupon + (face_value if is_final_payment else 0.0),
+                    'days_to_payment': (payment_date - today).days,
+                    'period_number': i + 1,
+                    'is_final': is_final_payment
+                }
+                
+                schedule.append(payment_info)
+        
+        return schedule
+
     def generate_coupon_schedule(self, gilt_info: Dict) -> List[Dict]:
         """
         Generate complete coupon payment schedule for a gilt
@@ -37,51 +76,12 @@ class CouponScheduler:
         elif isinstance(maturity_date, pd.Timestamp):
             maturity_date = maturity_date.date()
         
-        # No coupons for zero-coupon gilts
-        if coupon_rate == 0:
-            return []
-        
-        # Calculate semi-annual coupon amount
-        semi_annual_coupon = (coupon_rate / 2.0) * (face_value / 100.0)
-        
-        # Generate payment dates
-        payment_dates = self._generate_payment_dates(maturity_date)
-        
-        # Create detailed schedule
-        schedule = []
-        today = date.today()
-        
-        for i, payment_date in enumerate(payment_dates):
-            if payment_date >= today:
-                # Calculate days from today to payment
-                days_to_payment = (payment_date - today).days
-                years_to_payment = days_to_payment / 365.25
-                
-                # Calculate accrued interest period
-                if i == 0:
-                    # First payment - calculate from issue date (approximation)
-                    accrual_days = 182  # Assume 6 months
-                else:
-                    # Subsequent payments - 6 months from previous payment
-                    accrual_days = (payment_date - payment_dates[i-1]).days
-                
-                # Final payment gets principal repayment
-                is_final_payment = (payment_date == maturity_date)
-                principal_payment = face_value if is_final_payment else 0.0
-                
-                schedule.append({
-                    'payment_date': payment_date,
-                    'days_to_payment': days_to_payment,
-                    'years_to_payment': years_to_payment,
-                    'coupon_rate': coupon_rate,
-                    'coupon_amount': semi_annual_coupon,
-                    'principal_amount': principal_payment,
-                    'total_payment': semi_annual_coupon + principal_payment,
-                    'accrual_days': accrual_days,
-                    'is_final_payment': is_final_payment
-                })
-        
-        return schedule
+        # Use cached version for efficiency
+        return self._generate_coupon_schedule_cached(
+            maturity_date.isoformat(), 
+            coupon_rate, 
+            face_value
+        )
     
     def _generate_payment_dates(self, maturity_date: date) -> List[date]:
         """

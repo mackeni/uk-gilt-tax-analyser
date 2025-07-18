@@ -7,6 +7,7 @@ import time
 import streamlit as st
 import re
 from bs4 import BeautifulSoup
+from functools import lru_cache
 
 class GiltDataFetcher:
     """Fetches UK gilt data from various sources"""
@@ -19,6 +20,7 @@ class GiltDataFetcher:
         }
         self.max_years_default = 3  # Default maximum maturity filter
     
+    @st.cache_data(ttl=300)  # Cache for 5 minutes
     def get_gilt_data(self) -> pd.DataFrame:
         """
         Fetch current gilt data from available sources
@@ -319,21 +321,20 @@ class GiltDataFetcher:
         
         return df
     
-    def _calculate_accrued_interest(self, row):
-        """Calculate accrued interest based on days since last coupon payment"""
+    @lru_cache(maxsize=128)
+    def _calculate_accrued_interest_cached(self, coupon_rate, maturity_date_str):
+        """Cached version of accrued interest calculation"""
         try:
-            coupon_rate = row['Coupon Rate']
-            maturity_date = row['Maturity Date']
+            maturity_date = datetime.fromisoformat(maturity_date_str).date()
             
             # UK gilts typically pay semi-annually
             # Calculate the last coupon date before today
             today = datetime.now().date()
-            maturity_date_obj = maturity_date.date() if isinstance(maturity_date, datetime) else maturity_date
             
             # Find the last coupon payment date
             # UK gilts typically pay on the same day and month as maturity, 6 months earlier
-            last_coupon_date = self._get_last_coupon_date(maturity_date_obj, today)
-            next_coupon_date = self._get_next_coupon_date(maturity_date_obj, today)
+            last_coupon_date = self._get_last_coupon_date(maturity_date, today)
+            next_coupon_date = self._get_next_coupon_date(maturity_date, today)
             
             # Calculate days since last coupon payment
             days_since_last_coupon = (today - last_coupon_date).days
@@ -350,6 +351,25 @@ class GiltDataFetcher:
             accrued_interest_pounds = semi_annual_coupon_pounds * accrued_fraction
             
             return accrued_interest_pounds
+            
+        except Exception as e:
+            # Fallback to simplified calculation if date parsing fails
+            # Conservative estimate: 25% of the way through a 6-month period
+            return (coupon_rate / 2) * 0.25  # Conservative estimate in pounds per £100
+
+    def _calculate_accrued_interest(self, row):
+        """Calculate accrued interest based on days since last coupon payment"""
+        try:
+            coupon_rate = row['Coupon Rate']
+            maturity_date = row['Maturity Date']
+            
+            # Convert to string for caching
+            if isinstance(maturity_date, datetime):
+                maturity_date_str = maturity_date.isoformat()
+            else:
+                maturity_date_str = maturity_date.isoformat()
+            
+            return self._calculate_accrued_interest_cached(coupon_rate, maturity_date_str)
             
         except Exception as e:
             # Fallback to simplified calculation if date parsing fails

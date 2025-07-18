@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional
+from functools import lru_cache
 
 class TaxCalculator:
     """
@@ -34,6 +35,31 @@ class TaxCalculator:
             'cgt_allowance': 3000
         }
     
+    @lru_cache(maxsize=128)
+    def calculate_after_tax_yield_cached(self, current_yield: float, years_to_maturity: float, 
+                                       coupon_rate: float, taxpayer_type: str = 'additional_rate',
+                                       remaining_coupons: int = None, 
+                                       dirty_price: float = None, clean_price: float = None) -> float:
+        """Cached version of after-tax yield calculation"""
+        # Get applicable tax rates
+        income_tax_rate = self.tax_rates[taxpayer_type]
+        
+        # Calculate after-tax coupon yield
+        after_tax_coupon_yield = coupon_rate * (1 - income_tax_rate)
+        
+        # Calculate capital gains component (if any)
+        if clean_price is not None and clean_price != 100:
+            capital_gain_per_year = (100 - clean_price) / years_to_maturity
+            # Capital gains on gilts are tax-free in the UK
+            capital_gains_yield = capital_gain_per_year
+        else:
+            capital_gains_yield = 0
+        
+        # Total after-tax yield
+        total_after_tax_yield = after_tax_coupon_yield + capital_gains_yield
+        
+        return total_after_tax_yield
+
     def calculate_after_tax_yield(self, current_yield: float, years_to_maturity: float, 
                                  coupon_rate: float, taxpayer_type: str = 'additional_rate',
                                  next_coupon_date: Optional[datetime] = None,

@@ -7,7 +7,7 @@ import numpy as np
 from gilt_data import GiltDataFetcher
 from tax_calculator import TaxCalculator
 from coupon_scheduler import CouponScheduler
-from utils import format_currency, format_percentage, calculate_years_to_maturity
+from utils import format_currency, format_percentage, calculate_years_to_maturity, calculate_additional_metrics
 from database import DatabaseManager
 
 # Page configuration
@@ -37,10 +37,14 @@ def get_tax_calculator():
 def get_database_manager():
     return DatabaseManager()
 
+@st.cache_resource
+def get_coupon_scheduler():
+    return CouponScheduler()
+
 gilt_fetcher = get_data_fetcher()
 tax_calc = get_tax_calculator()
 db_manager = get_database_manager()
-coupon_scheduler = CouponScheduler()
+coupon_scheduler = get_coupon_scheduler()
 
 # Main title and description
 st.title("🏦 UK Gilt Tax Efficiency Analyzer")
@@ -109,21 +113,11 @@ if st.session_state.gilt_data is None:
 if st.session_state.gilt_data is not None and not st.session_state.gilt_data.empty:
     df = st.session_state.gilt_data.copy()
     
-    # Calculate additional metrics
-    df['Years to Maturity'] = df['Maturity Date'].apply(calculate_years_to_maturity)
-    
-    # Ensure Dirty Price column exists
-    if 'Dirty Price' not in df.columns:
-        # Calculate dirty price from clean price and accrued interest
-        if 'Clean Price' in df.columns and 'Accrued Interest' in df.columns:
-            df['Dirty Price'] = df['Clean Price'] + df['Accrued Interest']
-        else:
-            # Fallback: estimate accrued interest and calculate dirty price
-            df['Accrued Interest'] = df['Coupon Rate'] * 0.25  # Rough estimate
-            df['Clean Price'] = df['Price']
-            df['Dirty Price'] = df['Price'] + df['Accrued Interest']
+    # Calculate additional metrics efficiently
+    df = calculate_additional_metrics(df)
     
     # Calculate after-tax yields using detailed coupon schedules
+    @st.cache_data(ttl=60)  # Cache for 1 minute
     def calculate_enhanced_after_tax_yield(row):
         try:
             # Create gilt info for coupon scheduler

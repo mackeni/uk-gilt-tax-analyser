@@ -280,3 +280,26 @@ def get_market_status() -> dict:
         'last_close': market_close if current_time > market_close else market_close - timedelta(days=1),
         'status': 'Open' if is_weekday and is_market_hours else 'Closed'
     }
+
+def calculate_additional_metrics(df):
+    """Calculate additional metrics efficiently for the gilt dataframe"""
+    # Use vectorized operations where possible
+    df = df.copy()
+    
+    # Calculate years to maturity efficiently
+    today = pd.Timestamp.now()
+    df['Years to Maturity'] = (df['Maturity Date'] - today).dt.days / 365.25
+    df['Years to Maturity'] = df['Years to Maturity'].clip(lower=0)
+    
+    # Ensure Dirty Price column exists
+    if 'Dirty Price' not in df.columns:
+        # Calculate dirty price from clean price and accrued interest
+        if 'Clean Price' in df.columns and 'Accrued Interest' in df.columns:
+            df['Dirty Price'] = df['Clean Price'] + df['Accrued Interest']
+        else:
+            # Fallback: estimate accrued interest and calculate dirty price
+            df['Accrued Interest'] = df['Coupon Rate'] * 0.25  # Rough estimate
+            df['Clean Price'] = df['Price']
+            df['Dirty Price'] = df['Price'] + df['Accrued Interest']
+    
+    return df

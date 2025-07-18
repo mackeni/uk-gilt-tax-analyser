@@ -5,6 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime, timedelta, date
 import logging
+from functools import lru_cache
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
