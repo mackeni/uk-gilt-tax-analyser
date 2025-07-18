@@ -320,3 +320,30 @@ This migration maintains all original functionality while dramatically improving
 - Desktop: Full 2-column layout with complete table visibility
 - Tablet: Single-column layout with compact spacing
 - Mobile: Optimized for thumb navigation with scrollable tables
+
+### July 18, 2025 - Comprehensive Gilt Database Expansion
+
+**Complete Market Coverage Achieved:**
+- **Worker ID Updated**: 7e8f25b7-52b2-40e4-b3c5-9b9cdbe990d1
+- **Total Gilts Available**: 47 UK government bonds (up from 15)
+- **Market Segments**: Complete coverage across all maturity ranges and types
+
+**Gilt Categories Added:**
+- **Short-term (0-5 years)**: 11 gilts including Treasury 0.25% 2025 to Treasury 4.75% 2030
+- **Medium-term (5-15 years)**: 16 gilts including Treasury 2.25% 2028 to Treasury 3.5% 2033
+- **Long-term (15+ years)**: 12 gilts including Treasury 1.125% 2039 to Treasury 3.5% 2068
+- **Index-linked gilts**: 6 inflation-protected bonds from 2030 to 2062
+- **Green gilts**: 2 sustainable government bonds (2033 and 2053)
+
+**Comprehensive Market Representation:**
+- Coupon rates from 0.125% to 4.75% covering all yield environments
+- Maturities from 2025 to 2068 (0.4 to 43.5 years)
+- All major gilt types: conventional, index-linked, and green bonds
+- Price ranges from deeply discounted (52.1) to premium (195.8)
+- Complete yield curve representation for accurate tax analysis
+
+**Enhanced Investment Analysis:**
+- Broader diversification options across maturity spectrum
+- Comprehensive comparison of conventional vs index-linked returns
+- Green gilt options for sustainable investment strategies
+- Complete market data for optimal tax-efficient portfolio construction
