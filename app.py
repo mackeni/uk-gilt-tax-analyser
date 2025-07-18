@@ -50,15 +50,6 @@ coupon_scheduler = get_coupon_scheduler()
 
 # Main title and description
 st.title("🏦 UK Gilt Tax Efficiency Analyzer")
-st.markdown("""
-**For Additional Rate Taxpayers (45% Tax Band)**
-
-This tool helps UK additional rate taxpayers analyze the tax efficiency of UK gilt investments.
-Key advantages of gilts for higher rate taxpayers:
-- **Capital Gains Tax Exempt**: No CGT on gilt price appreciation
-- **Predictable Returns**: Fixed coupon payments and known maturity value
-- **Tax Efficiency**: Optimized after-tax returns using actual coupon schedules
-""")
 
 # Sidebar for user inputs
 st.sidebar.header("Tax Settings")
@@ -88,6 +79,34 @@ st.sidebar.markdown(f"""
 - Income Tax Rate: {tax_rate*100:.0f}%
 - Personal Savings Allowance: £{psa:,}
 - Capital Gains Tax on Gilts: 0% (exempt)
+""")
+
+# Dynamic description based on selected tax bracket
+tax_bracket_descriptions = {
+    "Basic Rate (20%)": {
+        "title": "For Basic Rate Taxpayers (20% Tax Band)",
+        "description": "This tool helps UK basic rate taxpayers analyze the tax efficiency of UK gilt investments with your £1,000 Personal Savings Allowance."
+    },
+    "Higher Rate (40%)": {
+        "title": "For Higher Rate Taxpayers (40% Tax Band)", 
+        "description": "This tool helps UK higher rate taxpayers analyze the tax efficiency of UK gilt investments with your £500 Personal Savings Allowance."
+    },
+    "Additional Rate (45%)": {
+        "title": "For Additional Rate Taxpayers (45% Tax Band)",
+        "description": "This tool helps UK additional rate taxpayers analyze the tax efficiency of UK gilt investments with no Personal Savings Allowance."
+    }
+}
+
+selected_description = tax_bracket_descriptions[tax_bracket]
+st.markdown(f"""
+**{selected_description['title']}**
+
+{selected_description['description']}
+
+Key advantages of gilts for taxpayers:
+- **Capital Gains Tax Exempt**: No CGT on gilt price appreciation
+- **Predictable Returns**: Fixed coupon payments and known maturity value
+- **Tax Efficiency**: Optimized after-tax returns using actual coupon schedules
 """)
 
 # Additional settings
@@ -223,7 +242,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 
                 # Use the new schedule-based yield calculation with dirty price
                 return tax_calc._calculate_schedule_based_yield(
-                    coupon_schedule, dirty_price, tax_rate=tax_rate
+                    coupon_schedule, dirty_price, tax_rate=tax_rate, taxpayer_type=taxpayer_type
                 )
             else:
                 # No coupons - use simple calculation
@@ -436,6 +455,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
             - Income tax rate: {tax_rate*100:.0f}%
             - Personal Savings Allowance: £{psa:,}
             - Capital Gains Tax on gilts: 0% (exempt)
+            - Taxpayer type: {taxpayer_type.replace('_', ' ').title()}
             """)
         
         st.markdown("---")
@@ -463,13 +483,13 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                     # Calculate detailed coupon schedule and show calculations
                     if coupon_schedule:
                         after_tax_schedule = coupon_scheduler.calculate_after_tax_cash_flows(
-                            coupon_schedule, tax_rate=0.45
+                            coupon_schedule, tax_rate=tax_rate
                         )
                         schedule_summary = coupon_scheduler.get_schedule_summary(after_tax_schedule)
                         
                         st.markdown("**Coupon Schedule Analysis (per £100 nominal):**")
                         st.write(f"• Total Gross Coupons: £{schedule_summary['total_gross_coupons']:.6f}")
-                        st.write(f"• Total Coupon Tax (45%): £{schedule_summary['total_coupon_tax']:.6f}")
+                        st.write(f"• Total Coupon Tax ({tax_rate*100:.0f}%): £{schedule_summary['total_coupon_tax']:.6f}")
                         st.write(f"• Total After-Tax Coupons: £{schedule_summary['total_after_tax_coupons']:.6f}")
                         st.write(f"• Principal Return: £{schedule_summary['total_principal']:.6f}")
                         st.write(f"• **Total After-Tax Return: £{schedule_summary['total_after_tax_cash_flows']:.6f}**")
@@ -479,7 +499,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         for i, payment in enumerate(coupon_schedule[:5]):  # Show first 5 payments
                             payment_date = payment['payment_date'].strftime('%d %b %Y')
                             coupon_amount = payment['coupon_amount']
-                            tax_amount = coupon_amount * 0.45
+                            tax_amount = coupon_amount * tax_rate
                             net_amount = coupon_amount - tax_amount
                             principal = payment.get('principal_amount', 0)
                             
@@ -509,8 +529,8 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                     
                     # Calculate tax efficiency metrics
                     gross_yield = row['Current Yield']
-                    tax_on_yield = gross_yield * 0.45
-                    st.write(f"• Tax on Yield (45%): {tax_on_yield:.3f}%")
+                    tax_on_yield = gross_yield * tax_rate
+                    st.write(f"• Tax on Yield ({tax_rate*100:.0f}%): {tax_on_yield:.3f}%")
                     st.write(f"• Tax Efficiency: {(row['After-Tax Yield'] / gross_yield * 100):.1f}%")
                     
                     # Detailed yield calculation breakdown
@@ -529,7 +549,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         st.write(f"• Accrued Interest: £{accrued_interest:.6f}")
                         st.write(f"• **Dirty Price (Total Purchase Cost): £{dirty_price:.6f}**")
                         st.write(f"• Total Gross Coupons: £{schedule_summary['total_gross_coupons']:.6f}")
-                        st.write(f"• Tax on Coupons (45%): £{schedule_summary['total_coupon_tax']:.6f}")
+                        st.write(f"• Tax on Coupons ({tax_rate*100:.0f}%): £{schedule_summary['total_coupon_tax']:.6f}")
                         st.write(f"• Net Coupons: £{schedule_summary['total_after_tax_coupons']:.6f}")
                         st.write(f"• Principal Return: £{schedule_summary['total_principal']:.6f}")
                         st.write(f"• **Total After-Tax Return: £{total_after_tax_return:.6f}**")
@@ -547,9 +567,9 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         
                         # Show equivalent savings rate calculation
                         st.markdown("**Step 4: Calculate Equivalent Savings Rate**")
-                        equivalent_rate = annualized_yield / (1 - 0.45)
+                        equivalent_rate = annualized_yield / (1 - tax_rate)
                         st.write(f"• Formula: After-Tax Yield ÷ (1 - Tax Rate)")
-                        st.write(f"• Calculation: {annualized_yield:.3f}% ÷ (1 - 0.45) = {equivalent_rate:.3f}%")
+                        st.write(f"• Calculation: {annualized_yield:.3f}% ÷ (1 - {tax_rate:.2f}) = {equivalent_rate:.3f}%")
                         st.write(f"• **Equivalent Savings Rate: {equivalent_rate:.3f}%**")
                         
                     else:
@@ -632,9 +652,9 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         
                         # Show equivalent savings rate calculation
                         st.markdown("**Step 3: Calculate Equivalent Savings Rate**")
-                        equivalent_rate = capital_gain_yield / (1 - 0.45)
+                        equivalent_rate = capital_gain_yield / (1 - tax_rate)
                         st.write(f"• Formula: After-Tax Yield ÷ (1 - Tax Rate)")
-                        st.write(f"• Calculation: {capital_gain_yield:.3f}% ÷ (1 - 0.45) = {equivalent_rate:.3f}%")
+                        st.write(f"• Calculation: {capital_gain_yield:.3f}% ÷ (1 - {tax_rate:.2f}) = {equivalent_rate:.3f}%")
                         st.write(f"• **Equivalent Savings Rate: {equivalent_rate:.3f}%**")
         
         # Visual comparison
@@ -715,7 +735,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         with col2:
             if best_coupon_schedule:
                 after_tax_schedule = coupon_scheduler.calculate_after_tax_cash_flows(
-                    best_coupon_schedule, tax_rate=0.45
+                    best_coupon_schedule, tax_rate=tax_rate
                 )
                 schedule_summary = coupon_scheduler.get_schedule_summary(after_tax_schedule)
                 
@@ -739,7 +759,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
             breakeven_rate = tax_calc.calculate_breakeven_savings_rate(
                 row.to_dict(),
                 row['Years to Maturity'],
-                'additional_rate'
+                taxpayer_type
             )
             breakeven_data.append({
                 'Gilt': row['Name'],

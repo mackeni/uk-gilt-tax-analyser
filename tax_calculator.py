@@ -118,7 +118,8 @@ class TaxCalculator:
         return after_tax_yield
     
     def _calculate_schedule_based_yield(self, coupon_schedule: List[Dict], 
-                                       purchase_price: float, tax_rate: float) -> float:
+                                       purchase_price: float, tax_rate: float, 
+                                       taxpayer_type: str = 'additional_rate') -> float:
         """
         Calculate after-tax yield using detailed coupon schedule with actual payment dates
         
