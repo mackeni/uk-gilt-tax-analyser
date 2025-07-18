@@ -23,6 +23,8 @@ if 'gilt_data' not in st.session_state:
     st.session_state.gilt_data = None
 if 'selected_gilts' not in st.session_state:
     st.session_state.selected_gilts = []
+if 'data_loaded' not in st.session_state:
+    st.session_state.data_loaded = False
 
 # Initialize data fetcher, calculator, and database
 @st.cache_resource
@@ -116,40 +118,79 @@ savings_rate = st.sidebar.number_input(
 # Data loading section
 st.header("📊 UK Gilt Data")
 
+# Auto-load data on first visit
+if not st.session_state.data_loaded:
+    with st.spinner("Loading gilt data..."):
+        try:
+            # Try to load from database first
+            st.session_state.gilt_data = db_manager.get_gilts_dataframe()
+            
+            if st.session_state.gilt_data.empty:
+                # If database is empty, fetch fresh data and populate
+                fresh_data = gilt_fetcher.get_gilt_data()
+                if fresh_data is not None and not fresh_data.empty:
+                    db_manager.populate_gilt_data(fresh_data.to_dict('records'))
+                    st.session_state.gilt_data = db_manager.get_gilts_dataframe()
+                else:
+                    # Use sample data as fallback
+                    sample_data = gilt_fetcher.get_sample_data()
+                    db_manager.populate_gilt_data(sample_data.to_dict('records'))
+                    st.session_state.gilt_data = db_manager.get_gilts_dataframe()
+            
+            st.session_state.data_loaded = True
+            
+            if st.session_state.gilt_data is not None and not st.session_state.gilt_data.empty:
+                st.success(f"✅ Loaded {len(st.session_state.gilt_data)} gilts automatically")
+            else:
+                st.warning("⚠️ No data loaded - check data sources")
+                
+        except Exception as e:
+            st.error(f"Auto-loading failed: {str(e)}")
+            # Fallback to sample data
+            sample_data = gilt_fetcher.get_sample_data()
+            st.session_state.gilt_data = sample_data
+            st.session_state.data_loaded = True
+
 # Data refresh button
 col1, col2, col3 = st.columns([1, 1, 2])
 with col1:
-    if st.button("🔄 Refresh Database", type="primary"):
+    if st.button("🔄 Refresh Data", type="primary"):
         st.session_state.gilt_data = None
-        with st.spinner("Updating database with latest gilt data..."):
+        st.session_state.data_loaded = False  # Reset auto-load flag
+        with st.spinner("Fetching latest gilt data..."):
             try:
-                # Get sample data and populate database
-                sample_data = gilt_fetcher.get_sample_data()
-                db_manager.populate_gilt_data(sample_data.to_dict('records'))
-                st.session_state.gilt_data = db_manager.get_gilts_dataframe()
-                st.success("Database updated with gilt data!")
+                # Clear any cached data first
+                gilt_fetcher.get_gilt_data.clear()
+                
+                # Try to get fresh data from external sources
+                fresh_data = gilt_fetcher.get_gilt_data()
+                
+                if fresh_data is not None and not fresh_data.empty:
+                    # Update database with fresh data
+                    db_manager.populate_gilt_data(fresh_data.to_dict('records'))
+                    st.session_state.gilt_data = db_manager.get_gilts_dataframe()
+                    st.success(f"✅ Refreshed with {len(st.session_state.gilt_data)} gilts from live sources")
+                else:
+                    # Fall back to sample data
+                    sample_data = gilt_fetcher.get_sample_data()
+                    db_manager.populate_gilt_data(sample_data.to_dict('records'))
+                    st.session_state.gilt_data = db_manager.get_gilts_dataframe()
+                    st.warning("⚠️ Live data unavailable - refreshed with sample data")
+                    
+                st.session_state.data_loaded = True
+                st.rerun()
+                
             except Exception as e:
-                st.error(f"Database update failed: {str(e)}")
+                st.error(f"Refresh failed: {str(e)}")
                 st.session_state.gilt_data = gilt_fetcher.get_sample_data()
+                st.session_state.data_loaded = True
 
 with col2:
     if st.button("📊 Load from Database"):
         st.session_state.gilt_data = db_manager.get_gilts_dataframe()
         st.info("Data loaded from database")
 
-# Load data if not already loaded
-if st.session_state.gilt_data is None:
-    with st.spinner("Loading gilt data from database..."):
-        try:
-            st.session_state.gilt_data = db_manager.get_gilts_dataframe()
-            if st.session_state.gilt_data.empty:
-                # If database is empty, populate with sample data
-                sample_data = gilt_fetcher.get_sample_data()
-                db_manager.populate_gilt_data(sample_data.to_dict('records'))
-                st.session_state.gilt_data = db_manager.get_gilts_dataframe()
-        except Exception as e:
-            st.error(f"Database error: {e}")
-            st.session_state.gilt_data = gilt_fetcher.get_sample_data()
+
 
 # Display gilt data
 if st.session_state.gilt_data is not None and not st.session_state.gilt_data.empty:

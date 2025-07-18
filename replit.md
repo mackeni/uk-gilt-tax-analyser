@@ -106,6 +106,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 18, 2025 - Auto-Loading and Tax Rate Flexibility
+
+- **Automatic Data Loading**: Application now automatically loads gilt data on startup for better user experience
+- **Tax Rate Selection**: Added dropdown to choose between Basic Rate (20%), Higher Rate (40%), and Additional Rate (45%)
+- **Personal Savings Allowance Integration**: Dynamic PSA calculation (£1,000 for basic, £500 for higher, £0 for additional rate)
+- **Enhanced Tax Efficiency Analysis**: Comprehensive comparison considering PSA and selected tax rates
+- **Streamlined Interface**: Removed unnecessary summary metrics and improved data refresh functionality
+- **Performance Optimizations**: Added caching decorators and LRU caching for faster calculations
+
 ### July 18, 2025 - Precision Enhancements and Accurate Dirty Price Implementation
 - **6 Decimal Place Precision**: All money calculations now display with 6 decimal places for enhanced accuracy
 - **Corrected Accrued Interest Calculation**: Implemented proper UK gilt accrued interest methodology
