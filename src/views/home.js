@@ -355,7 +355,8 @@ export async function renderHomePage(request, env) {
         }
         
         table th:nth-child(2), table td:nth-child(2) {
-            min-width: 80px; /* Coupon column */
+            min-width: 100px; /* Coupon column - increased for better display */
+            width: 100px; /* Fixed width to prevent compression */
         }
         
         table th:nth-child(3), table td:nth-child(3) {
@@ -381,11 +382,20 @@ export async function renderHomePage(request, env) {
         table th:nth-child(5), table td:nth-child(5),
         table th:nth-child(6), table td:nth-child(6) {
             white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+        
+        /* Specific styling for coupon column to prevent compression */
+        table th:nth-child(2), table td:nth-child(2) {
+            flex-shrink: 0;
+            max-width: none;
         }
         
         @media (max-width: 768px) {
             table {
                 font-size: 12px;
+                table-layout: fixed; /* Ensure fixed layout to maintain column widths */
             }
             
             th, td {
@@ -395,20 +405,32 @@ export async function renderHomePage(request, env) {
             .table-container {
                 margin: 10px -5px;
             }
+            
+            /* Maintain coupon column width on tablet */
+            table th:nth-child(2), table td:nth-child(2) {
+                width: 90px !important;
+                min-width: 90px !important;
+            }
         }
         
         @media (max-width: 480px) {
             table {
                 font-size: 11px;
+                table-layout: fixed;
             }
             
             th, td {
                 padding: 6px 4px; /* Still provide adequate padding */
             }
-
             
             .table-container {
                 margin: 10px -10px;
+            }
+            
+            /* Maintain coupon column width on mobile */
+            table th:nth-child(2), table td:nth-child(2) {
+                width: 80px !important;
+                min-width: 80px !important;
             }
         }
         
