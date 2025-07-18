@@ -108,11 +108,11 @@ Preferred communication style: Simple, everyday language.
 
 ### July 18, 2025 - Display Formatting Enhancement
 
-- **2 Decimal Place Display**: All currency and percentage values now display with 2 decimal places for better readability
+- **Optimized Decimal Display**: Currency values display with 2 decimal places, coupon rates with 3 decimal places
 - **Maintained Calculation Precision**: Underlying calculations retain 6 decimal place precision for accuracy
 - **Consistent Formatting**: Applied comma separators and standardized display throughout
 - **User-Friendly Interface**: Cleaner monetary and percentage displays while preserving calculation accuracy
-- **Percentage Formatting**: Standardized all percentage displays to 2 decimal places
+- **Percentage Formatting**: Standardized percentage displays to 2 decimal places (3 for coupon rates)
 
 ### July 18, 2025 - Investment Amount Integration and Real Money Calculations
 
