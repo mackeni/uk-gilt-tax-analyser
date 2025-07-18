@@ -20,29 +20,29 @@ class GiltDataFetcher:
         }
         self.max_years_default = 3  # Default maximum maturity filter
     
-    @st.cache_data(ttl=300)  # Cache for 5 minutes
-    def get_gilt_data(self) -> pd.DataFrame:
+    @st.cache_data(ttl=300, hash_funcs={type(None): lambda _: None})  # Cache for 5 minutes
+    def get_gilt_data(_self) -> pd.DataFrame:
         """
         Fetch current gilt data from available sources
         """
         try:
             # Try to get real data from DividendData first
-            df = self._fetch_from_dividenddata()
+            df = _self._fetch_from_dividenddata()
             if df is not None and not df.empty:
                 return df
             
             # Try DMO as fallback
-            df = self._fetch_from_dmo()
+            df = _self._fetch_from_dmo()
             if df is not None and not df.empty:
                 return df
             
             # If real data fails, return sample data with notification
             st.warning("Unable to fetch real-time data. Using sample data for demonstration.")
-            return self.get_sample_data()
+            return _self.get_sample_data()
             
         except Exception as e:
             st.error(f"Error fetching gilt data: {str(e)}")
-            return self.get_sample_data()
+            return _self.get_sample_data()
     
     def _fetch_from_dividenddata(self) -> Optional[pd.DataFrame]:
         """

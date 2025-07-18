@@ -160,7 +160,11 @@ with col1:
         with st.spinner("Fetching latest gilt data..."):
             try:
                 # Clear any cached data first
-                gilt_fetcher.get_gilt_data.clear()
+                try:
+                    gilt_fetcher.get_gilt_data.clear()
+                except AttributeError:
+                    # Cache clear method may not be available, continue anyway
+                    pass
                 
                 # Try to get fresh data from external sources
                 fresh_data = gilt_fetcher.get_gilt_data()
