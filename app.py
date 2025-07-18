@@ -151,10 +151,9 @@ if not st.session_state.data_loaded:
                     db_manager.populate_gilt_data(fresh_data.to_dict('records'))
                     st.session_state.gilt_data = db_manager.get_gilts_dataframe()
                 else:
-                    # Use sample data as fallback
-                    sample_data = gilt_fetcher.get_sample_data()
-                    db_manager.populate_gilt_data(sample_data.to_dict('records'))
-                    st.session_state.gilt_data = db_manager.get_gilts_dataframe()
+                    # No fallback to sample data - require real data
+                    st.error("Unable to fetch or populate gilt data from external sources.")
+                    st.session_state.gilt_data = pd.DataFrame()
             
             st.session_state.data_loaded = True
             
@@ -165,9 +164,8 @@ if not st.session_state.data_loaded:
                 
         except Exception as e:
             st.error(f"Auto-loading failed: {str(e)}")
-            # Fallback to sample data
-            sample_data = gilt_fetcher.get_sample_data()
-            st.session_state.gilt_data = sample_data
+            # No fallback to sample data
+            st.session_state.gilt_data = pd.DataFrame()
             st.session_state.data_loaded = True
 
 # Data refresh button
@@ -905,7 +903,24 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         )
 
 else:
-    st.error("Unable to load gilt data. Please try refreshing or check your internet connection.")
+    st.error("⚠️ No gilt data available. This application requires real-time data from UK gilt markets.")
+    st.markdown("""
+    **About Real Data Requirements:**
+    - This application only uses authentic UK gilt market data
+    - Data sources include UK Debt Management Office (DMO) and financial data providers
+    - No sample or simulated data is used to ensure accuracy
+    
+    **Troubleshooting:**
+    - Click the 'Refresh Data' button to fetch latest gilt information
+    - Check your internet connection
+    - Ensure access to financial data providers is not blocked
+    - Try again during UK market hours for best data availability
+    
+    **Data Sources:**
+    - UK Debt Management Office (DMO)
+    - DividendData UK Gilts
+    - Other authorized financial data providers
+    """)
 
 # Educational section
 st.header("📚 Understanding Gilt Taxation")

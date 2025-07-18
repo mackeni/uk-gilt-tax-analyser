@@ -106,6 +106,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 18, 2025 - Sample Data Removal and Real Data Requirements
+
+- **Sample Data Removal**: Completely removed all sample/fallback data to ensure application only uses authentic UK gilt market data
+- **Real Data Enforcement**: Application now requires successful connection to external UK gilt data sources
+- **Enhanced Error Handling**: Clear messaging when real data is unavailable with troubleshooting guidance
+- **Data Source Transparency**: Explicit documentation of authentic data sources (DMO, DividendData)
+- **Improved User Communication**: Better explanation of real data requirements and troubleshooting steps
+
 ### July 18, 2025 - Auto-Loading and Tax Rate Flexibility
 
 - **Automatic Data Loading**: Application now automatically loads gilt data on startup for better user experience
