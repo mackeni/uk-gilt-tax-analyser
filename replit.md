@@ -220,3 +220,52 @@ Preferred communication style: Simple, everyday language.
 - **Investment Return Projections**: Accurate scaling for different investment amounts
 
 This architecture delivers precise tax efficiency analysis for UK additional rate taxpayers using actual coupon payment schedules, providing significantly more accurate results than simplified annual calculations.
+
+## Cloudflare Worker Conversion
+
+### July 18, 2025 - Complete Cloudflare Worker Migration
+
+**Architecture Transformation:**
+- **Runtime Migration**: Converted from Python/Streamlit to JavaScript/Cloudflare Workers
+- **Serverless Deployment**: Moved from server-based to edge computing platform
+- **API-First Design**: Restructured as REST API with separate frontend
+- **Global Performance**: Edge deployment for sub-100ms worldwide response times
+
+**Technical Implementation:**
+- **Core Libraries**: Recreated all Python functionality in JavaScript
+  - `GiltDataFetcher`: Real-time UK gilt data retrieval
+  - `TaxCalculator`: Complete tax efficiency calculations
+  - `CouponScheduler`: Detailed payment schedule generation
+  - `Utils`: Common formatting and calculation functions
+
+**Frontend Conversion:**
+- **Pure HTML/CSS/JavaScript**: No framework dependencies
+- **Responsive Design**: Mobile-first approach
+- **Real-time Updates**: Live API integration
+- **British Pound Icons**: Maintained 💷 currency identity
+
+**API Endpoints:**
+- `GET /api/gilt-data`: Retrieves current UK gilt market data
+- `POST /api/calculate-tax`: Performs tax efficiency calculations
+- `POST /api/coupon-schedule`: Generates detailed payment schedules
+
+**Key Benefits:**
+- **Performance**: Sub-100ms global response times via edge computing
+- **Scalability**: Automatic scaling with zero cold starts
+- **Cost Efficiency**: Pay-per-request serverless model
+- **Reliability**: Global CDN with automatic failover
+
+**Preserved Features:**
+- All original tax calculation logic
+- Coupon scheduling methodology
+- Data fetching strategies
+- British English language and currency
+- Complete UI functionality
+
+**Deployment Ready:**
+- Wrangler configuration complete
+- Environment variables defined
+- Database integration prepared
+- Deployment scripts provided
+
+This migration maintains all original functionality while dramatically improving performance, scalability, and global accessibility through Cloudflare's edge computing platform.

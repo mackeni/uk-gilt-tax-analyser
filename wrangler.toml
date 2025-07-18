@@ -1,0 +1,14 @@
+name = "uk-gilt-tax-analyser"
+main = "src/index.js"
+compatibility_date = "2024-03-18"
+
+[vars]
+ENVIRONMENT = "production"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gilt-analyser-db"
+database_id = "your-database-id"
+
+[build]
+command = "npm run build"

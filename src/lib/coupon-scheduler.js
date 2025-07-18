@@ -1,0 +1,146 @@
+/**
+ * UK Gilt Coupon Scheduler - Cloudflare Worker Version
+ * Generate coupon payment schedules for UK gilts
+ */
+
+import { addMonths, addDays, isSameDay, isWeekend } from 'date-fns';
+
+export class CouponScheduler {
+  constructor() {
+    this.ukHolidays = [
+      // Basic UK holidays - in production, use a proper holiday calendar
+      '2025-01-01', '2025-12-25', '2025-12-26'
+    ];
+  }
+
+  generateCouponSchedule(giltInfo) {
+    const { maturityDate, couponRate, faceValue = 100 } = giltInfo;
+    const maturity = new Date(maturityDate);
+    const today = new Date();
+    
+    // UK gilts typically pay coupons semi-annually
+    const couponFrequency = 2; // payments per year
+    const couponAmount = (couponRate / couponFrequency) * (faceValue / 100);
+    
+    const schedule = [];
+    let currentDate = new Date(maturity);
+    
+    // Generate payment dates working backwards from maturity
+    while (currentDate > today) {
+      const paymentDate = this.adjustForBusinessDay(new Date(currentDate));
+      const daysToPayment = Math.floor((paymentDate - today) / (1000 * 60 * 60 * 24));
+      
+      schedule.unshift({
+        paymentDate: paymentDate,
+        daysToPayment: daysToPayment,
+        couponAmount: couponAmount,
+        principalAmount: isSameDay(paymentDate, maturity) ? faceValue : 0,
+        totalPayment: couponAmount + (isSameDay(paymentDate, maturity) ? faceValue : 0)
+      });
+      
+      // Move to next payment date (6 months earlier)
+      currentDate = addMonths(currentDate, -6);
+    }
+    
+    return schedule;
+  }
+
+  calculateAfterTaxCashFlows(schedule, taxRate) {
+    return schedule.map(payment => {
+      const couponTax = payment.couponAmount * taxRate;
+      const afterTaxCoupon = payment.couponAmount - couponTax;
+      const afterTaxTotal = afterTaxCoupon + payment.principalAmount;
+      
+      return {
+        ...payment,
+        couponTax: couponTax,
+        afterTaxCoupon: afterTaxCoupon,
+        afterTaxTotal: afterTaxTotal
+      };
+    });
+  }
+
+  getScheduleSummary(afterTaxSchedule) {
+    if (!afterTaxSchedule || afterTaxSchedule.length === 0) {
+      return null;
+    }
+    
+    const numberOfPayments = afterTaxSchedule.length;
+    const firstPayment = afterTaxSchedule[0];
+    const finalPayment = afterTaxSchedule[afterTaxSchedule.length - 1];
+    
+    const totalCoupons = afterTaxSchedule.reduce((sum, payment) => sum + payment.couponAmount, 0);
+    const totalAfterTaxCoupons = afterTaxSchedule.reduce((sum, payment) => sum + payment.afterTaxCoupon, 0);
+    const totalTax = afterTaxSchedule.reduce((sum, payment) => sum + payment.couponTax, 0);
+    const totalPrincipal = afterTaxSchedule.reduce((sum, payment) => sum + payment.principalAmount, 0);
+    
+    return {
+      numberOfPayments: numberOfPayments,
+      firstPaymentDate: firstPayment.paymentDate,
+      finalPaymentDate: finalPayment.paymentDate,
+      totalCoupons: totalCoupons,
+      totalAfterTaxCoupons: totalAfterTaxCoupons,
+      totalTax: totalTax,
+      totalPrincipal: totalPrincipal,
+      totalAfterTaxReturn: totalAfterTaxCoupons + totalPrincipal
+    };
+  }
+
+  adjustForBusinessDay(date) {
+    // Move to next business day if weekend
+    let adjustedDate = new Date(date);
+    
+    while (isWeekend(adjustedDate) || this.isUKHoliday(adjustedDate)) {
+      adjustedDate = addDays(adjustedDate, 1);
+    }
+    
+    return adjustedDate;
+  }
+
+  isUKHoliday(date) {
+    const dateStr = date.toISOString().split('T')[0];
+    return this.ukHolidays.includes(dateStr);
+  }
+
+  calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
+    if (!settlementDate) {
+      settlementDate = new Date();
+    }
+    
+    const lastPayment = new Date(lastPaymentDate);
+    const daysSinceLastPayment = Math.floor((settlementDate - lastPayment) / (1000 * 60 * 60 * 24));
+    
+    // UK gilts use Actual/Actual day count convention
+    const daysInCouponPeriod = 182.5; // Average for semi-annual
+    const accruedFraction = daysSinceLastPayment / daysInCouponPeriod;
+    
+    // Semi-annual coupon payment
+    const semiAnnualCoupon = couponRate / 2;
+    const accruedInterest = semiAnnualCoupon * accruedFraction;
+    
+    return accruedInterest;
+  }
+
+  calculateDirtyPrice(cleanPrice, accruedInterest) {
+    return cleanPrice + accruedInterest;
+  }
+
+  calculateUnitsOwned(investmentAmount, dirtyPrice) {
+    return (investmentAmount / dirtyPrice) * 100;
+  }
+
+  scalePaymentsToInvestment(schedule, investmentAmount, dirtyPrice) {
+    const unitsOwned = this.calculateUnitsOwned(investmentAmount, dirtyPrice);
+    const scalingFactor = unitsOwned / 100;
+    
+    return schedule.map(payment => ({
+      ...payment,
+      couponAmount: payment.couponAmount * scalingFactor,
+      couponTax: payment.couponTax * scalingFactor,
+      afterTaxCoupon: payment.afterTaxCoupon * scalingFactor,
+      principalAmount: payment.principalAmount * scalingFactor,
+      afterTaxTotal: payment.afterTaxTotal * scalingFactor,
+      totalPayment: payment.totalPayment * scalingFactor
+    }));
+  }
+}
