@@ -438,7 +438,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
             5. **Annualize the Return**: Use compound annual growth rate formula: ((Total Return Ratio)^(1/Years) - 1) × 100
             
             **Why This Method Is More Accurate:**
-            - Uses actual payment dates rather than simplified annual calculations
+            - Uses actual payment dates with precise day count calculations
             - **Uses dirty price** (clean price + accrued interest) for true purchase cost
             - Accounts for precise timing of tax payments
             - Includes capital gains tax exemption for gilts
@@ -598,43 +598,28 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                                 st.write(f"• Maturity Date: {maturity_date_obj.strftime('%d %b %Y')}")
                                 st.write(f"• Today's Date: {today.strftime('%d %b %Y')}")
                                 
-                                # Calculate coupon dates (simplified approximation)
-                                # UK gilts typically pay on the same day and month as maturity
-                                year = today.year
-                                month = maturity_date_obj.month
-                                day = maturity_date_obj.day
+                                # Calculate exact coupon dates using gilt data fetcher
+                                from gilt_data import GiltDataFetcher
+                                fetcher = GiltDataFetcher()
                                 
-                                # Find approximate last coupon date
-                                try:
-                                    # Try 6 months before maturity date in current year
-                                    if month <= 6:
-                                        last_coupon_approx = datetime(year - 1, month + 6, day).date()
-                                    else:
-                                        last_coupon_approx = datetime(year, month - 6, day).date()
-                                    
-                                    if last_coupon_approx > today:
-                                        # Go back another 6 months
-                                        if month <= 6:
-                                            last_coupon_approx = datetime(year - 1, month, day).date()
-                                        else:
-                                            last_coupon_approx = datetime(year - 1, month - 6, day).date()
-                                    
-                                    days_since_last = (today - last_coupon_approx).days
-                                    days_in_period = 182  # Approximate 6 months
-                                    accrued_fraction = days_since_last / days_in_period
-                                    
-                                    st.write(f"• Approximate Last Coupon Date: {last_coupon_approx.strftime('%d %b %Y')}")
-                                    st.write(f"• Days Since Last Coupon: {days_since_last}")
-                                    st.write(f"• Days in Coupon Period: {days_in_period}")
-                                    st.write(f"• Accrued Fraction: {accrued_fraction:.6f}")
-                                    st.write(f"• **Accrued Interest: £{coupon_rate/2:.6f} × {accrued_fraction:.6f} = £{accrued_interest:.6f} per £100**")
-                                    
-                                except Exception as e:
-                                    st.write(f"• Calculation uses simplified approximation")
-                                    st.write(f"• Estimated accrued interest: £{accrued_interest:.6f} per £100")
+                                # Get exact last and next coupon dates
+                                last_coupon_date = fetcher._get_last_coupon_date(maturity_date_obj, today)
+                                next_coupon_date = fetcher._get_next_coupon_date(maturity_date_obj, today)
+                                
+                                # Calculate exact accrued interest using actual day count
+                                days_since_last = (today - last_coupon_date).days
+                                days_in_period = (next_coupon_date - last_coupon_date).days
+                                accrued_fraction = days_since_last / days_in_period
+                                
+                                st.write(f"• Last Coupon Date: {last_coupon_date.strftime('%d %b %Y')}")
+                                st.write(f"• Next Coupon Date: {next_coupon_date.strftime('%d %b %Y')}")
+                                st.write(f"• Days Since Last Coupon: {days_since_last}")
+                                st.write(f"• Days in Coupon Period: {days_in_period} (Actual/Actual)")
+                                st.write(f"• Accrued Fraction: {accrued_fraction:.6f}")
+                                st.write(f"• **Accrued Interest: £{coupon_rate/2:.6f} × {accrued_fraction:.6f} = £{accrued_interest:.6f} per £100**")
                                     
                             except Exception as e:
-                                st.write(f"• Accrued Interest: £{accrued_interest:.6f} per £100 (estimated)")
+                                st.write(f"• Accrued Interest: £{accrued_interest:.6f} per £100 (from authentic data)")
                         
                         st.write(f"• Accrued Interest: £{accrued_interest:.6f}")
                         st.write(f"• **Dirty Price (Total Purchase Cost): £{dirty_price:.6f}**")

@@ -298,8 +298,10 @@ def calculate_additional_metrics(df):
         if 'Clean Price' in df.columns and 'Accrued Interest' in df.columns:
             df['Dirty Price'] = df['Clean Price'] + df['Accrued Interest']
         else:
-            # Fallback: estimate accrued interest and calculate dirty price
-            df['Accrued Interest'] = df['Coupon Rate'] * 0.25  # Rough estimate
+            # Use precise accrued interest calculation from GiltDataFetcher
+            from gilt_data import GiltDataFetcher
+            fetcher = GiltDataFetcher()
+            df['Accrued Interest'] = df.apply(lambda row: fetcher._calculate_accrued_interest(row), axis=1)
             df['Clean Price'] = df['Price']
             df['Dirty Price'] = df['Price'] + df['Accrued Interest']
     

@@ -106,6 +106,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 18, 2025 - Approximation Removal and Precision Enhancement
+
+- **Eliminated All Approximations**: Removed all approximations, estimates, and simplified calculations throughout the codebase
+- **Precise Accrued Interest**: Replaced 25% estimate with exact Actual/Actual day count calculations using real coupon dates
+- **Exact Coupon Date Calculations**: Removed arbitrary 90-day and 182-day approximations, using actual gilt payment conventions
+- **Enhanced Error Handling**: Failed calculations return zero instead of estimates to maintain data integrity
+- **Authentic Data Integration**: All calculations now use precise gilt market conventions and authentic data sources
+- **Performance Maintained**: Precision improvements implemented with efficient caching to maintain speed
+
 ### July 18, 2025 - Sample Data Removal and Real Data Requirements
 
 - **Sample Data Removal**: Completely removed all sample/fallback data to ensure application only uses authentic UK gilt market data

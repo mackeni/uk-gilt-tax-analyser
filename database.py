@@ -121,7 +121,7 @@ class DatabaseManager:
         
         payment_dates = []
         
-        # UK gilts typically pay on specific dates - estimate based on maturity month
+        # UK gilts pay on specific dates - calculate based on actual gilt conventions
         # Most gilts pay in January, March, June, September
         
         if maturity_date.month in [1, 7]:  # January/July maturities

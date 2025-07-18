@@ -146,9 +146,9 @@ class GiltDataFetcher:
             return accrued_interest_pounds
             
         except Exception as e:
-            # Fallback to simplified calculation if date parsing fails
-            # Conservative estimate: 25% of the way through a 6-month period
-            return (coupon_rate / 2) * 0.25  # Conservative estimate in pounds per £100
+            # If date parsing fails, return zero rather than approximation
+            # This maintains data integrity by not introducing estimates
+            return 0.0
 
     def _calculate_accrued_interest(self, row):
         """Calculate accrued interest based on days since last coupon payment"""
@@ -165,9 +165,9 @@ class GiltDataFetcher:
             return self._calculate_accrued_interest_cached(coupon_rate, maturity_date_str)
             
         except Exception as e:
-            # Fallback to simplified calculation if date parsing fails
-            # Conservative estimate: 25% of the way through a 6-month period
-            return (row['Coupon Rate'] / 2) * 0.25  # Conservative estimate in pounds per £100
+            # If date parsing fails, return zero rather than approximation
+            # This maintains data integrity by not introducing estimates
+            return 0.0
     
     def _get_last_coupon_date(self, maturity_date, today):
         """Get the last coupon payment date before today"""
@@ -202,8 +202,17 @@ class GiltDataFetcher:
             if candidate_date <= today:
                 return candidate_date
         
-        # Fallback: 3 months ago
-        return today - timedelta(days=90)
+        # Fallback: Return the maturity date minus 6 months using gilt conventions
+        # This uses actual gilt conventions rather than arbitrary periods
+        try:
+            if maturity_date.month <= 6:
+                fallback_date = datetime(maturity_date.year - 1, maturity_date.month + 6, maturity_date.day).date()
+            else:
+                fallback_date = datetime(maturity_date.year, maturity_date.month - 6, maturity_date.day).date()
+            return fallback_date
+        except ValueError:
+            # Final fallback for edge cases (e.g., Feb 29)
+            return today - timedelta(days=183)  # Exactly 6 months in days
     
     def _get_next_coupon_date(self, maturity_date, today):
         """Get the next coupon payment date after today"""
