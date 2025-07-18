@@ -577,15 +577,21 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         st.write(f"• **Total After-Tax Return: £{total_after_tax_return:.6f}**")
                         
                         st.markdown("**Step 2: Calculate Total Return Ratio (Using Dirty Price)**")
+                        # Calculate the net gain: total cash received minus purchase price
+                        net_gain = total_after_tax_return - dirty_price
                         total_return_ratio = total_after_tax_return / dirty_price
-                        st.write(f"• Total Return Ratio = £{total_after_tax_return:,.2f} ÷ £{dirty_price:,.2f} = {total_return_ratio:.4f}")
+                        st.write(f"• Total Cash Received: £{total_after_tax_return:.6f}")
+                        st.write(f"• Purchase Price (Dirty): £{dirty_price:.6f}")
+                        st.write(f"• Net Gain: £{net_gain:.6f}")
+                        st.write(f"• Total Return Ratio = £{total_after_tax_return:.6f} ÷ £{dirty_price:.6f} = {total_return_ratio:.6f}")
                         
                         st.markdown("**Step 3: Annualize the Return**")
                         st.write(f"• Years to Maturity: {years_to_maturity:.6f}")
                         st.write(f"• Formula: ((Total Return Ratio)^(1/Years) - 1) × 100")
                         annualized_yield = ((total_return_ratio ** (1/years_to_maturity)) - 1) * 100
                         st.write(f"• Calculation: (({total_return_ratio:.6f})^(1/{years_to_maturity:.6f}) - 1) × 100")
-                        st.write(f"• **After-Tax Yield: {annualized_yield:.2f}%**")
+                        st.write(f"• Return Per Year: {((total_return_ratio - 1) / years_to_maturity * 100):.6f}% (simple)")
+                        st.write(f"• **After-Tax Yield (compound): {annualized_yield:.2f}%**")
                         
                         # Show equivalent savings rate calculation
                         st.markdown("**Step 4: Calculate Equivalent Savings Rate**")
