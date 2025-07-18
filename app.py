@@ -498,7 +498,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         total_gross_coupons_scaled = schedule_summary['total_gross_coupons'] * scaling_factor
                         total_coupon_tax_scaled = schedule_summary['total_coupon_tax'] * scaling_factor
                         total_after_tax_coupons_scaled = schedule_summary['total_after_tax_coupons'] * scaling_factor
-                        # Principal is nominal value
+                        # Principal is nominal value of units owned
                         total_principal_scaled = investment_amount / row['Dirty Price'] * 100
                         
                         st.write(f"• Total Gross Coupons: £{total_gross_coupons_scaled:,.2f}")
@@ -516,8 +516,9 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                             coupon_amount_scaled = payment['coupon_amount'] * (units_owned / 100)
                             tax_amount_scaled = coupon_amount_scaled * tax_rate
                             net_amount_scaled = coupon_amount_scaled - tax_amount_scaled
-                            # Principal is nominal value - always investment amount at maturity
-                            principal_scaled = investment_amount if payment.get('principal_amount', 0) > 0 else 0
+                            # Principal is nominal value of units owned
+                            nominal_units = investment_amount / row['Dirty Price'] * 100
+                            principal_scaled = nominal_units if payment.get('principal_amount', 0) > 0 else 0
                             
                             if principal_scaled > 0:
                                 st.write(f"• {payment_date}: £{coupon_amount_scaled:,.2f} coupon - £{tax_amount_scaled:,.2f} tax = £{net_amount_scaled:,.2f} + £{principal_scaled:,.2f} principal")
@@ -861,10 +862,11 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                     units_owned = investment_amount / selected_gilt_row.get('Price', 100) * 100
                     scaling_factor = units_owned / 100
                     # Calculate correctly scaled return for metric display
-                    metric_units_owned = investment_amount / selected_gilt_row.get('Dirty Price', 100) * 100
+                    dirty_price = selected_gilt_row.get('Dirty Price', selected_gilt_row.get('Price', 100))
+                    metric_units_owned = investment_amount / dirty_price * 100
                     metric_scaling_factor = metric_units_owned / 100
                     metric_after_tax_coupons = schedule_summary['total_after_tax_coupons'] * metric_scaling_factor
-                    metric_principal = investment_amount / selected_gilt_row.get('Dirty Price', 100) * 100
+                    metric_principal = metric_units_owned  # Nominal value
                     scaled_return = metric_after_tax_coupons + metric_principal
                     st.metric("Total After-Tax Return", f"£{scaled_return:,.2f}")
                 
@@ -892,7 +894,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 scaling_factor = units_owned / 100
                 
                 # Handle principal column separately - it should be the nominal value
-                coupon_cols = ['Gross Coupon (£)', 'Tax Paid (£)', 'Net Coupon (£)', 'Total Net (£)']
+                coupon_cols = ['Gross Coupon (£)', 'Tax Paid (£)', 'Net Coupon (£)']
                 for col in coupon_cols:
                     display_schedule[col] = display_schedule[col].apply(lambda x: f"£{x * scaling_factor:,.2f}")
                 
@@ -900,6 +902,12 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 nominal_value_per_100 = investment_amount / dirty_price * 100
                 display_schedule['Principal (£)'] = display_schedule['Principal (£)'].apply(
                     lambda x: f"£{nominal_value_per_100:,.2f}" if x > 0 else "£0.00"
+                )
+                
+                # Total Net column needs to be recalculated with correct principal
+                display_schedule['Total Net (£)'] = display_schedule.apply(
+                    lambda row: f"£{float(row['Net Coupon (£)'].replace('£', '').replace(',', '')) + (nominal_value_per_100 if float(row['Principal (£)'].replace('£', '').replace(',', '')) > 0 else 0):,.2f}",
+                    axis=1
                 )
                 
                 st.dataframe(display_schedule, use_container_width=True, hide_index=True)
