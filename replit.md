@@ -369,3 +369,18 @@ This migration maintains all original functionality while dramatically improving
 - Quick comparison of gilts within preferred investment timeframes
 - Efficient navigation through comprehensive 47-gilt database
 - Maintained sorting by duration for logical gilt comparison
+
+### July 18, 2025 - Table Display Optimization
+
+**Fixed Coupon Truncation Issues:**
+- **Worker ID Updated**: 374b04cb-37aa-45d2-9020-50f01494bd19
+- **Minimum Column Widths**: Added appropriate minimum widths for all numerical columns
+- **Enhanced Mobile Padding**: Improved cell padding to prevent text cutting on smaller screens
+- **No-Wrap Protection**: Added white-space rules to prevent numeric values from wrapping
+- **Responsive Horizontal Scroll**: Maintains full precision display across all device sizes
+
+**Column Width Optimization:**
+- Coupon column: 80px minimum (displays up to 3 decimal places fully)
+- Current/After-tax yields: 80-90px minimum for complete percentage display
+- Years column: 60px minimum for maturity values
+- Horizontal scrolling preserves all data visibility on mobile devices

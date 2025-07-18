@@ -354,13 +354,42 @@ export async function renderHomePage(request, env) {
             font-size: 14px;
         }
         
+        table th:nth-child(2), table td:nth-child(2) {
+            min-width: 80px; /* Coupon column */
+        }
+        
+        table th:nth-child(3), table td:nth-child(3) {
+            min-width: 80px; /* Current yield column */
+        }
+        
+        table th:nth-child(4), table td:nth-child(4) {
+            min-width: 90px; /* After-tax column */
+        }
+        
+        table th:nth-child(5), table td:nth-child(5) {
+            min-width: 90px; /* Equivalent column */
+        }
+        
+        table th:nth-child(6), table td:nth-child(6) {
+            min-width: 60px; /* Years column */
+        }
+        
+        /* Prevent text wrapping in numeric columns */
+        table th:nth-child(2), table td:nth-child(2),
+        table th:nth-child(3), table td:nth-child(3),
+        table th:nth-child(4), table td:nth-child(4),
+        table th:nth-child(5), table td:nth-child(5),
+        table th:nth-child(6), table td:nth-child(6) {
+            white-space: nowrap;
+        }
+        
         @media (max-width: 768px) {
             table {
                 font-size: 12px;
             }
             
             th, td {
-                padding: 8px 4px;
+                padding: 8px 6px; /* Increased padding to prevent truncation */
             }
             
             .table-container {
@@ -374,8 +403,9 @@ export async function renderHomePage(request, env) {
             }
             
             th, td {
-                padding: 6px 3px;
+                padding: 6px 4px; /* Still provide adequate padding */
             }
+
             
             .table-container {
                 margin: 10px -10px;
