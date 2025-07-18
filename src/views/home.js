@@ -502,6 +502,15 @@ export async function renderHomePage(request, env) {
         };
         let durationFilter = { min: 0, max: 45 };
         
+        // Format coupon rate with max 3 decimal places, remove trailing zeros
+        function formatCouponRate(rate) {
+            if (typeof rate !== 'number') return '0';
+            let formatted = rate.toFixed(3);
+            // Remove trailing zeros and decimal point if not needed
+            formatted = formatted.replace(/\.?0+$/, '');
+            return formatted;
+        }
+        
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             setupEventListeners();
@@ -714,7 +723,7 @@ export async function renderHomePage(request, env) {
                             \${sortedResults.map(gilt => \`
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
                                     <td style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500;">\${gilt.name}</td>
-                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.couponRate.toFixed(3).replace(/\.?0+$/, '')}%</td>
+                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${formatCouponRate(gilt.couponRate)}%</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.currentYield.toFixed(2)}%</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${gilt.afterTaxYield.toFixed(2)}%</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.equivalentSavingsRate.toFixed(2)}%</td>
