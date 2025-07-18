@@ -458,10 +458,10 @@ class TaxCalculator:
         psa = self.psa[taxpayer_type]
         
         # For additional rate taxpayers, PSA is £0
-        # So all savings income is taxed at 45%
+        # So all savings income is taxed at the marginal rate
         
         if taxpayer_type == 'additional_rate':
-            # All savings income taxed at 45%
+            # All savings income taxed at marginal rate
             equivalent_rate = after_tax_yield / (1 - tax_rate)
         else:
             # Would need to account for PSA for other taxpayer types
@@ -607,16 +607,16 @@ class TaxCalculator:
         
         if taxpayer_type == 'additional_rate':
             return f"""
-            **Additional Rate Taxpayer (45% tax band):**
+            **Tax Treatment Summary:**
             
             **Gilt Taxation:**
-            • Coupon payments: Taxed at 45% income tax rate
+            • Coupon payments: Taxed at marginal income tax rate
             • Capital gains: Completely exempt from CGT
-            • Personal Savings Allowance: £0 (no tax-free savings income)
+            • Personal Savings Allowance: Varies by tax bracket
             
             **Savings Account Taxation:**
-            • All interest: Taxed at 45% income tax rate
-            • No tax-free allowance available
+            • All interest: Taxed at marginal income tax rate
+            • Tax-free allowance varies by bracket
             
             **Key Advantage:**
             Gilts benefit from CGT exemption, making them particularly attractive

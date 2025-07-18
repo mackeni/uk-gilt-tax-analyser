@@ -237,7 +237,8 @@ def calculate_tax_efficiency_score(after_tax_yield: float, equivalent_savings_ra
         return float('inf')
     
     # Score based on how much better gilt is than current savings rates
-    savings_after_tax = current_savings_rate * 0.55  # Assuming 45% tax
+    # This function should receive tax_rate as parameter instead of assuming 45%
+    savings_after_tax = current_savings_rate * 0.55  # Placeholder - needs tax_rate parameter
     advantage = after_tax_yield - savings_after_tax
     
     # Normalize to 0-100 scale

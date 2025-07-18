@@ -853,7 +853,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 with col1:
                     st.write("**Income Tax Analysis:**")
                     st.write(f"Total Gross Coupon Income: £{schedule_summary['total_gross_coupons']:.6f}")
-                    st.write(f"Total Tax Paid (45%): £{schedule_summary['total_coupon_tax']:.6f}")
+                    st.write(f"Total Tax Paid ({tax_rate*100:.0f}%): £{schedule_summary['total_coupon_tax']:.6f}")
                     st.write(f"Total Net Coupon Income: £{schedule_summary['total_after_tax_coupons']:.6f}")
                     st.write(f"Effective Tax Rate: {(schedule_summary['total_coupon_tax'] / schedule_summary['total_gross_coupons'] * 100):.1f}%")
                 
@@ -926,7 +926,7 @@ with st.expander("💡 Tax Advantages of Gilts for Additional Rate Taxpayers"):
     
     **3. Tax Efficiency vs Savings**
     - Additional rate taxpayers receive 0% Personal Savings Allowance
-    - All savings interest is taxed at 45%
+    - Savings interest is taxed at your marginal rate
     - Gilts often provide better after-tax returns than savings accounts
     
     ### Important Considerations:
@@ -941,13 +941,13 @@ with st.expander("🧮 How the Calculations Work"):
     ### After-Tax Yield Calculation:
     
     **For Gilts:**
-    - Coupon income is taxed at 45%
+    - Coupon income is taxed at your marginal rate
     - Capital gains/losses are tax-free
     - After-tax yield = Coupon rate × (1 - tax_rate) + Capital appreciation
     
     **For Savings Accounts:**
-    - All interest is taxed at 45%
-    - No Personal Savings Allowance for additional rate taxpayers
+    - All interest is taxed at your marginal rate
+    - Personal Savings Allowance varies by tax bracket
     - After-tax yield = Gross rate × (1 - tax_rate)
     
     **Equivalent Savings Rate:**
@@ -956,8 +956,8 @@ with st.expander("🧮 How the Calculations Work"):
     
     ### Example:
     A gilt yielding 4% with 3 years to maturity:
-    - Annual coupon: 4% × (1 - 0.45) = 2.2% after tax
-    - Equivalent savings rate: 2.2% ÷ (1 - 0.45) = 4.0%
+    - Annual coupon: 4% × (1 - 0.45) = 2.2% after tax (for 45% taxpayer)
+    - Equivalent savings rate: 2.2% ÷ (1 - 0.45) = 4.0% (for 45% taxpayer)
     """)
 
 # Footer
