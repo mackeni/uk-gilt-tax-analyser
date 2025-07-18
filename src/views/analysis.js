@@ -176,7 +176,7 @@ export async function renderAnalysisPage(request, env) {
                 displaySchedule(schedule);
             } catch (error) {
                 document.getElementById('scheduleTable').innerHTML = 
-                    `<p>Error loading analysis: ${error.message}</p>`;
+                    '<p>Error loading analysis: ' + error.message + '</p>';
             }
         }
         
