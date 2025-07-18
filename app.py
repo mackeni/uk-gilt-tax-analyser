@@ -13,7 +13,7 @@ from database import DatabaseManager
 # Page configuration
 st.set_page_config(
     page_title="UK Gilt Tax Efficiency Analyser",
-    page_icon="💰",
+    page_icon="💷",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -49,7 +49,7 @@ db_manager = get_database_manager()
 coupon_scheduler = get_coupon_scheduler()
 
 # Main title and description
-st.title("🏦 UK Gilt Tax Efficiency Analyser")
+st.title("💷 UK Gilt Tax Efficiency Analyser")
 
 # Sidebar for user inputs
 st.sidebar.header("Tax Settings")
@@ -339,27 +339,27 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         if len(filtered_df) > 0:
             best_after_tax = filtered_df.loc[filtered_df['After-Tax Yield'].idxmax()]
             st.metric(
-                "Best After-Tax Yield",
+                "💷 Best After-Tax Yield",
                 f"{best_after_tax['After-Tax Yield']:.2f}%",
                 f"{best_after_tax['Name']}"
             )
         else:
-            st.metric("Best After-Tax Yield", "N/A", "No gilts found")
+            st.metric("💷 Best After-Tax Yield", "N/A", "No gilts found")
     
     with col2:
         if len(filtered_df) > 0:
             highest_equivalent = filtered_df.loc[filtered_df['Equivalent Savings Rate'].idxmax()]
             st.metric(
-                "Best Equivalent Savings Rate",
+                "💷 Best Equivalent Savings Rate",
                 f"{highest_equivalent['Equivalent Savings Rate']:.2f}%",
                 f"{highest_equivalent['Name']}"
             )
         else:
-            st.metric("Best Equivalent Savings Rate", "N/A", "No gilts found")
+            st.metric("💷 Best Equivalent Savings Rate", "N/A", "No gilts found")
     
     # Tax efficiency comparison
     if not filtered_df.empty:
-        st.subheader("💰 Tax Efficiency Comparison")
+        st.subheader("💷 Tax Efficiency Comparison")
         
         best_yield = filtered_df['After-Tax Yield'].max()
         
@@ -383,7 +383,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         
         with col1:
             st.metric(
-                "Your Savings Account",
+                "💷 Your Savings Account",
                 f"{savings_after_tax_rate:.2f}%",
                 f"After {tax_rate*100:.0f}% tax & PSA"
             )
@@ -400,7 +400,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         
         with col2:
             st.metric(
-                "Best Gilt After-Tax",
+                "💷 Best Gilt After-Tax",
                 f"{best_yield:.2f}%",
                 f"{best_gilt_advantage:+.2f}% vs savings"
             )
@@ -428,7 +428,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         selected_data = filtered_df[filtered_df['Name'].isin(selected_gilt_names)]
         
         # Tax efficiency comparison
-        st.subheader("💰 Tax Efficiency Analysis")
+        st.subheader("💷 Tax Efficiency Analysis")
         
         # Add calculation methodology explanation
         with st.expander("📖 How After-Tax Yields Are Calculated", expanded=False):
@@ -823,7 +823,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         """)
         
         # Detailed Coupon Schedule Analysis
-        st.subheader("💰 Detailed Coupon Schedule Analysis")
+        st.subheader("💷 Detailed Coupon Schedule Analysis")
         
         # Select gilt for detailed analysis
         gilt_names = selected_data['Name'].tolist()
@@ -857,11 +857,11 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 # Display schedule overview
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
-                    st.metric("Total Payments", schedule_summary['number_of_payments'])
+                    st.metric("📅 Total Payments", schedule_summary['number_of_payments'])
                 with col2:
-                    st.metric("First Payment", schedule_summary['first_payment_date'].strftime('%d %b %Y'))
+                    st.metric("📅 First Payment", schedule_summary['first_payment_date'].strftime('%d %b %Y'))
                 with col3:
-                    st.metric("Final Payment", schedule_summary['final_payment_date'].strftime('%d %b %Y'))
+                    st.metric("📅 Final Payment", schedule_summary['final_payment_date'].strftime('%d %b %Y'))
                 with col4:
                     # Scale the metric to investment amount using dirty price consistently
                     dirty_price = selected_gilt_row.get('Dirty Price', selected_gilt_row.get('Price', 100))
@@ -871,7 +871,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                     metric_after_tax_coupons = schedule_summary['total_after_tax_coupons'] * scaling_factor
                     metric_principal = units_owned
                     scaled_return = metric_after_tax_coupons + metric_principal
-                    st.metric("Total After-Tax Return", f"£{scaled_return:,.2f}")
+                    st.metric("💷 Total After-Tax Return", f"£{scaled_return:,.2f}")
                 
                 # Detailed payment schedule table
                 st.subheader("📅 Complete Payment Schedule")
