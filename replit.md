@@ -114,14 +114,6 @@ Preferred communication style: Simple, everyday language.
 - **User-Friendly Interface**: Cleaner monetary and percentage displays while preserving calculation accuracy
 - **Percentage Formatting**: Standardized percentage displays to 2 decimal places (3 for coupon rates)
 
-### July 18, 2025 - Principal Repayment and Return Calculation Corrections
-
-- **Fixed Principal Repayment Logic**: Corrected principal repayment to show nominal value (£100 per £100 nominal) regardless of purchase price
-- **Accurate Total Return Calculations**: Fixed all return calculations to properly scale coupon payments while maintaining correct principal values
-- **Enhanced Calculation Transparency**: Added detailed breakdown showing total cash received vs purchase price for yield calculations
-- **Correct Investment Scaling**: All monetary displays now accurately reflect actual investment amounts with proper unit calculations
-- **Improved Return Methodology**: Fixed total return ratio calculations to properly account for both coupon income and capital gains components
-
 ### July 18, 2025 - Investment Amount Integration and Real Money Calculations
 
 - **Investment Amount Scaling**: All calculations now use the user's actual investment amount instead of notional £100
