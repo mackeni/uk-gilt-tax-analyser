@@ -193,17 +193,151 @@ export async function renderHomePage(request, env) {
             margin-top: 5px;
         }
         
+        /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+                margin-bottom: 20px;
             }
             
             .header h1 {
-                font-size: 2em;
+                font-size: 1.8em;
+                margin-bottom: 8px;
+            }
+            
+            .header p {
+                font-size: 1em;
             }
             
             .container {
                 padding: 10px;
+            }
+            
+            .sidebar {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .gilt-table {
+                padding: 20px;
+            }
+            
+            .metrics {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .metric-card {
+                padding: 15px;
+            }
+            
+            .metric-value {
+                font-size: 1.5em;
+            }
+            
+            .form-group select,
+            .form-group input {
+                font-size: 16px;
+                padding: 12px;
+            }
+            
+            .btn {
+                width: 100%;
+                padding: 15px;
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 5px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .sidebar,
+            .gilt-table {
+                padding: 15px;
+            }
+            
+            .sidebar h3,
+            .gilt-table h3 {
+                font-size: 1.1em;
+            }
+            
+            .metric-value {
+                font-size: 1.3em;
+            }
+            
+            .tax-info {
+                padding: 12px;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+        }
+        
+        /* Table Responsiveness */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 8px 4px;
+            }
+            
+            .table-container {
+                margin: 10px -5px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            table {
+                font-size: 11px;
+            }
+            
+            th, td {
+                padding: 6px 3px;
+            }
+            
+            .table-container {
+                margin: 10px -10px;
+            }
+        }
+        
+        /* Better touch targets for mobile */
+        @media (max-width: 768px) {
+            select, input, button {
+                min-height: 44px;
+            }
+            
+            .btn {
+                min-height: 48px;
             }
         }
     </style>
@@ -404,30 +538,32 @@ export async function renderHomePage(request, env) {
             
             // Display table
             const tableHTML = \`
-                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
-                    <thead>
-                        <tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">
-                            <th style="padding: 12px; text-align: left; border-right: 1px solid #e0e0e0;">Name</th>
-                            <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Coupon Rate</th>
-                            <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Current Yield</th>
-                            <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">After-Tax Yield</th>
-                            <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Equivalent Savings Rate</th>
-                            <th style="padding: 12px; text-align: right;">Years to Maturity</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        \${results.map(gilt => \`
-                            <tr style="border-bottom: 1px solid #e0e0e0;">
-                                <td style="padding: 12px; border-right: 1px solid #e0e0e0;">\${gilt.name}</td>
-                                <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.couponRate.toFixed(2)}%</td>
-                                <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.currentYield.toFixed(2)}%</td>
-                                <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${gilt.afterTaxYield.toFixed(2)}%</td>
-                                <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.equivalentSavingsRate.toFixed(2)}%</td>
-                                <td style="padding: 12px; text-align: right;">\${gilt.yearsToMaturity.toFixed(1)}</td>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">
+                                <th style="padding: 12px; text-align: left; border-right: 1px solid #e0e0e0;">Name</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Coupon</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Current</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">After-Tax</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Equivalent</th>
+                                <th style="padding: 12px; text-align: right;">Years</th>
                             </tr>
-                        \`).join('')}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            \${results.map(gilt => \`
+                                <tr style="border-bottom: 1px solid #e0e0e0;">
+                                    <td style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500;">\${gilt.name}</td>
+                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.couponRate.toFixed(2)}%</td>
+                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.currentYield.toFixed(2)}%</td>
+                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${gilt.afterTaxYield.toFixed(2)}%</td>
+                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.equivalentSavingsRate.toFixed(2)}%</td>
+                                    <td style="padding: 12px; text-align: right;">\${gilt.yearsToMaturity.toFixed(1)}</td>
+                                </tr>
+                            \`).join('')}
+                        </tbody>
+                    </table>
+                </div>
             \`;
             
             dataDiv.innerHTML = tableHTML;
