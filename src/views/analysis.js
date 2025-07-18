@@ -150,20 +150,34 @@ export async function renderAnalysisPage(request, env) {
         });
         
         async function loadAnalysisData() {
-            // This would fetch detailed analysis data from the API
-            // Generate authentic coupon schedule from real gilt data
-            if (!giltData || !giltData.maturityDate || !giltData.couponRate) {
-                throw new Error('Authentic gilt data required for coupon schedule generation');
+            try {
+                // Fetch authentic gilt data from API
+                const response = await fetch('/api/gilt-data');
+                const giltData = await response.json();
+                
+                if (!giltData || giltData.length === 0) {
+                    throw new Error('No authentic gilt data available');
+                }
+                
+                // Use first gilt for demonstration of coupon schedule
+                const firstGilt = giltData[0];
+                
+                // Import coupon scheduler module
+                const { CouponScheduler } = await import('../lib/coupon-scheduler.js');
+                const scheduler = new CouponScheduler();
+                
+                // Generate authentic coupon schedule
+                const schedule = scheduler.generateCouponSchedule(firstGilt);
+                
+                if (!schedule || schedule.length === 0) {
+                    throw new Error('Failed to generate authentic coupon schedule from gilt data');
+                }
+                
+                displaySchedule(schedule);
+            } catch (error) {
+                document.getElementById('scheduleTable').innerHTML = 
+                    `<p>Error loading analysis: ${error.message}</p>`;
             }
-            
-            const scheduler = new CouponScheduler();
-            const schedule = scheduler.generateCouponSchedule(giltData);
-            
-            if (!schedule || schedule.length === 0) {
-                throw new Error('Failed to generate authentic coupon schedule from gilt data');
-            }
-            
-            displaySchedule(schedule);
         }
         
         function displaySchedule(schedule) {
