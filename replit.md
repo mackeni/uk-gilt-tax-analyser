@@ -106,6 +106,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 18, 2025 - Display Formatting Enhancement
+
+- **2 Decimal Place Display**: All currency and percentage values now display with 2 decimal places for better readability
+- **Maintained Calculation Precision**: Underlying calculations retain 6 decimal place precision for accuracy
+- **Consistent Formatting**: Applied comma separators and standardized display throughout
+- **User-Friendly Interface**: Cleaner monetary and percentage displays while preserving calculation accuracy
+- **Percentage Formatting**: Standardized all percentage displays to 2 decimal places
+
 ### July 18, 2025 - Investment Amount Integration and Real Money Calculations
 
 - **Investment Amount Scaling**: All calculations now use the user's actual investment amount instead of notional £100
