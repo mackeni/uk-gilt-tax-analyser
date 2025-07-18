@@ -192,18 +192,17 @@ with col1:
                     st.session_state.gilt_data = db_manager.get_gilts_dataframe()
                     st.success(f"✅ Refreshed with {len(st.session_state.gilt_data)} gilts from live sources")
                 else:
-                    # Fall back to sample data
-                    sample_data = gilt_fetcher.get_sample_data()
-                    db_manager.populate_gilt_data(sample_data.to_dict('records'))
-                    st.session_state.gilt_data = db_manager.get_gilts_dataframe()
-                    st.warning("⚠️ Live data unavailable - refreshed with sample data")
+                    # No fallback to sample data - require real data
+                    st.error("❌ Unable to fetch gilt data from external sources. Please check your internet connection and try again.")
+                    st.session_state.gilt_data = pd.DataFrame()
                     
                 st.session_state.data_loaded = True
                 st.rerun()
                 
             except Exception as e:
                 st.error(f"Refresh failed: {str(e)}")
-                st.session_state.gilt_data = gilt_fetcher.get_sample_data()
+                st.error("Unable to load gilt data. Please check data sources and connectivity.")
+                st.session_state.gilt_data = pd.DataFrame()
                 st.session_state.data_loaded = True
 
 with col2:
