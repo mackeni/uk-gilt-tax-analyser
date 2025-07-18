@@ -515,13 +515,13 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         capital_gain_per_100 = 100 - purchase_price
                         
                         # Scale to investment amount
-                        units_purchased = investment_amount / purchase_price * 100  # Units per £100 nominal
+                        units_purchased = investment_amount / purchase_price * 100  # Units purchased
                         maturity_value = units_purchased  # Redeemed at par
                         capital_gain_total = maturity_value - investment_amount
                         
                         st.markdown(f"**Zero-Coupon Analysis (£{investment_amount:,.0f} investment):**")
                         st.write(f"• Purchase Price: £{investment_amount:,.6f}")
-                        st.write(f"• Units Purchased (per £100 nominal): {units_purchased:,.6f}")
+                        st.write(f"• Units Purchased: {units_purchased:,.6f}")
                         st.write(f"• Maturity Value: £{maturity_value:,.6f}")
                         st.write(f"• Capital Gain: £{capital_gain_total:,.6f}")
                         st.write(f"• Capital Gains Tax: £0.000000 (Exempt)")
@@ -604,7 +604,6 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                                 # Scale coupon to investment amount
                                 units_owned = investment_amount / row['Dirty Price'] * 100
                                 semi_annual_coupon_total = (coupon_rate/2) * (units_owned / 100)
-                                st.write(f"• Semi-Annual Coupon per £100: £{coupon_rate/2:.6f}")
                                 st.write(f"• Your Semi-Annual Coupon: £{semi_annual_coupon_total:.6f}")
                                 st.write(f"• Maturity Date: {maturity_date_obj.strftime('%d %b %Y')}")
                                 st.write(f"• Today's Date: {today.strftime('%d %b %Y')}")
@@ -629,14 +628,12 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                                 st.write(f"• Accrued Fraction: {accrued_fraction:.6f}")
                                 # Scale accrued interest to investment amount
                                 accrued_interest_total = accrued_interest * (units_owned / 100)
-                                st.write(f"• **Accrued Interest per £100: £{accrued_interest:.6f}**")
                                 st.write(f"• **Your Accrued Interest: £{accrued_interest_total:.6f}**")
                                     
                             except Exception as e:
                                 # Scale accrued interest to investment amount
                                 units_owned = investment_amount / row['Dirty Price'] * 100
                                 accrued_interest_total = accrued_interest * (units_owned / 100)
-                                st.write(f"• Accrued Interest per £100: £{accrued_interest:.6f}")
                                 st.write(f"• Your Accrued Interest: £{accrued_interest_total:.6f}")
                         
                         # Scale all amounts to investment amount
@@ -646,7 +643,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         total_maturity_value = units_owned  # Redeemed at par
                         total_capital_gain = total_maturity_value - total_dirty_price
                         
-                        st.write(f"• Units Owned (per £100 nominal): {units_owned:.6f}")
+                        st.write(f"• Units Owned: {units_owned:.6f}")
                         st.write(f"• Accrued Interest: £{total_accrued_interest:.6f}")
                         st.write(f"• **Dirty Price (Total Purchase Cost): £{total_dirty_price:.6f}**")
                         st.write(f"• Maturity Value: £{total_maturity_value:.6f}")
@@ -754,7 +751,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 units_owned = investment_amount / best_gilt_price * 100
                 scaling_factor = units_owned / 100
                 
-                st.write(f"Units owned (per £100 nominal): {units_owned:.6f}")
+                st.write(f"Units owned: {units_owned:.6f}")
                 st.write(f"Total gross coupon income: £{schedule_summary['total_gross_coupons'] * scaling_factor:,.6f}")
                 st.write(f"Total tax on coupons: £{schedule_summary['total_coupon_tax'] * scaling_factor:,.6f}")
                 st.write(f"Total net coupon income: £{schedule_summary['total_after_tax_coupons'] * scaling_factor:,.6f}")
@@ -876,7 +873,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                     st.write(f"**Income Tax Analysis (£{investment_amount:,.0f} investment):**")
                     units_owned = investment_amount / selected_gilt_row.get('Price', 100) * 100
                     scaling_factor = units_owned / 100
-                    st.write(f"Units Owned (per £100 nominal): {units_owned:.6f}")
+                    st.write(f"Units Owned: {units_owned:.6f}")
                     st.write(f"Total Gross Coupon Income: £{schedule_summary['total_gross_coupons'] * scaling_factor:.6f}")
                     st.write(f"Total Tax Paid ({tax_rate*100:.0f}%): £{schedule_summary['total_coupon_tax'] * scaling_factor:.6f}")
                     st.write(f"Total Net Coupon Income: £{schedule_summary['total_after_tax_coupons'] * scaling_factor:.6f}")
@@ -905,7 +902,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 total_after_tax_cash_flows_scaled = schedule_summary['total_after_tax_cash_flows'] * scaling_factor
                 
                 st.write(f"**For Your £{investment_amount:,.0f} Investment:**")
-                st.write(f"Units Owned (per £100 nominal): {units_owned:.6f}")
+                st.write(f"Units Owned: {units_owned:.6f}")
                 st.write(f"Total Gross Coupon Income: £{total_gross_coupons_scaled:,.6f}")
                 st.write(f"Total Tax Paid: £{total_coupon_tax_scaled:,.6f}")
                 st.write(f"Total Net Coupon Income: £{total_after_tax_coupons_scaled:,.6f}")

@@ -137,10 +137,10 @@ class GiltDataFetcher:
             # UK gilts use Actual/Actual day count convention
             accrued_fraction = days_since_last_coupon / days_in_coupon_period
             
-            # Semi-annual coupon payment per £100 nominal (not percentage)
-            semi_annual_coupon_pounds = coupon_rate / 2  # This gives us £X per £100
+            # Semi-annual coupon payment (not percentage)
+            semi_annual_coupon_pounds = coupon_rate / 2  # This gives us £X
             
-            # Accrued interest in pounds per £100 nominal
+            # Accrued interest in pounds
             accrued_interest_pounds = semi_annual_coupon_pounds * accrued_fraction
             
             return accrued_interest_pounds
