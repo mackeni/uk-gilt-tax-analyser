@@ -37,8 +37,8 @@ class GiltDataFetcher:
                 return df
             
             # If real data fails, return empty dataframe
-            st.error("Unable to fetch real-time data. Please check your internet connection or try again later.")
-            return pd.DataFrame()
+            st.error("Unable to fetch real-time data from authentic sources. All sample data has been removed. Please ensure internet connectivity to UK gilt data sources.")
+            raise ConnectionError("Failed to connect to authentic UK gilt data sources")
             
         except Exception as e:
             st.error(f"Error fetching gilt data: {str(e)}")
@@ -57,7 +57,7 @@ class GiltDataFetcher:
             response.raise_for_status()
             
             # For now, since the direct scraping isn't working, return None
-            # This will fallback to sample data
+            # No sample data fallback - requires authentic sources
             return None
                 
         except Exception as e:

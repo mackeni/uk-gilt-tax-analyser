@@ -100,7 +100,7 @@ class DatabaseManager:
                             gilt_id=gilt.id,
                             payment_date=payment_date,
                             coupon_amount=gilt.coupon_rate / 2,  # Semi-annual payment
-                            ex_dividend_date=payment_date - timedelta(days=7)  # Approximate ex-div date
+                            ex_dividend_date=None  # Requires authentic ex-dividend date source
                         )
                         session.add(coupon_payment)
             

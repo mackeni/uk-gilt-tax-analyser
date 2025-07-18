@@ -151,37 +151,19 @@ export async function renderAnalysisPage(request, env) {
         
         async function loadAnalysisData() {
             // This would fetch detailed analysis data from the API
-            const mockSchedule = [
-                {
-                    paymentDate: '2025-03-22',
-                    daysToPayment: 65,
-                    couponAmount: 20.00,
-                    couponTax: 9.00,
-                    afterTaxCoupon: 11.00,
-                    principalAmount: 0,
-                    afterTaxTotal: 11.00
-                },
-                {
-                    paymentDate: '2025-09-22',
-                    daysToPayment: 249,
-                    couponAmount: 20.00,
-                    couponTax: 9.00,
-                    afterTaxCoupon: 11.00,
-                    principalAmount: 0,
-                    afterTaxTotal: 11.00
-                },
-                {
-                    paymentDate: '2030-09-22',
-                    daysToPayment: 2072,
-                    couponAmount: 20.00,
-                    couponTax: 9.00,
-                    afterTaxCoupon: 11.00,
-                    principalAmount: 100.00,
-                    afterTaxTotal: 111.00
-                }
-            ];
+            // Generate authentic coupon schedule from real gilt data
+            if (!giltData || !giltData.maturityDate || !giltData.couponRate) {
+                throw new Error('Authentic gilt data required for coupon schedule generation');
+            }
             
-            displaySchedule(mockSchedule);
+            const scheduler = new CouponScheduler();
+            const schedule = scheduler.generateCouponSchedule(giltData);
+            
+            if (!schedule || schedule.length === 0) {
+                throw new Error('Failed to generate authentic coupon schedule from gilt data');
+            }
+            
+            displaySchedule(schedule);
         }
         
         function displaySchedule(schedule) {

@@ -7,10 +7,9 @@ import { addMonths, addDays, isSameDay, isWeekend } from 'date-fns';
 
 export class CouponScheduler {
   constructor() {
-    this.ukHolidays = [
-      // Basic UK holidays - in production, use a proper holiday calendar
-      '2025-01-01', '2025-12-25', '2025-12-26'
-    ];
+    // UK holidays should be loaded from an authentic data source
+    // No hardcoded holiday data - implement proper holiday calendar API
+    this.ukHolidays = [];
   }
 
   generateCouponSchedule(giltInfo) {
@@ -26,6 +25,7 @@ export class CouponScheduler {
     let currentDate = new Date(maturity);
     
     // Generate payment dates working backwards from maturity
+    // Use exact 6-month intervals based on the maturity date pattern
     while (currentDate > today) {
       const paymentDate = this.adjustForBusinessDay(new Date(currentDate));
       const daysToPayment = Math.floor((paymentDate - today) / (1000 * 60 * 60 * 24));
@@ -38,7 +38,7 @@ export class CouponScheduler {
         totalPayment: couponAmount + (isSameDay(paymentDate, maturity) ? faceValue : 0)
       });
       
-      // Move to next payment date (6 months earlier)
+      // Move to exactly 6 months earlier (same day of month, 6 months prior)
       currentDate = addMonths(currentDate, -6);
     }
     
@@ -102,17 +102,20 @@ export class CouponScheduler {
     return this.ukHolidays.includes(dateStr);
   }
 
-  calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
+  calculateAccruedInterest(couponRate, lastPaymentDate, nextPaymentDate, settlementDate = null) {
     if (!settlementDate) {
       settlementDate = new Date();
     }
     
     const lastPayment = new Date(lastPaymentDate);
-    const daysSinceLastPayment = Math.floor((settlementDate - lastPayment) / (1000 * 60 * 60 * 24));
+    const nextPayment = new Date(nextPaymentDate);
     
-    // UK gilts use Actual/Actual day count convention
-    const daysInCouponPeriod = 182.5; // Average for semi-annual
-    const accruedFraction = daysSinceLastPayment / daysInCouponPeriod;
+    // Exact day count - Actual/Actual convention for UK gilts
+    const daysSinceLastPayment = Math.floor((settlementDate - lastPayment) / (1000 * 60 * 60 * 24));
+    const totalDaysInPeriod = Math.floor((nextPayment - lastPayment) / (1000 * 60 * 60 * 24));
+    
+    // Precise accrued fraction
+    const accruedFraction = daysSinceLastPayment / totalDaysInPeriod;
     
     // Semi-annual coupon payment
     const semiAnnualCoupon = couponRate / 2;
