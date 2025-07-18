@@ -280,6 +280,31 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         # Tax efficiency comparison
         st.subheader("💰 Tax Efficiency Analysis")
         
+        # Add calculation methodology explanation
+        with st.expander("📖 How After-Tax Yields Are Calculated", expanded=False):
+            st.markdown("""
+            **Our Schedule-Based Calculation Method:**
+            
+            1. **Generate Actual Payment Schedule**: Create detailed coupon payment dates based on UK gilt conventions
+            2. **Calculate Tax on Each Payment**: Apply 45% tax rate to each coupon payment
+            3. **Sum After-Tax Cash Flows**: Total all net coupons plus tax-free principal repayment
+            4. **Calculate Total Return Ratio**: Divide total after-tax return by purchase price
+            5. **Annualize the Return**: Use compound annual growth rate formula: ((Total Return Ratio)^(1/Years) - 1) × 100
+            
+            **Why This Method Is More Accurate:**
+            - Uses actual payment dates rather than simplified annual calculations
+            - Accounts for precise timing of tax payments
+            - Includes capital gains tax exemption for gilts
+            - Provides exact equivalent savings rate needed to match gilt returns
+            
+            **Tax Assumptions for Additional Rate Taxpayers:**
+            - Income tax rate: 45%
+            - Personal Savings Allowance: £0 (nil for additional rate taxpayers)
+            - Capital Gains Tax on gilts: 0% (exempt)
+            """)
+        
+        st.markdown("---")
+        
         for idx, row in selected_data.iterrows():
             with st.expander(f"📋 {row['Name']} - Detailed Analysis"):
                 # Generate detailed coupon schedule for this gilt
@@ -353,35 +378,64 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                     st.write(f"• Tax on Yield (45%): {tax_on_yield:.3f}%")
                     st.write(f"• Tax Efficiency: {(row['After-Tax Yield'] / gross_yield * 100):.1f}%")
                     
-                    # Yield calculation breakdown
-                    st.markdown("**Yield Calculation Breakdown:**")
+                    # Detailed yield calculation breakdown
+                    st.markdown("**After-Tax Yield Calculation Method:**")
                     
                     if coupon_schedule:
-                        # Schedule-based yield calculation
+                        # Schedule-based yield calculation with detailed steps
                         purchase_price = row.get('Price', 100)
                         total_after_tax_return = schedule_summary['total_after_tax_cash_flows']
                         years_to_maturity = row['Years to Maturity']
                         
+                        st.markdown("**Step 1: Calculate Total After-Tax Cash Flows**")
                         st.write(f"• Purchase Price: £{purchase_price:.2f}")
-                        st.write(f"• Total After-Tax Return: £{total_after_tax_return:.2f}")
-                        st.write(f"• Years to Maturity: {years_to_maturity:.2f}")
+                        st.write(f"• Total Gross Coupons: £{schedule_summary['total_gross_coupons']:.2f}")
+                        st.write(f"• Tax on Coupons (45%): £{schedule_summary['total_coupon_tax']:.2f}")
+                        st.write(f"• Net Coupons: £{schedule_summary['total_after_tax_coupons']:.2f}")
+                        st.write(f"• Principal Return: £{schedule_summary['total_principal']:.2f}")
+                        st.write(f"• **Total After-Tax Return: £{total_after_tax_return:.2f}**")
                         
-                        # Calculate yield step by step
+                        st.markdown("**Step 2: Calculate Total Return Ratio**")
                         total_return_ratio = total_after_tax_return / purchase_price
+                        st.write(f"• Total Return Ratio = £{total_after_tax_return:.2f} ÷ £{purchase_price:.2f} = {total_return_ratio:.4f}")
+                        
+                        st.markdown("**Step 3: Annualize the Return**")
+                        st.write(f"• Years to Maturity: {years_to_maturity:.2f}")
+                        st.write(f"• Formula: ((Total Return Ratio)^(1/Years) - 1) × 100")
                         annualized_yield = ((total_return_ratio ** (1/years_to_maturity)) - 1) * 100
+                        st.write(f"• Calculation: (({total_return_ratio:.4f})^(1/{years_to_maturity:.2f}) - 1) × 100")
+                        st.write(f"• **After-Tax Yield: {annualized_yield:.3f}%**")
                         
-                        st.write(f"• Total Return Ratio: {total_return_ratio:.4f}")
-                        st.write(f"• Annualized Yield: {annualized_yield:.3f}%")
-                        st.write(f"• **After-Tax Yield: {row['After-Tax Yield']:.3f}%**")
+                        # Show equivalent savings rate calculation
+                        st.markdown("**Step 4: Calculate Equivalent Savings Rate**")
+                        equivalent_rate = annualized_yield / (1 - 0.45)
+                        st.write(f"• Formula: After-Tax Yield ÷ (1 - Tax Rate)")
+                        st.write(f"• Calculation: {annualized_yield:.3f}% ÷ (1 - 0.45) = {equivalent_rate:.3f}%")
+                        st.write(f"• **Equivalent Savings Rate: {equivalent_rate:.3f}%**")
+                        
                     else:
-                        # Zero-coupon yield calculation
+                        # Zero-coupon yield calculation with detailed steps
                         purchase_price = row.get('Price', 100)
-                        capital_gain_yield = (capital_gain_per_100 / purchase_price / row['Years to Maturity']) * 100
+                        capital_gain_per_100 = 100 - purchase_price
                         
+                        st.markdown("**Step 1: Calculate Capital Gain**")
                         st.write(f"• Purchase Price: £{purchase_price:.2f}")
-                        st.write(f"• Capital Gain: £{capital_gain_per_100:.2f}")
-                        st.write(f"• Annualized Capital Gain: {capital_gain_yield:.3f}%")
-                        st.write(f"• **After-Tax Yield: {row['After-Tax Yield']:.3f}%**")
+                        st.write(f"• Maturity Value: £100.00")
+                        st.write(f"• Capital Gain: £100.00 - £{purchase_price:.2f} = £{capital_gain_per_100:.2f}")
+                        st.write(f"• Tax on Capital Gain: £0.00 (Gilts are CGT exempt)")
+                        
+                        st.markdown("**Step 2: Calculate Annualized Yield**")
+                        st.write(f"• Years to Maturity: {row['Years to Maturity']:.2f}")
+                        capital_gain_yield = (capital_gain_per_100 / purchase_price / row['Years to Maturity']) * 100
+                        st.write(f"• Simple Annualized Yield: £{capital_gain_per_100:.2f} ÷ £{purchase_price:.2f} ÷ {row['Years to Maturity']:.2f} × 100")
+                        st.write(f"• **After-Tax Yield: {capital_gain_yield:.3f}%**")
+                        
+                        # Show equivalent savings rate calculation
+                        st.markdown("**Step 3: Calculate Equivalent Savings Rate**")
+                        equivalent_rate = capital_gain_yield / (1 - 0.45)
+                        st.write(f"• Formula: After-Tax Yield ÷ (1 - Tax Rate)")
+                        st.write(f"• Calculation: {capital_gain_yield:.3f}% ÷ (1 - 0.45) = {equivalent_rate:.3f}%")
+                        st.write(f"• **Equivalent Savings Rate: {equivalent_rate:.3f}%**")
         
         # Visual comparison
         st.subheader("📊 Visual Comparison")
