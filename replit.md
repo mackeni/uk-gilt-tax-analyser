@@ -391,3 +391,27 @@ This migration maintains all original functionality while dramatically improving
 - **Input Validation**: Automatic bounds checking (0-45 years) with smart min/max logic
 - **Improved Accessibility**: Better keyboard navigation and screen reader support
 - **Professional Design**: Styled number inputs with focus states and consistent theming
+
+### July 18, 2025 - Interactive Calculation Explanations
+
+**Worker ID Updated**: ff967f75-0397-4414-83e7-5491675b7aea
+**Click-Through Educational Features**:
+- **Interactive Table Cells**: All data cells now clickable with hover effects for better user engagement
+- **Detailed Calculation Modals**: Professional modal windows explaining how each value is calculated
+- **Formula Transparency**: Step-by-step breakdowns with mathematical formulas and examples
+- **Educational Content**: Clear explanations of financial concepts (coupon rates, yields, tax implications)
+- **Responsive Design**: Mobile-friendly modals with proper scrolling and close functionality
+
+**Calculation Explanations Include**:
+- **Coupon Rate**: Definition and annual payment calculations
+- **Current Yield**: Market price-based return formula with examples
+- **After-Tax Yield**: Tax impact calculations showing income tax on coupons vs tax-free capital gains
+- **Equivalent Savings Rate**: Comparison methodology for matching savings account rates
+- **Years to Maturity**: Time calculations with exact maturity dates
+
+**Technical Implementation**:
+- Modal overlay system with professional styling and animations
+- Dynamic content generation based on user's tax bracket and gilt details
+- Accessible close functionality (click outside, X button, escape key support)
+- Formula highlighting with monospace fonts for clarity
+- Step-by-step calculation breakdowns with real numbers from selected gilts

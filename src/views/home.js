@@ -226,6 +226,79 @@ export async function renderHomePage(request, env) {
             color: #7f8c8d;
         }
         
+        .clickable-cell {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .clickable-cell:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 15px;
+        }
+        
+        .modal-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .calculation-step {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .calculation-formula {
+            font-family: 'Courier New', monospace;
+            background-color: #e8f4f8;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 10px 0;
+        }
+        
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .main-content {
@@ -465,11 +538,7 @@ export async function renderHomePage(request, env) {
         };
         let durationFilter = { min: 0, max: 45 };
         
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-            loadGiltData();
-        });
+        // Initialize app (moved to end after modal creation)
         
         function setupEventListeners() {
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
@@ -674,14 +743,14 @@ export async function renderHomePage(request, env) {
                             </tr>
                         </thead>
                         <tbody>
-                            \${sortedResults.map(gilt => \`
+                            \${sortedResults.map((gilt, index) => \`
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
                                     <td style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500;">\${gilt.name}</td>
-                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${formatCouponRate(gilt.couponRate)}</td>
-                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.currentYield.toFixed(2)}%</td>
-                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${gilt.afterTaxYield.toFixed(2)}%</td>
-                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.equivalentSavingsRate.toFixed(2)}%</td>
-                                    <td style="padding: 12px; text-align: right;">\${gilt.yearsToMaturity.toFixed(1)}</td>
+                                    <td class="clickable-cell" data-type="coupon" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${formatCouponRate(gilt.couponRate)}</td>
+                                    <td class="clickable-cell" data-type="current-yield" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.currentYield.toFixed(2)}%</td>
+                                    <td class="clickable-cell" data-type="after-tax" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${gilt.afterTaxYield.toFixed(2)}%</td>
+                                    <td class="clickable-cell" data-type="equivalent" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.equivalentSavingsRate.toFixed(2)}%</td>
+                                    <td class="clickable-cell" data-type="years" data-index="\${index}" style="padding: 12px; text-align: right;">\${gilt.yearsToMaturity.toFixed(1)}</td>
                                 </tr>
                             \`).join('')}
                         </tbody>
@@ -690,7 +759,183 @@ export async function renderHomePage(request, env) {
             \`;
             
             dataDiv.innerHTML = tableHTML;
+            
+            // Add click event listeners to clickable cells
+            document.querySelectorAll('.clickable-cell').forEach(cell => {
+                cell.addEventListener('click', function() {
+                    const type = this.dataset.type;
+                    const index = parseInt(this.dataset.index);
+                    const gilt = sortedResults[index];
+                    showCalculationModal(type, gilt);
+                });
+            });
         }
+        
+        function showCalculationModal(type, gilt) {
+            const modal = document.getElementById('calculationModal');
+            const title = document.getElementById('modalTitle');
+            const content = document.getElementById('modalContent');
+            
+            let titleText = '';
+            let contentHTML = '';
+            
+            switch(type) {
+                case 'coupon':
+                    titleText = 'Coupon Rate';
+                    contentHTML = \`
+                        <div class="calculation-step">
+                            <h4>What is the Coupon Rate?</h4>
+                            <p>The coupon rate is the annual interest rate paid by the gilt, expressed as a percentage of the nominal (face) value.</p>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>For \${gilt.name}:</h4>
+                            <div class="calculation-formula">
+                                Coupon Rate = \${formatCouponRate(gilt.couponRate)}
+                            </div>
+                            <p>This means the gilt pays \${gilt.couponRate}% of its £100 nominal value annually as interest, split into two semi-annual payments.</p>
+                            <p><strong>Annual coupon payment per £100:</strong> £\${gilt.couponRate.toFixed(2)}</p>
+                        </div>
+                    \`;
+                    break;
+                    
+                case 'current-yield':
+                    titleText = 'Current Yield';
+                    contentHTML = \`
+                        <div class="calculation-step">
+                            <h4>Current Yield Calculation</h4>
+                            <p>Current yield shows the annual return based on the current market price, not the nominal value.</p>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>Formula:</h4>
+                            <div class="calculation-formula">
+                                Current Yield = (Annual Coupon Payment ÷ Current Price) × 100
+                            </div>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>For \${gilt.name}:</h4>
+                            <div class="calculation-formula">
+                                Current Yield = (£\${gilt.couponRate.toFixed(2)} ÷ £\${gilt.cleanPrice.toFixed(2)}) × 100 = \${gilt.currentYield.toFixed(2)}%
+                            </div>
+                            <p>The current yield reflects the actual return you get based on today's market price.</p>
+                        </div>
+                    \`;
+                    break;
+                    
+                case 'after-tax':
+                    const taxRate = currentSettings.taxBracket === 'additional_rate' ? 45 : 
+                                   currentSettings.taxBracket === 'higher_rate' ? 40 : 20;
+                    contentHTML = \`
+                        <div class="calculation-step">
+                            <h4>After-Tax Yield Calculation</h4>
+                            <p>Shows your actual return after paying income tax on coupon payments. Capital gains on gilts are tax-free.</p>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>Formula:</h4>
+                            <div class="calculation-formula">
+                                After-Tax Yield = Coupon Rate × (1 - Tax Rate) + Capital Gains Yield
+                            </div>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>For \${gilt.name} (Tax Rate: \${taxRate}%):</h4>
+                            <div class="calculation-formula">
+                                After-Tax Coupon = \${gilt.couponRate.toFixed(2)}% × (1 - 0.\${taxRate}) = \${(gilt.couponRate * (1 - taxRate/100)).toFixed(2)}%
+                            </div>
+                            \${gilt.cleanPrice !== 100 ? \`
+                                <div class="calculation-formula">
+                                    Capital Gains = (\${((100 - gilt.cleanPrice) / gilt.yearsToMaturity).toFixed(2)}% per year, tax-free)
+                                </div>
+                            \` : ''}
+                            <div class="calculation-formula">
+                                <strong>Total After-Tax Yield = \${gilt.afterTaxYield.toFixed(2)}%</strong>
+                            </div>
+                        </div>
+                    \`;
+                    titleText = 'After-Tax Yield';
+                    break;
+                    
+                case 'equivalent':
+                    titleText = 'Equivalent Savings Rate';
+                    contentHTML = \`
+                        <div class="calculation-step">
+                            <h4>Equivalent Savings Rate</h4>
+                            <p>The gross interest rate a savings account would need to match this gilt's after-tax return.</p>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>Formula:</h4>
+                            <div class="calculation-formula">
+                                Equivalent Rate = After-Tax Yield ÷ (1 - Tax Rate)
+                            </div>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>For \${gilt.name}:</h4>
+                            <div class="calculation-formula">
+                                Equivalent Rate = \${gilt.afterTaxYield.toFixed(2)}% ÷ (1 - 0.\${taxRate}) = \${gilt.equivalentSavingsRate.toFixed(2)}%
+                            </div>
+                            <p>A savings account would need to pay \${gilt.equivalentSavingsRate.toFixed(2)}% gross to match this gilt's \${gilt.afterTaxYield.toFixed(2)}% after-tax return.</p>
+                        </div>
+                    \`;
+                    break;
+                    
+                case 'years':
+                    titleText = 'Years to Maturity';
+                    const maturityDate = new Date(gilt.maturityDate);
+                    contentHTML = \`
+                        <div class="calculation-step">
+                            <h4>Years to Maturity Calculation</h4>
+                            <p>Time remaining until the gilt matures and pays back the £100 nominal value.</p>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>For \${gilt.name}:</h4>
+                            <div class="calculation-formula">
+                                Maturity Date: \${maturityDate.toLocaleDateString('en-GB')}
+                            </div>
+                            <div class="calculation-formula">
+                                Years to Maturity: \${gilt.yearsToMaturity.toFixed(1)} years
+                            </div>
+                            <p>This gilt will mature in approximately \${gilt.yearsToMaturity.toFixed(1)} years, at which point you'll receive £100 per £100 nominal value held.</p>
+                        </div>
+                    \`;
+                    break;
+            }
+            
+            title.textContent = titleText;
+            content.innerHTML = contentHTML;
+            modal.style.display = 'block';
+        }
+        
+        // Add modal HTML and event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create modal HTML
+            const modalHTML = \`
+                <div id="calculationModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <span id="modalTitle" class="modal-title"></span>
+                            <span class="close">&times;</span>
+                        </div>
+                        <div id="modalContent"></div>
+                    </div>
+                </div>
+            \`;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Close modal functionality
+            const modal = document.getElementById('calculationModal');
+            const closeBtn = document.querySelector('.close');
+            
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            setupEventListeners();
+            loadGiltData();
+        });
     </script>
 </body>
 </html>
