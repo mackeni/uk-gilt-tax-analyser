@@ -347,3 +347,26 @@ This migration maintains all original functionality while dramatically improving
 - Comprehensive comparison of conventional vs index-linked returns
 - Green gilt options for sustainable investment strategies
 - Complete market data for optimal tax-efficient portfolio construction
+
+### July 18, 2025 - Duration Filtering and Sorting Implementation
+
+**Worker ID Updated**: 64927cdb-a7b1-429a-b39d-f22ba932504a
+**Duration-Based Analysis Features:**
+- **Automatic Sorting**: All gilts now display in increasing duration order (shortest to longest maturity)
+- **Dual-Range Slider Filter**: Interactive filter controls for minimum and maximum years to maturity
+- **Real-Time Filtering**: Instant table updates showing "X of 47 gilts" as users adjust duration ranges
+- **Smart Filter Logic**: Prevents invalid ranges where minimum exceeds maximum duration
+- **Enhanced User Experience**: Filter controls appear after data loads with live count updates
+
+**Technical Implementation:**
+- Added duration filter state management with min/max bounds (0-45 years)
+- Implemented real-time event listeners for both range sliders
+- Enhanced displayResults function with filtering and sorting logic
+- Added filtered count display showing active vs total gilt count
+- Maintained mobile responsiveness for filter controls
+
+**User Interface Improvements:**
+- Clear visual feedback when no gilts match filter criteria
+- Seamless integration with existing tax calculation workflow
+- Preserved all existing functionality while adding duration-based navigation
+- Optimized for investment strategy planning across different maturity horizons
