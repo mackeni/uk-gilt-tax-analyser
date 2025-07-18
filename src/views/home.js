@@ -436,6 +436,17 @@ export async function renderHomePage(request, env) {
     </div>
     
     <script>
+        // Import utility functions
+        function formatCouponRate(rate) {
+            if (isNaN(rate) || rate === null || rate === undefined) {
+                return 'N/A';
+            }
+            
+            // Format with max 3 decimal places, removing trailing zeros
+            const formatted = rate.toFixed(3).replace(/\\.?0+$/, '');
+            return formatted + '%';
+        }
+        
         let currentGiltData = [];
         let currentResults = [];
         let currentSettings = {
@@ -657,7 +668,7 @@ export async function renderHomePage(request, env) {
                             \${sortedResults.map(gilt => \`
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
                                     <td style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500;">\${gilt.name}</td>
-                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.couponRate.toFixed(2)}%</td>
+                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${formatCouponRate(gilt.couponRate)}</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.currentYield.toFixed(2)}%</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${gilt.afterTaxYield.toFixed(2)}%</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.equivalentSavingsRate.toFixed(2)}%</td>
