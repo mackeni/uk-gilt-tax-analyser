@@ -347,3 +347,25 @@ This migration maintains all original functionality while dramatically improving
 - Comprehensive comparison of conventional vs index-linked returns
 - Green gilt options for sustainable investment strategies
 - Complete market data for optimal tax-efficient portfolio construction
+
+### July 18, 2025 - Duration Filtering and Sorting Enhancement
+
+**Interactive Duration Controls Added:**
+- **Worker ID Updated**: eabf018e-3502-4e37-924c-f21b9434174c
+- **Automatic Duration Sorting**: All 47 gilts now display in increasing order of years to maturity
+- **Dual-Slider Duration Filter**: Interactive range controls to filter gilts by maturity period
+- **Real-time Filter Feedback**: Live count showing filtered results (e.g., "12 of 47 gilts")
+- **Improved Slider Sensitivity**: Step size increased to 1 year for better user control
+
+**Enhanced User Experience:**
+- Coupon rates display with maximum 3 decimal places (trailing zeros removed)
+- Smart filter logic prevents min/max slider conflicts
+- Visual slider styling with larger thumbs and better contrast
+- Empty state messaging when no gilts match filter criteria
+- Instant table updates as users adjust duration preferences
+
+**Filtering Benefits:**
+- Focus on specific maturity ranges (short, medium, long-term)
+- Quick comparison of gilts within preferred investment timeframes
+- Efficient navigation through comprehensive 47-gilt database
+- Maintained sorting by duration for logical gilt comparison

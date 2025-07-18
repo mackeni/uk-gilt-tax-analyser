@@ -211,6 +211,33 @@ export async function renderHomePage(request, env) {
         .range-container input[type="range"] {
             flex: 1;
             max-width: 200px;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .range-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .range-container input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
         .range-info {
@@ -415,10 +442,10 @@ export async function renderHomePage(request, env) {
                     <div class="form-group">
                         <label for="durationRange">Filter by Duration (Years to Maturity):</label>
                         <div class="range-container">
-                            <input type="range" id="durationMin" min="0" max="45" value="0" step="0.5">
+                            <input type="range" id="durationMin" min="0" max="45" value="0" step="1">
                             <span id="durationMinValue">0</span> years
                             <span style="margin: 0 10px;">to</span>
-                            <input type="range" id="durationMax" min="0" max="45" value="45" step="0.5">
+                            <input type="range" id="durationMax" min="0" max="45" value="45" step="1">
                             <span id="durationMaxValue">45</span> years
                         </div>
                         <div class="range-info">
@@ -657,7 +684,7 @@ export async function renderHomePage(request, env) {
                             \${sortedResults.map(gilt => \`
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
                                     <td style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500;">\${gilt.name}</td>
-                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.couponRate.toFixed(2)}%</td>
+                                    <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.couponRate.toFixed(3).replace(/\.?0+$/, '')}%</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.currentYield.toFixed(2)}%</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${gilt.afterTaxYield.toFixed(2)}%</td>
                                     <td style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.equivalentSavingsRate.toFixed(2)}%</td>
