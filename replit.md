@@ -335,7 +335,7 @@ This migration maintains all original functionality while dramatically improving
 ### July 18, 2025 - Complete UK Gilt Database Integration
 
 **Complete Market Coverage Achieved:**
-- **Worker ID Updated**: dbc8fa6f-218c-4af8-b2e5-db4fcd6a1e37
+- **Worker ID Updated**: 76b377ef-ebeb-4f5d-b071-aa21f56289cd
 - **Total Gilts Available**: 68 UK government bonds (comprehensive market coverage)
 - **Data Sources**: UK DMO, DividendData, Hargreaves Lansdown, AJ Bell close-of-business prices
 

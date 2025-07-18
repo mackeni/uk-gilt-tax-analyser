@@ -518,7 +518,27 @@ export async function renderHomePage(request, env) {
     </div>
     
     <script>
-        // Import utility functions
+        // Utility functions (inline to avoid module import issues)
+        function formatCurrency(amount, currency = '£') {
+            if (isNaN(amount) || amount === null || amount === undefined) {
+                return 'N/A';
+            }
+            if (Math.abs(amount) >= 1000000) {
+                return currency + (amount / 1000000).toFixed(2) + 'M';
+            } else if (Math.abs(amount) >= 1000) {
+                return currency + (amount / 1000).toFixed(1) + 'K';
+            } else {
+                return currency + amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+        }
+
+        function formatPercentage(percentage, decimalPlaces = 2) {
+            if (isNaN(percentage) || percentage === null || percentage === undefined) {
+                return 'N/A';
+            }
+            return percentage.toFixed(decimalPlaces) + '%';
+        }
+
         function formatCouponRate(rate) {
             if (isNaN(rate) || rate === null || rate === undefined) {
                 return 'N/A';

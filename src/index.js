@@ -70,7 +70,7 @@ async function handleAPIRequest(request, env, path) {
 async function getGiltData(request, env) {
   try {
     const fetcher = new GiltDataFetcher();
-    const data = await fetcher.getGiltData();
+    const data = await fetcher.fetchGiltData();
     
     return new Response(JSON.stringify(data), {
       headers: { 
