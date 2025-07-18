@@ -762,7 +762,9 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 st.write(f"Total gross coupon income: £{schedule_summary['total_gross_coupons'] * scaling_factor:,.2f}")
                 st.write(f"Total tax on coupons: £{schedule_summary['total_coupon_tax'] * scaling_factor:,.2f}")
                 st.write(f"Total net coupon income: £{schedule_summary['total_after_tax_coupons'] * scaling_factor:,.2f}")
-                st.write(f"Principal repayment: £{schedule_summary['total_principal'] * scaling_factor:,.2f}")
+                # Principal repayment is the nominal value of units owned
+                nominal_value = investment_amount / best_gilt_price * 100
+                st.write(f"Principal repayment: £{nominal_value:,.2f}")
                 st.write(f"**Total net return: £{schedule_summary['total_after_tax_cash_flows'] * scaling_factor:,.2f}**")
             else:
                 st.info("Zero-coupon gilt - no coupon income")
@@ -863,12 +865,20 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 ]
                 
                 # Scale currency columns to investment amount and format
-                units_owned = investment_amount / selected_gilt_row.get('Price', 100) * 100
+                dirty_price = selected_gilt_row.get('Dirty Price', selected_gilt_row.get('Price', 100))
+                units_owned = investment_amount / dirty_price * 100
                 scaling_factor = units_owned / 100
                 
-                currency_cols = ['Gross Coupon (£)', 'Tax Paid (£)', 'Net Coupon (£)', 'Principal (£)', 'Total Net (£)']
-                for col in currency_cols:
+                # Handle principal column separately - it should be the nominal value
+                coupon_cols = ['Gross Coupon (£)', 'Tax Paid (£)', 'Net Coupon (£)', 'Total Net (£)']
+                for col in coupon_cols:
                     display_schedule[col] = display_schedule[col].apply(lambda x: f"£{x * scaling_factor:,.2f}")
+                
+                # Principal is always the nominal value (£100 per £100 nominal) regardless of purchase price
+                nominal_value_per_100 = investment_amount / dirty_price * 100
+                display_schedule['Principal (£)'] = display_schedule['Principal (£)'].apply(
+                    lambda x: f"£{nominal_value_per_100:,.2f}" if x > 0 else "£0.00"
+                )
                 
                 st.dataframe(display_schedule, use_container_width=True, hide_index=True)
                 
@@ -878,7 +888,8 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 
                 with col1:
                     st.write(f"**Income Tax Analysis (£{investment_amount:,.0f} investment):**")
-                    units_owned = investment_amount / selected_gilt_row.get('Price', 100) * 100
+                    dirty_price = selected_gilt_row.get('Dirty Price', selected_gilt_row.get('Price', 100))
+                    units_owned = investment_amount / dirty_price * 100
                     scaling_factor = units_owned / 100
                     st.write(f"Units Owned: {units_owned:.6f}")
                     st.write(f"Total Gross Coupon Income: £{schedule_summary['total_gross_coupons'] * scaling_factor:,.2f}")
@@ -889,7 +900,11 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 with col2:
                     st.write("**Capital Gains Analysis:**")
                     st.write(f"Purchase Price: £{investment_amount:,.2f}")
-                    redemption_value = schedule_summary['total_principal'] * scaling_factor
+                    # Principal repayment is always the nominal value of units owned
+                    # For gilts, this is £100 per £100 nominal, regardless of purchase price
+                    dirty_price = selected_gilt_row.get('Dirty Price', selected_gilt_row.get('Price', 100))
+                    nominal_value = investment_amount / dirty_price * 100
+                    redemption_value = nominal_value
                     capital_gain = redemption_value - investment_amount
                     st.write(f"Redemption Value: £{redemption_value:,.2f}")
                     st.write(f"Capital Gain/Loss: £{capital_gain:,.2f}")
@@ -899,13 +914,18 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 st.subheader("💷 Yield Calculation Details")
                 
                 # Scale to investment amount
-                units_owned = investment_amount / selected_gilt_row.get('Price', 100) * 100
+                dirty_price = selected_gilt_row.get('Dirty Price', selected_gilt_row.get('Price', 100))
+                units_owned = investment_amount / dirty_price * 100
                 scaling_factor = units_owned / 100
                 
                 total_gross_coupons_scaled = schedule_summary['total_gross_coupons'] * scaling_factor
                 total_coupon_tax_scaled = schedule_summary['total_coupon_tax'] * scaling_factor
                 total_after_tax_coupons_scaled = schedule_summary['total_after_tax_coupons'] * scaling_factor
-                total_principal_scaled = schedule_summary['total_principal'] * scaling_factor
+                # Principal repayment is the nominal value of units owned
+                # This is £100 per £100 nominal, regardless of purchase price
+                dirty_price = selected_gilt_row.get('Dirty Price', selected_gilt_row.get('Price', 100))
+                nominal_value = investment_amount / dirty_price * 100
+                total_principal_scaled = nominal_value
                 total_after_tax_cash_flows_scaled = schedule_summary['total_after_tax_cash_flows'] * scaling_factor
                 
                 st.write(f"**For Your £{investment_amount:,.0f} Investment:**")
