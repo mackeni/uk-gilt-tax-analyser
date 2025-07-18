@@ -1,8 +1,8 @@
-# UK Gilt Tax Efficiency Analyzer
+# UK Gilt Tax Efficiency Analyser
 
 ## Overview
 
-This is a Streamlit web application designed to help UK additional rate taxpayers (45% tax band) analyze the tax efficiency of UK gilt investments compared to savings accounts. The application provides tools to calculate after-tax yields, compare investment options, and visualize tax implications for high-rate taxpayers.
+This is a Streamlit web application designed to help UK additional rate taxpayers (45% tax band) analyse the tax efficiency of UK gilt investments compared to savings accounts. The application provides tools to calculate after-tax yields, compare investment options, and visualise tax implications for high-rate taxpayers.
 
 ## User Preferences
 
@@ -19,7 +19,7 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Language**: Python
 - **Structure**: Modular design with separate components for data fetching, tax calculations, and utilities
-- **Caching**: Streamlit's `@st.cache_resource` decorator for performance optimization
+- **Caching**: Streamlit's `@st.cache_resource` decorator for performance optimisation
 - **Data Processing**: Pandas for data manipulation and NumPy for numerical computations
 
 ## Key Components
@@ -102,7 +102,7 @@ Preferred communication style: Simple, everyday language.
 3. **Fallback Data**: Implemented sample data to ensure application functionality
 4. **Tax Focus**: Specifically designed for UK additional rate taxpayers
 5. **Real-time Data**: Attempted integration with live market data sources
-6. **Caching Strategy**: Utilized Streamlit's caching for performance optimization
+6. **Caching Strategy**: Utilised Streamlit's caching for performance optimisation
 
 ## Recent Changes
 
@@ -154,7 +154,14 @@ Preferred communication style: Simple, everyday language.
 - **Personal Savings Allowance Integration**: Dynamic PSA calculation (£1,000 for basic, £500 for higher, £0 for additional rate)
 - **Enhanced Tax Efficiency Analysis**: Comprehensive comparison considering PSA and selected tax rates
 - **Streamlined Interface**: Removed unnecessary summary metrics and improved data refresh functionality
-- **Performance Optimizations**: Added caching decorators and LRU caching for faster calculations
+- **Performance Optimisations**: Added caching decorators and LRU caching for faster calculations
+
+### July 18, 2025 - British English Language Conversion
+- **Application Title**: Changed from "Analyzer" to "Analyser" throughout the application
+- **British Spelling**: Updated "analyze" to "analyse" in all user-facing text
+- **British Terminology**: Changed "optimization" to "optimisation" in documentation
+- **Language Consistency**: Converted "visualize" to "visualise" for British English compliance
+- **Interface Language**: All user interface text now uses proper British English spelling conventions
 
 ### July 18, 2025 - Comprehensive Calculation Consistency Fixes
 - **Fixed Redemption Amount Logic**: Corrected principal repayment calculations throughout payment schedules
@@ -163,7 +170,7 @@ Preferred communication style: Simple, everyday language.
 - **Payment Schedule Accuracy**: Final payment now shows correct principal repayment amount at maturity
 - **UK Gilt Convention Compliance**: Redemption at £100 per £100 nominal regardless of purchase price
 - **Eliminated Duplicate Calculations**: Removed redundant `dirty_price`, `units_owned` and `scaling_factor` calculations
-- **Standardized Price References**: Consistent use of 'Dirty Price' vs 'Price' throughout the application
+- **Standardised Price References**: Consistent use of 'Dirty Price' vs 'Price' throughout the application
 - **Precision Display Consistency**: All monetary displays use 2 decimal places while calculations retain 6-decimal precision
 - **Calculation Consolidation**: Merged duplicate calculation blocks to improve maintainability and consistency
 

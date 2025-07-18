@@ -12,7 +12,7 @@ from database import DatabaseManager
 
 # Page configuration
 st.set_page_config(
-    page_title="UK Gilt Tax Efficiency Analyzer",
+    page_title="UK Gilt Tax Efficiency Analyser",
     page_icon="💰",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -49,7 +49,7 @@ db_manager = get_database_manager()
 coupon_scheduler = get_coupon_scheduler()
 
 # Main title and description
-st.title("🏦 UK Gilt Tax Efficiency Analyzer")
+st.title("🏦 UK Gilt Tax Efficiency Analyser")
 
 # Sidebar for user inputs
 st.sidebar.header("Tax Settings")
@@ -85,15 +85,15 @@ st.sidebar.markdown(f"""
 tax_bracket_descriptions = {
     "Basic Rate (20%)": {
         "title": "For Basic Rate Taxpayers (20% Tax Band)",
-        "description": "This tool helps UK basic rate taxpayers analyze the tax efficiency of UK gilt investments with your £1,000 Personal Savings Allowance."
+        "description": "This tool helps UK basic rate taxpayers analyse the tax efficiency of UK gilt investments with your £1,000 Personal Savings Allowance."
     },
     "Higher Rate (40%)": {
         "title": "For Higher Rate Taxpayers (40% Tax Band)", 
-        "description": "This tool helps UK higher rate taxpayers analyze the tax efficiency of UK gilt investments with your £500 Personal Savings Allowance."
+        "description": "This tool helps UK higher rate taxpayers analyse the tax efficiency of UK gilt investments with your £500 Personal Savings Allowance."
     },
     "Additional Rate (45%)": {
         "title": "For Additional Rate Taxpayers (45% Tax Band)",
-        "description": "This tool helps UK additional rate taxpayers analyze the tax efficiency of UK gilt investments with no Personal Savings Allowance."
+        "description": "This tool helps UK additional rate taxpayers analyse the tax efficiency of UK gilt investments with no Personal Savings Allowance."
     }
 }
 
@@ -418,7 +418,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     # Gilt selection for comparison
     st.subheader("🔍 Detailed Analysis")
     selected_gilt_names = st.multiselect(
-        "Select gilts to analyze:",
+        "Select gilts to analyse:",
         options=filtered_df['Name'].tolist(),
         default=filtered_df['Name'].head(3).tolist() if len(filtered_df) >= 3 else filtered_df['Name'].tolist(),
         help="Choose up to 5 gilts for detailed comparison"
