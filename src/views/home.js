@@ -730,12 +730,14 @@ export async function renderHomePage(request, env) {
             
             // Display table
             const tableHTML = \`
-                <div class="table-container">
-                    <table>
+                <div class="table-container" style="overflow-x: auto;">
+                    <table style="min-width: 1000px;">
                         <thead>
                             <tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">
                                 <th style="padding: 12px; text-align: left; border-right: 1px solid #e0e0e0;">Name</th>
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Coupon</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Clean Price</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Dirty Price</th>
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Current</th>
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">After-Tax</th>
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Equivalent</th>
@@ -747,6 +749,8 @@ export async function renderHomePage(request, env) {
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
                                     <td style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500;">\${gilt.name}</td>
                                     <td class="clickable-cell" data-type="coupon" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${formatCouponRate(gilt.couponRate)}</td>
+                                    <td class="clickable-cell" data-type="clean-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${gilt.cleanPrice.toFixed(2)}</td>
+                                    <td class="clickable-cell" data-type="dirty-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${gilt.dirtyPrice.toFixed(2)}</td>
                                     <td class="clickable-cell" data-type="current-yield" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.currentYield.toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="after-tax" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${gilt.afterTaxYield.toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="equivalent" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.equivalentSavingsRate.toFixed(2)}%</td>
@@ -794,6 +798,55 @@ export async function renderHomePage(request, env) {
                             </div>
                             <p>This means the gilt pays \${gilt.couponRate}% of its £100 nominal value annually as interest, split into two semi-annual payments.</p>
                             <p><strong>Annual coupon payment per £100:</strong> £\${gilt.couponRate.toFixed(2)}</p>
+                        </div>
+                    \`;
+                    break;
+                    
+                case 'clean-price':
+                    titleText = 'Clean Price';
+                    contentHTML = \`
+                        <div class="calculation-step">
+                            <h4>What is the Clean Price?</h4>
+                            <p>The clean price is the market price of the gilt excluding accrued interest. This is the quoted price you see in markets.</p>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>For \${gilt.name}:</h4>
+                            <div class="calculation-formula">
+                                Clean Price = £\${gilt.cleanPrice.toFixed(2)} per £100 nominal
+                            </div>
+                            <p>This is the base trading price before adding any accrued interest since the last coupon payment.</p>
+                            \${gilt.cleanPrice > 100 ? '<p><strong>Premium Bond:</strong> Trading above par value (£100).</p>' : 
+                              gilt.cleanPrice < 100 ? '<p><strong>Discount Bond:</strong> Trading below par value (£100).</p>' : 
+                              '<p><strong>Par Bond:</strong> Trading at exactly par value (£100).</p>'}
+                        </div>
+                    \`;
+                    break;
+                    
+                case 'dirty-price':
+                    titleText = 'Dirty Price';
+                    contentHTML = \`
+                        <div class="calculation-step">
+                            <h4>What is the Dirty Price?</h4>
+                            <p>The dirty price is the total price you pay, including both the clean price and accrued interest since the last coupon payment.</p>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>Calculation:</h4>
+                            <div class="calculation-formula">
+                                Dirty Price = Clean Price + Accrued Interest
+                            </div>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>For \${gilt.name}:</h4>
+                            <div class="calculation-formula">
+                                Clean Price = £\${gilt.cleanPrice.toFixed(2)}
+                            </div>
+                            <div class="calculation-formula">
+                                Accrued Interest = £\${(gilt.dirtyPrice - gilt.cleanPrice).toFixed(2)}
+                            </div>
+                            <div class="calculation-formula">
+                                <strong>Dirty Price = £\${gilt.dirtyPrice.toFixed(2)} per £100 nominal</strong>
+                            </div>
+                            <p>This is the actual amount you pay when purchasing the gilt, as you compensate the seller for interest earned since the last payment.</p>
                         </div>
                     \`;
                     break;

@@ -415,3 +415,26 @@ This migration maintains all original functionality while dramatically improving
 - Accessible close functionality (click outside, X button, escape key support)
 - Formula highlighting with monospace fonts for clarity
 - Step-by-step calculation breakdowns with real numbers from selected gilts
+
+### July 18, 2025 - Clean and Dirty Price Display
+
+**Worker ID Updated**: 850e7929-8f96-461d-a111-50a357358f99
+**Enhanced Pricing Information**:
+- **Clean Price Column**: Market price excluding accrued interest (quoted price)
+- **Dirty Price Column**: Total purchase price including accrued interest
+- **Complete Price Transparency**: Shows both quoted and actual purchase prices
+- **Interactive Explanations**: Click-through modals explaining price differences
+- **Premium/Discount Indicators**: Automatic identification of bonds trading above/below par
+
+**Educational Content Added**:
+- **Clean Price**: Definition as base trading price before accrued interest
+- **Dirty Price**: Formula showing Clean Price + Accrued Interest breakdown
+- **Accrued Interest**: Explanation of compensation for interest earned since last payment
+- **Par Value Concepts**: Automatic classification as Premium, Discount, or Par bonds
+- **Market Context**: Clear explanation of why dirty price is the actual amount paid
+
+**Table Enhancement**:
+- Expanded from 6 to 8 columns with improved horizontal scrolling
+- Consistent £ currency formatting for all price columns
+- Mobile-responsive design with minimum table width for readability
+- Maintained all existing functionality while adding comprehensive pricing data
