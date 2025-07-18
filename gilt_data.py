@@ -342,13 +342,19 @@ class GiltDataFetcher:
             # Calculate accrued interest using actual day count
             # UK gilts use Actual/Actual day count convention
             accrued_fraction = days_since_last_coupon / days_in_coupon_period
-            semi_annual_coupon = coupon_rate / 2
             
-            return semi_annual_coupon * accrued_fraction
+            # Semi-annual coupon payment per £100 nominal (not percentage)
+            semi_annual_coupon_pounds = coupon_rate / 2  # This gives us £X per £100
+            
+            # Accrued interest in pounds per £100 nominal
+            accrued_interest_pounds = semi_annual_coupon_pounds * accrued_fraction
+            
+            return accrued_interest_pounds
             
         except Exception as e:
             # Fallback to simplified calculation if date parsing fails
-            return (row['Coupon Rate'] / 2) * 0.25  # Conservative estimate
+            # Conservative estimate: 25% of the way through a 6-month period
+            return (row['Coupon Rate'] / 2) * 0.25  # Conservative estimate in pounds per £100
     
     def _get_last_coupon_date(self, maturity_date, today):
         """Get the last coupon payment date before today"""

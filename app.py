@@ -459,7 +459,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                                 # Show the calculation logic
                                 st.write("**UK Gilt Accrued Interest Calculation:**")
                                 st.write(f"• Coupon Rate: {coupon_rate:.6f}%")
-                                st.write(f"• Semi-Annual Coupon: {coupon_rate/2:.6f}%")
+                                st.write(f"• Semi-Annual Coupon: £{coupon_rate/2:.6f} per £100")
                                 st.write(f"• Maturity Date: {maturity_date_obj.strftime('%d %b %Y')}")
                                 st.write(f"• Today's Date: {today.strftime('%d %b %Y')}")
                                 
@@ -492,14 +492,14 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                                     st.write(f"• Days Since Last Coupon: {days_since_last}")
                                     st.write(f"• Days in Coupon Period: {days_in_period}")
                                     st.write(f"• Accrued Fraction: {accrued_fraction:.6f}")
-                                    st.write(f"• **Accrued Interest: {coupon_rate/2:.6f}% × {accrued_fraction:.6f} = {accrued_interest:.6f}%**")
+                                    st.write(f"• **Accrued Interest: £{coupon_rate/2:.6f} × {accrued_fraction:.6f} = £{accrued_interest:.6f} per £100**")
                                     
                                 except Exception as e:
                                     st.write(f"• Calculation uses simplified approximation")
-                                    st.write(f"• Estimated accrued interest: {accrued_interest:.6f}%")
+                                    st.write(f"• Estimated accrued interest: £{accrued_interest:.6f} per £100")
                                     
                             except Exception as e:
-                                st.write(f"• Accrued Interest: {accrued_interest:.6f}% (estimated)")
+                                st.write(f"• Accrued Interest: £{accrued_interest:.6f} per £100 (estimated)")
                         
                         st.write(f"• Accrued Interest: £{accrued_interest:.6f}")
                         st.write(f"• **Dirty Price (Total Purchase Cost): £{dirty_price:.6f}**")
