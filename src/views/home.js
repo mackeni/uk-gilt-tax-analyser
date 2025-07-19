@@ -1002,16 +1002,50 @@ export async function renderHomePage(request, env) {
             currentSettings.taxBracket = taxBracket;
             
             const taxInfo = {
-                'basic_rate': { rate: 20, psa: 1000 },
-                'higher_rate': { rate: 40, psa: 500 },
-                'additional_rate': { rate: 45, psa: 0 }
+                'basic_rate': { rate: 20, psa: 1000, description: 'Basic Rate taxpayers typically receive £1,000 PSA' },
+                'higher_rate': { rate: 40, psa: 500, description: 'Higher Rate taxpayers typically receive £500 PSA' },
+                'additional_rate': { rate: 45, psa: 0, description: 'Additional Rate taxpayers receive no PSA' }
             };
             
             const info = taxInfo[taxBracket];
+            
+            // Ask for PSA confirmation when tax rate changes
+            const currentPSA = currentSettings.psaAmount;
+            const suggestedPSA = info.psa;
+            
+            let confirmedPSA = suggestedPSA;
+            
+            // Only ask for confirmation if this is a meaningful change and PSA is relevant
+            if (currentPSA !== suggestedPSA && (currentPSA !== undefined || suggestedPSA > 0)) {
+                const userPSA = prompt(
+                    \`Personal Savings Allowance Confirmation\n\n\` +
+                    \`Tax Bracket: \${taxBracket.replace('_', ' ').toUpperCase()}\n\` +
+                    \`Standard PSA: £\${suggestedPSA.toLocaleString()}\n\n\` +
+                    \`\${info.description}\n\n\` +
+                    \`What is your actual Personal Savings Allowance for this tax year?\n\` +
+                    \`(Enter amount or press Cancel to use standard amount)\`,
+                    suggestedPSA
+                );
+                
+                if (userPSA !== null) {
+                    const parsedPSA = parseFloat(userPSA);
+                    if (!isNaN(parsedPSA) && parsedPSA >= 0) {
+                        confirmedPSA = parsedPSA;
+                    }
+                }
+            }
+            
+            // Store the confirmed PSA amount
+            currentSettings.psaAmount = confirmedPSA;
+            
             document.getElementById('taxDetails').innerHTML = \`
                 <p><strong>Income Tax Rate:</strong> \${info.rate}%</p>
-                <p><strong>Personal Savings Allowance:</strong> £\${info.psa.toLocaleString()}</p>
+                <p><strong>Personal Savings Allowance:</strong> £\${confirmedPSA.toLocaleString()}</p>
                 <p><strong>Capital Gains Tax on Gilts:</strong> 0% (exempt)</p>
+                \${confirmedPSA !== suggestedPSA ? 
+                    '<p style="color: #e67e22; font-size: 12px; margin-top: 5px;"><strong>Custom PSA:</strong> Using your specified allowance</p>' : 
+                    ''
+                }
             \`;
             
             if (currentGiltData.length > 0) {
@@ -1241,7 +1275,9 @@ export async function renderHomePage(request, env) {
             
             const taxInfo = taxRates[taxBracket] || taxRates['additional_rate'];
             const incomeTaxRate = taxInfo.income / 100;
-            const psaAmount = taxInfo.psa;
+            
+            // Use confirmed PSA amount if available, otherwise use standard
+            const psaAmount = currentSettings.psaAmount !== undefined ? currentSettings.psaAmount : taxInfo.psa;
             
             console.log('Using tax rates:', taxInfo);
             
@@ -1938,8 +1974,11 @@ export async function renderHomePage(request, env) {
                     if (breakdownDiv) {
                         // Use the same variables as defined above for consistency
                         const savingsRateLocal = currentSettings.savingsRate || 4.5;
-                        const psaAmountLocal = currentSettings.taxBracket === 'basic_rate' ? 1000 : 
-                                            currentSettings.taxBracket === 'higher_rate' ? 500 : 0;
+                        // Use confirmed PSA amount if available
+                        const psaAmountLocal = currentSettings.psaAmount !== undefined ? 
+                                             currentSettings.psaAmount : 
+                                             (currentSettings.taxBracket === 'basic_rate' ? 1000 : 
+                                              currentSettings.taxBracket === 'higher_rate' ? 500 : 0);
                         const modalTaxRateLocal = getCurrentTaxRate();
                         const investmentAmountLocal = currentSettings.investmentAmount || 10000;
                         

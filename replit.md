@@ -374,6 +374,29 @@ This migration maintains all original functionality while dramatically improving
 - **Tax-Free Principal**: Principal repayment at maturity correctly shown as tax-free
 - **True Compound Returns**: IRR methodology provides mathematically accurate compound annual returns
 
+### July 19, 2025 - PSA Confirmation System and Actual Calendar Days Implementation
+
+**Version ID**: bf5e6fa7-f6f0-4701-8bb1-fa4a7a657c2e
+
+**Enhanced PSA Validation and User Control:**
+- **Interactive PSA Confirmation**: Tax bracket changes now prompt users to confirm their actual Personal Savings Allowance
+- **Custom PSA Support**: Users can enter their specific PSA amount instead of using standard bracket defaults
+- **Smart Prompting Logic**: Only prompts when PSA changes meaningfully or when relevant (>£0)
+- **Visual Feedback**: Shows "Custom PSA" indicator when using non-standard amounts
+- **Persistent Storage**: Confirmed PSA amounts are remembered across calculations
+
+**Actual Calendar Days Implementation:**
+- **Real Day Calculations**: Savings calculations now use actual calendar days instead of proportional years
+- **365-Day Years**: Uses 365 days = 1 year for complete years (not 365.25)
+- **Remaining Days Logic**: Handles partial periods using daily interest rates
+- **Enhanced Tooltips**: Shows "X years + Y days (Z total days)" format for transparency
+- **Pro-rated PSA**: Personal Savings Allowance properly pro-rated based on actual days
+
+**Detailed Breakdown Enhancements:**
+- **PSA Usage Tracking**: Tooltips show exactly how much PSA is used vs available each period
+- **Tax Transparency**: Clear breakdown of gross interest, PSA used, taxable amount, and tax paid
+- **Year-by-Year Display**: Enhanced format showing all calculation components for each period
+
 ### July 19, 2025 - Complete Client-Side IRR System with Detailed Coupon Schedules
 
 **Version ID**: 471fa641-6201-4364-8524-2e33a38c8e82
