@@ -1090,8 +1090,16 @@ export async function renderHomePage(request, env) {
             console.log('=== APP INITIALIZATION STARTED ===');
             console.log('Current settings:', currentSettings);
             
-            setupEventListeners();
-            updateTaxSettings();
+            // Ensure DOM is ready before setting up listeners
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    setupEventListeners();
+                    updateTaxSettings();
+                });
+            } else {
+                setupEventListeners();
+                updateTaxSettings();
+            }
             
             // Skip API entirely and use fallback data for rate-limited scenarios
             console.log('=== STARTING IMMEDIATE FALLBACK DATA LOAD ===');
@@ -1099,7 +1107,7 @@ export async function renderHomePage(request, env) {
             // Add a small delay to ensure DOM is ready
             setTimeout(() => {
                 loadFallbackData();
-            }, 50);
+            }, 100);
         }
         
         async function loadFallbackData() {
@@ -1158,22 +1166,34 @@ export async function renderHomePage(request, env) {
         function setupEventListeners() {
             console.log('=== SETTING UP EVENT LISTENERS ===');
             
-            // Check if elements exist before adding listeners
-            const dealingChargeElement = document.getElementById('dealingCharge');
-            console.log('Dealing charge element:', dealingChargeElement);
+            // Wait for DOM to be ready and retry if elements don't exist
+            const setupListener = () => {
+                const dealingChargeElement = document.getElementById('dealingCharge');
+                console.log('Dealing charge element:', dealingChargeElement);
+                
+                if (dealingChargeElement) {
+                    // Remove any existing listeners first
+                    dealingChargeElement.removeEventListener('input', updateDealingCharge);
+                    dealingChargeElement.addEventListener('input', updateDealingCharge);
+                    console.log('Added dealing charge event listener');
+                    return true;
+                } else {
+                    console.error('Dealing charge element not found!');
+                    return false;
+                }
+            };
             
+            // Set up other listeners
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
             document.getElementById('investmentAmount').addEventListener('input', updateInvestmentAmount);
             document.getElementById('savingsRate').addEventListener('input', updateSavingsRate);
-            
-            if (dealingChargeElement) {
-                dealingChargeElement.addEventListener('input', updateDealingCharge);
-                console.log('Added dealing charge event listener');
-            } else {
-                console.error('Dealing charge element not found!');
-            }
-            
             document.getElementById('refreshData').addEventListener('click', loadGiltData);
+            
+            // Try to set up dealing charge listener, with retry if needed
+            if (!setupListener()) {
+                console.log('Retrying dealing charge listener setup in 100ms...');
+                setTimeout(setupListener, 100);
+            }
             
             // Duration filter listeners
             document.getElementById('durationMin').addEventListener('input', updateDurationFilter);
@@ -2518,6 +2538,36 @@ export async function renderHomePage(request, env) {
             buttonContainer.appendChild(debugButton);
             buttonContainer.appendChild(cacheButton);
             document.body.appendChild(buttonContainer);
+        }
+        
+        // Add direct event delegation for dealing charge to ensure it works
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.id === 'dealingCharge') {
+                console.log('=== DEALING CHARGE CHANGED (DELEGATION) ===');
+                const dealingCharge = parseFloat(e.target.value) || 5;
+                console.log('New dealing charge:', dealingCharge);
+                console.log('Previous dealing charge:', currentSettings.dealingCharge);
+                
+                currentSettings.dealingCharge = dealingCharge;
+                
+                // Clear cache since dealing charge affects calculations
+                clearAllCaches();
+                console.log('Cache cleared for dealing charge update');
+                
+                if (currentGiltData.length > 0) {
+                    console.log('Recalculating with new dealing charge...');
+                    calculateTaxEfficiency();
+                } else {
+                    console.log('No gilt data available for recalculation');
+                }
+            }
+        });
+        
+        // Also initialize app when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
         }
     </script>
 </body>

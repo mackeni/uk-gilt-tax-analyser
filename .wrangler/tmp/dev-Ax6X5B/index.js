@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-oM4rdx/checked-fetch.js
+// .wrangler/tmp/bundle-spAW02/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-oM4rdx/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-spAW02/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-oM4rdx/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-spAW02/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-oM4rdx/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-spAW02/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4340,8 +4340,16 @@ async function renderHomePage(request, env) {
             console.log('=== APP INITIALIZATION STARTED ===');
             console.log('Current settings:', currentSettings);
             
-            setupEventListeners();
-            updateTaxSettings();
+            // Ensure DOM is ready before setting up listeners
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    setupEventListeners();
+                    updateTaxSettings();
+                });
+            } else {
+                setupEventListeners();
+                updateTaxSettings();
+            }
             
             // Skip API entirely and use fallback data for rate-limited scenarios
             console.log('=== STARTING IMMEDIATE FALLBACK DATA LOAD ===');
@@ -4349,7 +4357,7 @@ async function renderHomePage(request, env) {
             // Add a small delay to ensure DOM is ready
             setTimeout(() => {
                 loadFallbackData();
-            }, 50);
+            }, 100);
         }
         
         async function loadFallbackData() {
@@ -4408,22 +4416,34 @@ async function renderHomePage(request, env) {
         function setupEventListeners() {
             console.log('=== SETTING UP EVENT LISTENERS ===');
             
-            // Check if elements exist before adding listeners
-            const dealingChargeElement = document.getElementById('dealingCharge');
-            console.log('Dealing charge element:', dealingChargeElement);
+            // Wait for DOM to be ready and retry if elements don't exist
+            const setupListener = () => {
+                const dealingChargeElement = document.getElementById('dealingCharge');
+                console.log('Dealing charge element:', dealingChargeElement);
+                
+                if (dealingChargeElement) {
+                    // Remove any existing listeners first
+                    dealingChargeElement.removeEventListener('input', updateDealingCharge);
+                    dealingChargeElement.addEventListener('input', updateDealingCharge);
+                    console.log('Added dealing charge event listener');
+                    return true;
+                } else {
+                    console.error('Dealing charge element not found!');
+                    return false;
+                }
+            };
             
+            // Set up other listeners
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
             document.getElementById('investmentAmount').addEventListener('input', updateInvestmentAmount);
             document.getElementById('savingsRate').addEventListener('input', updateSavingsRate);
-            
-            if (dealingChargeElement) {
-                dealingChargeElement.addEventListener('input', updateDealingCharge);
-                console.log('Added dealing charge event listener');
-            } else {
-                console.error('Dealing charge element not found!');
-            }
-            
             document.getElementById('refreshData').addEventListener('click', loadGiltData);
+            
+            // Try to set up dealing charge listener, with retry if needed
+            if (!setupListener()) {
+                console.log('Retrying dealing charge listener setup in 100ms...');
+                setTimeout(setupListener, 100);
+            }
             
             // Duration filter listeners
             document.getElementById('durationMin').addEventListener('input', updateDurationFilter);
@@ -5769,6 +5789,36 @@ async function renderHomePage(request, env) {
             buttonContainer.appendChild(cacheButton);
             document.body.appendChild(buttonContainer);
         }
+        
+        // Add direct event delegation for dealing charge to ensure it works
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.id === 'dealingCharge') {
+                console.log('=== DEALING CHARGE CHANGED (DELEGATION) ===');
+                const dealingCharge = parseFloat(e.target.value) || 5;
+                console.log('New dealing charge:', dealingCharge);
+                console.log('Previous dealing charge:', currentSettings.dealingCharge);
+                
+                currentSettings.dealingCharge = dealingCharge;
+                
+                // Clear cache since dealing charge affects calculations
+                clearAllCaches();
+                console.log('Cache cleared for dealing charge update');
+                
+                if (currentGiltData.length > 0) {
+                    console.log('Recalculating with new dealing charge...');
+                    calculateTaxEfficiency();
+                } else {
+                    console.log('No gilt data available for recalculation');
+                }
+            }
+        });
+        
+        // Also initialize app when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
     <\/script>
 </body>
 </html>
@@ -6540,7 +6590,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-oM4rdx/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-spAW02/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6574,7 +6624,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-oM4rdx/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-spAW02/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
