@@ -1582,17 +1582,12 @@ export async function renderHomePage(request, env) {
             
             metricsDiv.innerHTML = \`
                 <div class="metric-card">
-                    <div class="metric-label">💷 Best After-Tax Yield</div>
-                    <div class="metric-value">\${(bestGilt.afterTaxYield || 0).toFixed(2)}%</div>
+                    <div class="metric-label">💷 Best Option</div>
+                    <div class="metric-value">\${(bestGilt.afterTaxYield || 0).toFixed(2)}% yield</div>
                     <div class="metric-subtitle">\${bestGilt.name}</div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-label">💷 Best Equivalent Gross Savings Rate</div>
-                    <div class="metric-value">\${(bestGilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</div>
-                    <div class="metric-subtitle">\${bestGilt.name}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">💷 Total Extra Income</div>
+                    <div class="metric-label">💷 Extra Income</div>
                     <div class="metric-value">\${formatCurrency(bestGilt.extraIncome || 0)}</div>
                     <div class="metric-subtitle">vs. savings account</div>
                 </div>
