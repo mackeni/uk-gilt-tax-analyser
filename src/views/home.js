@@ -2514,6 +2514,12 @@ export async function renderHomePage(request, env) {
                                                 return '<p style="margin: 1px 0; border-top: 1px solid #ddd; padding-top: 2px; font-weight: bold;">= Manual Check: £' + manualCalc.toFixed(6) + '</p>';
                                             })()}
                                             <p style="margin: 1px 0; font-weight: bold; color: \${Math.abs(giltTotalCash - (totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0))) < 0.01 ? '#28a745' : '#dc3545'};">Function Result: £\${giltTotalCash.toFixed(6)}</p>
+                                            \${(() => {
+                                                // Debug account charges discrepancy
+                                                const storedCharges = gilt.accountCharges ? gilt.accountCharges.reduce((sum, charge) => sum + charge.amount, 0) : 0;
+                                                return currentSettings.accountChargeEnabled ? 
+                                                    '<p style="margin: 1px 0; color: #666; font-size: 9px;">Debug: Manual charges £' + totalMonthlyCharges.toFixed(6) + ' vs Stored charges £' + storedCharges.toFixed(6) + '</p>' : '';
+                                            })()}
                                             <p style="margin: 1px 0; color: #666;">Rounded Display: £\${giltTotalCash.toFixed(2)}</p>
                                             \${(() => {
                                                 const diff = Math.abs(giltTotalCash - (totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0)));

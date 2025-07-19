@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-BSKIxQ/checked-fetch.js
+// .wrangler/tmp/bundle-ZC483c/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-BSKIxQ/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-ZC483c/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-BSKIxQ/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-ZC483c/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-BSKIxQ/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-ZC483c/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5764,6 +5764,12 @@ async function renderHomePage(request, env) {
                                                 return '<p style="margin: 1px 0; border-top: 1px solid #ddd; padding-top: 2px; font-weight: bold;">= Manual Check: \xA3' + manualCalc.toFixed(6) + '</p>';
                                             })()}
                                             <p style="margin: 1px 0; font-weight: bold; color: \${Math.abs(giltTotalCash - (totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0))) < 0.01 ? '#28a745' : '#dc3545'};">Function Result: \xA3\${giltTotalCash.toFixed(6)}</p>
+                                            \${(() => {
+                                                // Debug account charges discrepancy
+                                                const storedCharges = gilt.accountCharges ? gilt.accountCharges.reduce((sum, charge) => sum + charge.amount, 0) : 0;
+                                                return currentSettings.accountChargeEnabled ? 
+                                                    '<p style="margin: 1px 0; color: #666; font-size: 9px;">Debug: Manual charges \xA3' + totalMonthlyCharges.toFixed(6) + ' vs Stored charges \xA3' + storedCharges.toFixed(6) + '</p>' : '';
+                                            })()}
                                             <p style="margin: 1px 0; color: #666;">Rounded Display: \xA3\${giltTotalCash.toFixed(2)}</p>
                                             \${(() => {
                                                 const diff = Math.abs(giltTotalCash - (totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0)));
@@ -6821,7 +6827,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-BSKIxQ/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-ZC483c/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6855,7 +6861,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-BSKIxQ/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-ZC483c/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
