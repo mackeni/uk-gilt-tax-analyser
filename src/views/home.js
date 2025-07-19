@@ -1624,7 +1624,7 @@ export async function renderHomePage(request, env) {
                         <div>
                             <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Extra Income</div>
                             <div style="font-size: 1.3em; font-weight: bold; color: #e67e22;">\${formatCurrency(bestGilt.extraIncome || 0)}</div>
-                            <div style="font-size: 0.8em; color: #666; margin-top: 5px;">vs. typical savings over \${bestGilt.yearsToMaturity} years</div>
+                            <div style="font-size: 0.8em; color: #666; margin-top: 5px;">vs. typical savings over \${Math.floor(bestGilt.yearsToMaturity)} years \${Math.round((bestGilt.yearsToMaturity % 1) * 365)} days</div>
                         </div>
                     </div>
                 </div>
