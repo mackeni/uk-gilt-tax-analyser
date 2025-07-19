@@ -346,6 +346,26 @@ This migration maintains all original functionality while dramatically improving
 - **Verified Calculations**: Treasury 2% 2025 shows £0.728261 accrued interest (134/184 days elapsed)
 - **Market Convention Compliance**: All accrued interest calculations now follow authentic UK gilt market standards
 
+### July 19, 2025 - Schedule-Based After-Tax Calculations with Detailed Tooltips Complete
+
+**Enhanced Calculation Accuracy:**
+- **Schedule-Based Calculations**: Both Cloudflare Worker and Streamlit apps now use actual coupon payment schedules for precise after-tax calculations
+- **Real Payment Dates**: Calculations use authentic UK gilt coupon payment dates with proper semi-annual conventions
+- **Detailed Tax Analysis**: Each coupon payment individually calculated with income tax, showing exact amounts and dates
+- **Investment Amount Scaling**: All calculations accurately scaled to user's actual investment amount using dirty price
+
+**Interactive Schedule Tooltips:**
+- **Cloudflare Worker**: Click after-tax yield cells to see complete payment schedule with tax breakdown
+- **Streamlit App**: Expandable sections showing detailed coupon schedules with payment dates and amounts
+- **Complete Transparency**: Every coupon payment, tax amount, and principal repayment clearly displayed
+- **Professional Styling**: Mobile-responsive tables with proper formatting and clear visual hierarchy
+
+**Calculation Methodology:**
+- **Dirty Price Calculations**: Uses actual purchase cost including accrued interest for accurate yield calculations
+- **Precise Unit Calculations**: Accurate units owned per £100 nominal for proper scaling
+- **Tax-Free Principal**: Principal repayment at maturity correctly shown as tax-free
+- **Annualized Returns**: Proper compound annual growth rate calculations using actual time periods
+
 ### July 19, 2025 - API-Based Real-Time Data Integration Complete
 
 **Successfully Deployed Multi-Provider API System:**

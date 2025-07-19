@@ -299,6 +299,73 @@ export async function renderHomePage(request, env) {
             margin: 10px 0;
         }
         
+        /* Schedule tooltip styles */
+        .schedule-tooltip {
+            max-width: 100%;
+        }
+        
+        .schedule-summary {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .schedule-summary p {
+            margin: 5px 0;
+            font-weight: 500;
+        }
+        
+        .payment-schedule {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        .payment-schedule table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            background: white;
+        }
+        
+        .payment-schedule th {
+            background-color: #f8f9fa;
+            padding: 8px 6px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+        .payment-schedule td {
+            padding: 6px;
+            border: 1px solid #dee2e6;
+            text-align: right;
+        }
+        
+        .payment-schedule td:first-child {
+            text-align: left;
+        }
+        
+        .maturity-payment {
+            background-color: #fff3cd;
+            font-weight: bold;
+        }
+        
+        .schedule-notes {
+            background-color: #f1f3f4;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        
+        .schedule-notes p {
+            margin: 2px 0;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .main-content {
@@ -906,33 +973,42 @@ export async function renderHomePage(request, env) {
                 case 'after-tax':
                     const taxRate = currentSettings.taxBracket === 'additional_rate' ? 45 : 
                                    currentSettings.taxBracket === 'higher_rate' ? 40 : 20;
-                    contentHTML = \`
-                        <div class="calculation-step">
-                            <h4>After-Tax Yield Calculation</h4>
-                            <p>Shows your actual return after paying income tax on coupon payments. Capital gains on gilts are tax-free.</p>
-                        </div>
-                        <div class="calculation-step">
-                            <h4>Formula:</h4>
-                            <div class="calculation-formula">
-                                After-Tax Yield = Coupon Rate × (1 - Tax Rate) + Capital Gains Yield
+                    
+                    titleText = 'After-Tax Yield with Detailed Schedule';
+                    
+                    // Check if we have schedule details from the API
+                    if (gilt.scheduleTooltip) {
+                        contentHTML = gilt.scheduleTooltip;
+                    } else {
+                        // Fallback to basic calculation
+                        contentHTML = \`
+                            <div class="calculation-step">
+                                <h4>After-Tax Yield Calculation</h4>
+                                <p>Shows your actual return after paying income tax on coupon payments. Capital gains on gilts are tax-free.</p>
                             </div>
-                        </div>
-                        <div class="calculation-step">
-                            <h4>For \${gilt.name} (Tax Rate: \${taxRate}%):</h4>
-                            <div class="calculation-formula">
-                                After-Tax Coupon = \${gilt.couponRate.toFixed(2)}% × (1 - 0.\${taxRate}) = \${(gilt.couponRate * (1 - taxRate/100)).toFixed(2)}%
-                            </div>
-                            \${gilt.cleanPrice !== 100 ? \`
+                            <div class="calculation-step">
+                                <h4>Formula:</h4>
                                 <div class="calculation-formula">
-                                    Capital Gains = (\${((100 - gilt.cleanPrice) / gilt.yearsToMaturity).toFixed(2)}% per year, tax-free)
+                                    After-Tax Yield = Coupon Rate × (1 - Tax Rate) + Capital Gains Yield
                                 </div>
-                            \` : ''}
-                            <div class="calculation-formula">
-                                <strong>Total After-Tax Yield = \${gilt.afterTaxYield.toFixed(2)}%</strong>
                             </div>
-                        </div>
-                    \`;
-                    titleText = 'After-Tax Yield';
+                            <div class="calculation-step">
+                                <h4>For \${gilt.name} (Tax Rate: \${taxRate}%):</h4>
+                                <div class="calculation-formula">
+                                    After-Tax Coupon = \${gilt.couponRate.toFixed(2)}% × (1 - 0.\${taxRate}) = \${(gilt.couponRate * (1 - taxRate/100)).toFixed(2)}%
+                                </div>
+                                \${gilt.cleanPrice !== 100 ? \`
+                                    <div class="calculation-formula">
+                                        Capital Gains = (\${((100 - gilt.cleanPrice) / gilt.yearsToMaturity).toFixed(2)}% per year, tax-free)
+                                    </div>
+                                \` : ''}
+                                <div class="calculation-formula">
+                                    <strong>Total After-Tax Yield = \${gilt.afterTaxYield.toFixed(2)}%</strong>
+                                </div>
+                                <p><em>Note: Detailed coupon schedule calculation unavailable. Please refresh data for complete schedule details.</em></p>
+                            </div>
+                        \`;
+                    }
                     break;
                     
                 case 'equivalent':

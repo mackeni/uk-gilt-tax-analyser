@@ -99,13 +99,41 @@ async function calculateTax(request, env) {
     const calculator = new TaxCalculator();
     
     if (body.giltData && Array.isArray(body.giltData)) {
-      // Calculate for multiple gilts
-      const results = calculator.calculateDetailedTaxAnalysis(
-        body.giltData,
-        body.investmentAmount,
-        body.taxpayerType,
-        body.savingsRate
-      );
+      // Calculate for multiple gilts using schedule-based approach
+      const results = await Promise.all(body.giltData.map(async gilt => {
+        // Use schedule-based calculation for accurate after-tax yields
+        const scheduleResult = await calculator.calculateAfterTaxYieldWithSchedule(
+          gilt,
+          body.taxpayerType,
+          body.investmentAmount || 10000
+        );
+        
+        const afterTaxYield = scheduleResult.afterTaxYield || calculator.calculateAfterTaxYield(
+          gilt.currentYield,
+          gilt.yearsToMaturity,
+          gilt.couponRate,
+          body.taxpayerType,
+          gilt.dirtyPrice,
+          gilt.cleanPrice
+        );
+        
+        const equivalentSavingsRate = calculator.calculateEquivalentSavingsRate(
+          afterTaxYield,
+          body.taxpayerType
+        );
+        
+        // Create detailed tooltip with payment schedule
+        const scheduleTooltip = createScheduleTooltip(scheduleResult, body.taxpayerType);
+        
+        return {
+          ...gilt,
+          afterTaxYield: afterTaxYield,
+          equivalentSavingsRate: equivalentSavingsRate,
+          taxAdvantage: afterTaxYield - (body.savingsRate * (1 - calculator.taxRates[body.taxpayerType])),
+          scheduleDetails: scheduleResult,
+          scheduleTooltip: scheduleTooltip
+        };
+      }));
       
       return new Response(JSON.stringify(results), {
         headers: { 
@@ -140,6 +168,64 @@ async function calculateTax(request, env) {
       }
     });
   }
+}
+
+function createScheduleTooltip(scheduleResult, taxpayerType) {
+  if (!scheduleResult || !scheduleResult.schedule) {
+    return "Schedule-based calculation unavailable";
+  }
+  
+  const { schedule, summary } = scheduleResult;
+  const taxRatePercent = taxpayerType === 'additional_rate' ? '45%' : 
+                        taxpayerType === 'higher_rate' ? '40%' : '20%';
+  
+  let tooltip = `<div class="schedule-tooltip">
+    <h4>Detailed Coupon Payment Schedule</h4>
+    <div class="schedule-summary">
+      <p><strong>Investment:</strong> £${summary.investmentAmount.toFixed(2)}</p>
+      <p><strong>Tax Rate:</strong> ${taxRatePercent} (Income Tax on Coupons)</p>
+      <p><strong>Total Return:</strong> £${summary.totalAfterTaxReturn.toFixed(2)} (${summary.totalReturn.toFixed(2)}%)</p>
+      <p><strong>Annualized Yield:</strong> ${summary.annualizedReturn.toFixed(3)}%</p>
+    </div>
+    <div class="payment-schedule">
+      <table>
+        <thead>
+          <tr>
+            <th>Payment Date</th>
+            <th>Gross Coupon</th>
+            <th>Tax (${taxRatePercent})</th>
+            <th>After-Tax Coupon</th>
+            <th>Principal</th>
+            <th>Total Received</th>
+          </tr>
+        </thead>
+        <tbody>`;
+  
+  schedule.forEach(payment => {
+    const paymentDate = new Date(payment.paymentDate).toLocaleDateString('en-GB');
+    tooltip += `
+          <tr${payment.isMaturity ? ' class="maturity-payment"' : ''}>
+            <td>${paymentDate}</td>
+            <td>£${payment.grossCouponAmount.toFixed(2)}</td>
+            <td>£${payment.couponTax.toFixed(2)}</td>
+            <td>£${payment.afterTaxCouponAmount.toFixed(2)}</td>
+            <td>£${payment.principalAmount.toFixed(2)}</td>
+            <td>£${payment.totalAfterTaxPayment.toFixed(2)}</td>
+          </tr>`;
+  });
+  
+  tooltip += `
+        </tbody>
+      </table>
+    </div>
+    <div class="schedule-notes">
+      <p><small>• Coupon payments subject to ${taxRatePercent} Income Tax</small></p>
+      <p><small>• Principal repayment is tax-free</small></p>
+      <p><small>• Capital gains on gilts are tax-free in the UK</small></p>
+    </div>
+  </div>`;
+  
+  return tooltip;
 }
 
 async function getCouponSchedule(request, env) {

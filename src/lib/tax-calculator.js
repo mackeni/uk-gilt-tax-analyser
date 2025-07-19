@@ -30,6 +30,76 @@ export class TaxCalculator {
     };
   }
 
+  async calculateAfterTaxYieldWithSchedule(gilt, taxpayerType = 'additional_rate', investmentAmount = 10000) {
+    const { CouponScheduler } = await import('./coupon-scheduler.js');
+    const scheduler = new CouponScheduler();
+    
+    // Generate detailed coupon schedule
+    const couponSchedule = scheduler.generateCouponSchedule({
+      maturityDate: gilt.maturityDate,
+      couponRate: gilt.couponRate,
+      faceValue: 100
+    });
+    
+    if (!couponSchedule || couponSchedule.length === 0) {
+      return this.calculateAfterTaxYield(gilt.currentYield, gilt.yearsToMaturity, gilt.couponRate, taxpayerType, gilt.dirtyPrice, gilt.cleanPrice);
+    }
+    
+    // Get tax rate
+    const incomeTaxRate = this.taxRates[taxpayerType] || this.taxRates['additional_rate'];
+    
+    // Calculate units owned
+    const dirtyPrice = gilt.dirtyPrice || gilt.cleanPrice;
+    const unitsOwned = investmentAmount / dirtyPrice;
+    
+    // Calculate after-tax cash flows for actual schedule
+    const afterTaxSchedule = couponSchedule.map(payment => {
+      const scaledCouponAmount = payment.couponAmount * unitsOwned;
+      const scaledPrincipalAmount = payment.principalAmount * unitsOwned;
+      const couponTax = scaledCouponAmount * incomeTaxRate;
+      const afterTaxCoupon = scaledCouponAmount - couponTax;
+      
+      return {
+        paymentDate: payment.paymentDate,
+        daysToPayment: payment.daysToPayment,
+        grossCouponAmount: scaledCouponAmount,
+        couponTax: couponTax,
+        afterTaxCouponAmount: afterTaxCoupon,
+        principalAmount: scaledPrincipalAmount, // Tax-free
+        totalAfterTaxPayment: afterTaxCoupon + scaledPrincipalAmount,
+        isMaturity: payment.principalAmount > 0
+      };
+    });
+    
+    // Calculate total returns
+    const totalGrossCoupons = afterTaxSchedule.reduce((sum, p) => sum + p.grossCouponAmount, 0);
+    const totalCouponTax = afterTaxSchedule.reduce((sum, p) => sum + p.couponTax, 0);
+    const totalAfterTaxCoupons = afterTaxSchedule.reduce((sum, p) => sum + p.afterTaxCouponAmount, 0);
+    const totalPrincipal = afterTaxSchedule.reduce((sum, p) => sum + p.principalAmount, 0);
+    const totalAfterTaxReturn = totalAfterTaxCoupons + totalPrincipal;
+    
+    // Calculate annualized after-tax yield
+    const totalReturn = (totalAfterTaxReturn - investmentAmount) / investmentAmount;
+    const annualizedAfterTaxYield = gilt.yearsToMaturity > 0 ? 
+      (totalReturn / gilt.yearsToMaturity) * 100 : 0;
+    
+    return {
+      afterTaxYield: Math.max(0, annualizedAfterTaxYield),
+      schedule: afterTaxSchedule,
+      summary: {
+        investmentAmount,
+        totalGrossCoupons,
+        totalCouponTax,
+        totalAfterTaxCoupons,
+        totalPrincipal,
+        totalAfterTaxReturn,
+        totalReturn: totalReturn * 100,
+        annualizedReturn: annualizedAfterTaxYield,
+        effectiveTaxRate: totalCouponTax / totalGrossCoupons * 100
+      }
+    };
+  }
+
   calculateAfterTaxYield(currentYield, yearsToMaturity, couponRate, taxpayerType = 'additional_rate', dirtyPrice = null, cleanPrice = null) {
     // Ensure we have valid input values
     if (!couponRate || couponRate === 0) {

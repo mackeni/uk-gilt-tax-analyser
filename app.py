@@ -223,29 +223,28 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     @st.cache_data(ttl=60)  # Cache for 1 minute
     def calculate_enhanced_after_tax_yield(row):
         try:
-            # Create gilt info for coupon scheduler
-            gilt_info = {
-                'maturity_date': row['Maturity Date'],
-                'coupon_rate': row['Coupon Rate'],
-                'face_value': 100.0
+            # Use the new schedule-based calculation method
+            gilt_data = {
+                'maturityDate': row['Maturity Date'],
+                'couponRate': row['Coupon Rate'],
+                'currentYield': row['Current Yield'],
+                'yearsToMaturity': row['Years to Maturity'],
+                'dirtyPrice': row.get('Dirty Price', row.get('Price', 100)),
+                'cleanPrice': row.get('Clean Price', row.get('Price', 100))
             }
             
-            # Generate detailed coupon schedule
-            coupon_schedule = coupon_scheduler.generate_coupon_schedule(gilt_info)
+            # Use the comprehensive schedule-based calculation
+            schedule_result = tax_calc.calculate_after_tax_yield_with_schedule(
+                gilt_data, taxpayer_type, investment_amount
+            )
             
-            if coupon_schedule:
-                # Use schedule-based calculation for accurate analysis with dirty price
-                dirty_price = row.get('Dirty Price', row.get('Price', 100))
-                
-                # Use the new schedule-based yield calculation with dirty price
-                return tax_calc._calculate_schedule_based_yield(
-                    coupon_schedule, dirty_price, tax_rate=tax_rate, taxpayer_type=taxpayer_type
-                )
-            else:
-                # No coupons - use simple calculation
-                return tax_calc.calculate_after_tax_yield(
-                    row['Current Yield'], row['Years to Maturity'], row['Coupon Rate'], taxpayer_type
-                )
+            # Store schedule details in session state for tooltip display
+            if 'schedule_details' not in st.session_state:
+                st.session_state.schedule_details = {}
+            st.session_state.schedule_details[row['Name']] = schedule_result
+            
+            return schedule_result['afterTaxYield']
+            
         except Exception as e:
             # Fallback to simple calculation
             return tax_calc.calculate_after_tax_yield(
@@ -524,6 +523,43 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                                 st.write(f"• {payment_date}: £{coupon_amount_scaled:,.2f} coupon - £{tax_amount_scaled:,.2f} tax = £{net_amount_scaled:,.2f}")
                         
                         if len(coupon_schedule) > 5:
+                            st.write(f"... and {len(coupon_schedule) - 5} more payments")
+                            
+                        # Add detailed schedule tooltip if available
+                        if hasattr(st.session_state, 'schedule_details') and row['Name'] in st.session_state.schedule_details:
+                            schedule_details = st.session_state.schedule_details[row['Name']]
+                            if schedule_details.get('schedule'):
+                                with st.expander("📋 Complete Payment Schedule"):
+                                    st.markdown("**All Coupon Payments with Tax Calculations:**")
+                                    
+                                    # Create DataFrame for payment schedule
+                                    schedule_data = []
+                                    for payment in schedule_details['schedule']:
+                                        schedule_data.append({
+                                            'Payment Date': payment['paymentDate'].strftime('%d %b %Y') if hasattr(payment['paymentDate'], 'strftime') else str(payment['paymentDate']),
+                                            'Gross Coupon': f"£{payment['grossCouponAmount']:.2f}",
+                                            'Tax': f"£{payment['couponTax']:.2f}",
+                                            'After-Tax Coupon': f"£{payment['afterTaxCouponAmount']:.2f}",
+                                            'Principal': f"£{payment['principalAmount']:.2f}" if payment['principalAmount'] > 0 else "-",
+                                            'Total Received': f"£{payment['totalAfterTaxPayment']:.2f}",
+                                            'Type': 'Maturity' if payment['isMaturity'] else 'Coupon'
+                                        })
+                                    
+                                    if schedule_data:
+                                        schedule_df = pd.DataFrame(schedule_data)
+                                        st.dataframe(schedule_df, use_container_width=True, hide_index=True)
+                                        
+                                        # Summary
+                                        summary = schedule_details.get('summary', {})
+                                        if summary:
+                                            st.markdown("**Schedule Summary:**")
+                                            col1, col2, col3 = st.columns(3)
+                                            with col1:
+                                                st.metric("Investment", f"£{summary.get('investmentAmount', 0):,.2f}")
+                                            with col2:
+                                                st.metric("Total Return", f"£{summary.get('totalAfterTaxReturn', 0):,.2f}")
+                                            with col3:
+                                                st.metric("Annualized Yield", f"{summary.get('annualizedReturn', 0):.3f}%")
                             st.write(f"• ... and {len(coupon_schedule) - 5} more payments")
                     else:
                         # Zero-coupon gilt

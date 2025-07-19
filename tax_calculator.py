@@ -60,6 +60,98 @@ class TaxCalculator:
         
         return total_after_tax_yield
 
+    def calculate_after_tax_yield_with_schedule(self, gilt_data: Dict, taxpayer_type: str = 'additional_rate', 
+                                               investment_amount: float = 10000) -> Dict:
+        """
+        Calculate after-tax yield using actual coupon payment schedule
+        
+        Args:
+            gilt_data: Dictionary containing gilt information
+            taxpayer_type: Type of taxpayer 
+            investment_amount: Investment amount in pounds
+            
+        Returns:
+            Dictionary with after-tax yield and detailed schedule
+        """
+        from coupon_scheduler import CouponScheduler
+        
+        scheduler = CouponScheduler()
+        
+        # Generate detailed coupon schedule
+        coupon_schedule = scheduler.generate_coupon_schedule(
+            maturity_date=gilt_data.get('maturityDate'),
+            coupon_rate=gilt_data.get('couponRate'),
+            face_value=100
+        )
+        
+        if not coupon_schedule:
+            return {
+                'afterTaxYield': self.calculate_after_tax_yield(
+                    gilt_data.get('currentYield', 0),
+                    gilt_data.get('yearsToMaturity', 0),
+                    gilt_data.get('couponRate', 0),
+                    taxpayer_type,
+                    dirty_price=gilt_data.get('dirtyPrice'),
+                    clean_price=gilt_data.get('cleanPrice')
+                ),
+                'schedule': [],
+                'summary': {}
+            }
+        
+        # Get tax rate
+        income_tax_rate = self.tax_rates[taxpayer_type]
+        
+        # Calculate units owned
+        dirty_price = gilt_data.get('dirtyPrice') or gilt_data.get('cleanPrice', 100)
+        units_owned = investment_amount / dirty_price
+        
+        # Calculate after-tax cash flows for actual schedule
+        after_tax_schedule = []
+        for payment in coupon_schedule:
+            scaled_coupon_amount = payment['coupon_amount'] * units_owned
+            scaled_principal_amount = payment['principal_amount'] * units_owned
+            coupon_tax = scaled_coupon_amount * income_tax_rate
+            after_tax_coupon = scaled_coupon_amount - coupon_tax
+            
+            after_tax_schedule.append({
+                'paymentDate': payment['payment_date'],
+                'daysToPayment': payment['days_to_payment'],
+                'grossCouponAmount': scaled_coupon_amount,
+                'couponTax': coupon_tax,
+                'afterTaxCouponAmount': after_tax_coupon,
+                'principalAmount': scaled_principal_amount,  # Tax-free
+                'totalAfterTaxPayment': after_tax_coupon + scaled_principal_amount,
+                'isMaturity': payment['principal_amount'] > 0
+            })
+        
+        # Calculate total returns
+        total_gross_coupons = sum(p['grossCouponAmount'] for p in after_tax_schedule)
+        total_coupon_tax = sum(p['couponTax'] for p in after_tax_schedule)
+        total_after_tax_coupons = sum(p['afterTaxCouponAmount'] for p in after_tax_schedule)
+        total_principal = sum(p['principalAmount'] for p in after_tax_schedule)
+        total_after_tax_return = total_after_tax_coupons + total_principal
+        
+        # Calculate annualized after-tax yield
+        total_return = (total_after_tax_return - investment_amount) / investment_amount
+        years_to_maturity = gilt_data.get('yearsToMaturity', 0)
+        annualized_after_tax_yield = (total_return / years_to_maturity * 100) if years_to_maturity > 0 else 0
+        
+        return {
+            'afterTaxYield': max(0, annualized_after_tax_yield),
+            'schedule': after_tax_schedule,
+            'summary': {
+                'investmentAmount': investment_amount,
+                'totalGrossCoupons': total_gross_coupons,
+                'totalCouponTax': total_coupon_tax,
+                'totalAfterTaxCoupons': total_after_tax_coupons,
+                'totalPrincipal': total_principal,
+                'totalAfterTaxReturn': total_after_tax_return,
+                'totalReturn': total_return * 100,
+                'annualizedReturn': annualized_after_tax_yield,
+                'effectiveTaxRate': (total_coupon_tax / total_gross_coupons * 100) if total_gross_coupons > 0 else 0
+            }
+        }
+
     def calculate_after_tax_yield(self, current_yield: float, years_to_maturity: float, 
                                  coupon_rate: float, taxpayer_type: str = 'additional_rate',
                                  next_coupon_date: Optional[datetime] = None,
