@@ -1001,12 +1001,32 @@ export async function renderHomePage(request, env) {
             metricsDiv.style.display = 'none';
             
             try {
-                const response = await fetch('/api/gilt-data');
+                console.log('Fetching gilt data from /api/gilt-data...');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+                
+                const response = await fetch('/api/gilt-data', {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
                 if (!response.ok) {
-                    throw new Error('Failed to fetch gilt data');
+                    const errorText = await response.text();
+                    console.error('API error response:', errorText);
+                    throw new Error(\`API error: \${response.status} - \${errorText}\`);
                 }
                 
                 const data = await response.json();
+                console.log('Received data:', data);
+                console.log('Data length:', data?.length);
+                
+                if (!data || !Array.isArray(data) || data.length === 0) {
+                    throw new Error('No gilt data received from API');
+                }
+                
                 currentGiltData = data;
                 
                 loadingDiv.style.display = 'none';
@@ -1016,9 +1036,15 @@ export async function renderHomePage(request, env) {
                 calculateTaxEfficiency();
                 
             } catch (error) {
+                console.error('Error in loadGiltData:', error);
                 loadingDiv.style.display = 'none';
                 errorDiv.style.display = 'block';
-                errorDiv.textContent = \`Error loading gilt data: \${error.message}\`;
+                
+                if (error.name === 'AbortError') {
+                    errorDiv.textContent = 'Request timed out. Please check your connection and try again.';
+                } else {
+                    errorDiv.textContent = \`Error loading gilt data: \${error.message}\`;
+                }
             }
         }
         

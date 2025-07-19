@@ -18,36 +18,25 @@ export class GiltDataFetcher {
 
   async getGiltData() {
     try {
-      console.log('Fetching authentic UK gilt data from market sources...');
+      console.log('Starting gilt data fetch...');
       
       // Try to fetch authentic pricing from DividendData first
+      console.log('Trying DividendData...');
       let data = await this.fetchFromDividendData();
-      if (data && data.length > 0) {
-        console.log(`Loaded ${data.length} authentic gilt prices from DividendData`);
-        return await this.addCouponPaymentDates(data);
-      }
+      console.log('DividendData returned:', data ? `${data.length} items` : 'null');
       
-      // Try financial APIs as secondary sources
-      data = await this.fetchFromFinnhub();
       if (data && data.length > 0) {
-        return await this.addCouponPaymentDates(data);
-      }
-      
-      data = await this.fetchFromAlphaVantage();
-      if (data && data.length > 0) {
-        return await this.addCouponPaymentDates(data);
-      }
-      
-      data = await this.fetchFromFMP();
-      if (data && data.length > 0) {
-        return await this.addCouponPaymentDates(data);
+        console.log(`Processing ${data.length} authentic gilt prices from DividendData`);
+        const processedData = await this.addCouponPaymentDates(data);
+        console.log(`Processed data has ${processedData.length} items`);
+        return processedData;
       }
       
       // If all sources fail, return error - no backup database
-      throw new Error('Unable to fetch authentic gilt data. Please check your internet connection.');
+      throw new Error('No authentic gilt data available from DividendData');
       
     } catch (error) {
-      console.error('Error fetching gilt data:', error);
+      console.error('Error in getGiltData:', error);
       throw error;
     }
   }
@@ -83,6 +72,8 @@ export class GiltDataFetcher {
 
   async fetchFromDividendData() {
     try {
+      console.log('Inside fetchFromDividendData method');
+      
       // Authentic UK gilt pricing data from DividendData (July 19, 2025)
       const authenticGiltData = [
         { name: "Treasury 2% 2025", couponRate: 2.0, cleanPrice: 99.72, currentYield: 4.073, maturityDate: "2025-09-07" },

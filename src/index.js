@@ -69,8 +69,16 @@ async function handleAPIRequest(request, env, path) {
 
 async function getGiltData(request, env) {
   try {
+    console.log('API endpoint called: /api/gilt-data');
     const fetcher = new GiltDataFetcher(env);
+    console.log('GiltDataFetcher created');
+    
     const data = await fetcher.getGiltData();
+    console.log(`Fetched ${data?.length || 0} gilts`);
+    
+    if (!data || data.length === 0) {
+      throw new Error('No gilt data available from any source');
+    }
     
     return new Response(JSON.stringify(data), {
       headers: { 
@@ -79,7 +87,12 @@ async function getGiltData(request, env) {
       }
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Error in getGiltData:', error);
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      timestamp: new Date().toISOString(),
+      debug: 'API endpoint /api/gilt-data failed'
+    }), {
       status: 500,
       headers: { 
         'Content-Type': 'application/json',
