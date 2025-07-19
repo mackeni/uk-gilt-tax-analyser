@@ -1855,18 +1855,37 @@ export async function renderHomePage(request, env) {
                                 </ul>
                                 
                                 <div style="background: white; padding: 10px; border-radius: 3px; margin-top: 10px;">
-                                    <p style="margin: 0; font-size: 11px;"><strong>Formula per year:</strong></p>
-                                    <p style="margin: 5px 0; font-family: monospace; font-size: 10px;">
-                                        grossInterest = currentBalance × \${savingsRate.toFixed(2)}%<br>
-                                        taxableInterest = max(0, grossInterest - £\${psaAmount.toFixed(2)})<br>
-                                        tax = taxableInterest × \${modalTaxRate}%<br>
-                                        newBalance = currentBalance + grossInterest - tax
-                                    </p>
-                                    <p style="margin: 5px 0; font-size: 11px;"><strong>Partial year calculation:</strong></p>
-                                    <p style="margin: 0; font-family: monospace; font-size: 10px;">
-                                        partialInterest = currentBalance × \${savingsRate.toFixed(2)}% × partialYear<br>
-                                        partialPSA = £\${psaAmount.toFixed(2)} × partialYear
-                                    </p>
+                                    <p style="margin: 0; font-size: 11px;"><strong>Year-by-Year Breakdown:</strong></p>
+                                    <div style="font-family: monospace; font-size: 10px; margin: 5px 0;">
+                                        \${(() => {
+                                            let breakdown = '';
+                                            let balance = investmentAmount;
+                                            const completeYears = Math.floor(yearsToMaturity);
+                                            
+                                            for (let year = 1; year <= completeYears; year++) {
+                                                const grossInterest = balance * (savingsRate / 100);
+                                                const taxableInterest = Math.max(0, grossInterest - psaAmount);
+                                                const tax = taxableInterest * incomeTaxRate;
+                                                const netInterest = grossInterest - tax;
+                                                balance += netInterest;
+                                                
+                                                breakdown += \`Year \${year}: £\${balance.toFixed(2)} (gross interest: £\${grossInterest.toFixed(2)}, tax: £\${tax.toFixed(2)})<br>\`;
+                                            }
+                                            
+                                            const partialYear = yearsToMaturity - completeYears;
+                                            if (partialYear > 0) {
+                                                const grossInterest = balance * (savingsRate / 100) * partialYear;
+                                                const taxableInterest = Math.max(0, grossInterest - (psaAmount * partialYear));
+                                                const tax = taxableInterest * incomeTaxRate;
+                                                const netInterest = grossInterest - tax;
+                                                balance += netInterest;
+                                                
+                                                breakdown += \`Partial Year (\${partialYear.toFixed(6)}): £\${balance.toFixed(2)} (gross interest: £\${grossInterest.toFixed(2)}, tax: £\${tax.toFixed(2)})\`;
+                                            }
+                                            
+                                            return breakdown;
+                                        })()}
+                                    </div>
                                 </div>
                                 
                                 <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
