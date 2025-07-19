@@ -1722,8 +1722,8 @@ export async function renderHomePage(request, env) {
                     const savingsRate = currentSettings.savingsRate || 4.5;
                     const psaAmount = currentSettings.taxBracket === 'basic_rate' ? 1000 : 
                                     currentSettings.taxBracket === 'higher_rate' ? 500 : 0;
-                    const modalTaxRate = currentSettings.taxBracket === 'basic_rate' ? 20 : 
-                                  currentSettings.taxBracket === 'higher_rate' ? 40 : 45;
+                    const modalTaxRate = getCurrentTaxRate();
+                    const investmentAmount = currentSettings.investmentAmount || 10000;
                     
                     // Calculate savings account after-tax return considering PSA
                     const annualSavingsInterest = (savingsRate / 100) * investmentAmount;
@@ -1747,10 +1747,10 @@ export async function renderHomePage(request, env) {
                         <div class="calculation-step">
                             <h4>Your Current Settings</h4>
                             <p><strong>Investment Amount:</strong> \${formatCurrency(investmentAmount)}</p>
-                            <p><strong>Your Tax Bracket:</strong> \${currentSettings.taxBracket.replace('_', ' ').toUpperCase()} (\${modalTaxRate}%)</p>
+                            <p><strong>Your Tax Bracket:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ').toUpperCase()} (\${modalTaxRate}%)</p>
                             <p><strong>Personal Savings Allowance:</strong> \${formatCurrency(psaAmount)}</p>
                             <p><strong>Savings Account Rate:</strong> \${savingsRate.toFixed(2)}%</p>
-                            <p><strong>Investment Period:</strong> \${gilt.yearsToMaturity?.toFixed(1)} years</p>
+                            <p><strong>Investment Period:</strong> \${(gilt.yearsToMaturity || 0).toFixed(1)} years</p>
                         </div>
                         
                         <div class="calculation-step">
@@ -1778,12 +1778,12 @@ export async function renderHomePage(request, env) {
                                 <strong>Formula:</strong><br>
                                 Extra Income = (Gilt Annual Income - Savings Annual Income) × Years to Maturity<br><br>
                                 <strong>Calculation:</strong><br>
-                                (\${formatCurrency(giltAnnualIncome)} - \${formatCurrency(netSavingsIncome)}) × \${gilt.yearsToMaturity?.toFixed(1)} years<br>
-                                = \${formatCurrency(extraIncomeAnnual)} × \${gilt.yearsToMaturity?.toFixed(1)}<br>
+                                (\${formatCurrency(giltAnnualIncome)} - \${formatCurrency(netSavingsIncome)}) × \${(gilt.yearsToMaturity || 0).toFixed(1)} years<br>
+                                = \${formatCurrency(extraIncomeAnnual)} × \${(gilt.yearsToMaturity || 0).toFixed(1)}<br>
                                 = <strong>\${formatCurrency(extraIncomeTotal)}</strong>
                             </div>
                             <p><strong>Annual Advantage:</strong> \${formatCurrency(extraIncomeAnnual)} per year</p>
-                            <p><strong>Total Advantage:</strong> \${formatCurrency(extraIncomeTotal)} over \${gilt.yearsToMaturity?.toFixed(1)} years</p>
+                            <p><strong>Total Advantage:</strong> \${formatCurrency(extraIncomeTotal)} over \${(gilt.yearsToMaturity || 0).toFixed(1)} years</p>
                             <p style="margin-top: 15px; font-weight: bold; color: \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'};">
                                 \${advantagePercent >= 0 ? 
                                     \`This gilt will earn you \${formatCurrency(Math.abs(extraIncomeTotal))} MORE than a savings account.\` : 
