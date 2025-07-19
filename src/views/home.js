@@ -368,10 +368,254 @@ export async function renderHomePage(request, env) {
         
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
             .main-content {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                gap: 15px;
             }
+            
+            .sidebar {
+                order: 2;
+                padding: 15px;
+            }
+            
+            .gilt-table {
+                order: 1;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .form-group label {
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+            
+            .form-group select,
+            .form-group input {
+                font-size: 16px; /* Prevent zoom on iOS */
+                padding: 12px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
+            .btn {
+                font-size: 16px;
+                padding: 12px 20px;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .tax-info {
+                font-size: 14px;
+                padding: 12px;
+            }
+            
+            .metrics {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .metric-card {
+                padding: 15px;
+                text-align: center;
+            }
+            
+            .metric-label {
+                font-size: 12px;
+            }
+            
+            .metric-value {
+                font-size: 20px;
+            }
+            
+            .metric-subtitle {
+                font-size: 11px;
+            }
+            
+            .filter-controls {
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+            
+            .range-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .range-container input {
+                width: 70px;
+                font-size: 14px;
+            }
+            
+            .range-container label {
+                font-size: 14px;
+                margin: 0;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            
+            .table-container table {
+                min-width: 800px;
+                font-size: 12px;
+            }
+            
+            .table-container th {
+                font-size: 11px;
+                padding: 8px 6px;
+                white-space: nowrap;
+            }
+            
+            .table-container td {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+            
+            .table-container td:first-child {
+                font-size: 11px;
+                max-width: 120px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            
+            .clickable-cell {
+                min-height: 44px; /* Touch target size */
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                cursor: pointer;
+            }
+            
+            .clickable-cell:first-child {
+                justify-content: flex-start;
+            }
+            
+            /* Modal improvements for mobile */
+            .modal-content {
+                width: 95%;
+                max-width: 400px;
+                margin: 5% auto;
+                max-height: 85vh;
+                overflow-y: auto;
+            }
+            
+            .calculation-step {
+                margin-bottom: 12px;
+                padding: 12px;
+            }
+            
+            .calculation-formula {
+                font-size: 13px;
+                padding: 8px;
+                word-wrap: break-word;
+            }
+            
+            .schedule-tooltip .payment-schedule table {
+                font-size: 10px;
+            }
+            
+            .schedule-tooltip .payment-schedule th,
+            .schedule-tooltip .payment-schedule td {
+                padding: 4px 3px;
+            }
+            
+            .loading, .error {
+                font-size: 14px;
+                padding: 20px 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 5px;
+            }
+            
+            h1 {
+                font-size: 22px;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            
+            h3 {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+            
+            .metrics {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .metric-card {
+                padding: 12px;
+            }
+            
+            .metric-value {
+                font-size: 18px;
+            }
+            
+            .range-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .range-container > div {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .table-container table {
+                min-width: 700px;
+                font-size: 11px;
+            }
+            
+            .table-container th {
+                font-size: 10px;
+                padding: 6px 4px;
+            }
+            
+            .table-container td {
+                padding: 6px 4px;
+                font-size: 11px;
+            }
+            
+            .table-container td:first-child {
+                max-width: 100px;
+                font-size: 10px;
+            }
+            
+            .modal-content {
+                width: 98%;
+                margin: 2% auto;
+                padding: 15px;
+                max-height: 90vh;
+            }
+            
+            .close {
+                font-size: 24px;
+                top: 10px;
+                right: 15px;
+            }
+        }
             
             .header {
                 padding: 20px;
@@ -563,12 +807,16 @@ export async function renderHomePage(request, env) {
                     <div class="form-group">
                         <label for="durationRange">Filter by Duration (Years to Maturity):</label>
                         <div class="range-container">
-                            <label for="durationMin" style="margin-right: 10px;">Min:</label>
-                            <input type="number" id="durationMin" min="0" max="45" value="0" step="0.5" style="width: 80px;">
-                            <span style="margin: 0 15px;">to</span>
-                            <label for="durationMax" style="margin-right: 10px;">Max:</label>
-                            <input type="number" id="durationMax" min="0" max="45" value="2" step="0.5" style="width: 80px;">
-                            <span style="margin-left: 10px;">years</span>
+                            <div>
+                                <label for="durationMin">Min:</label>
+                                <input type="number" id="durationMin" min="0" max="45" value="0" step="0.5">
+                                <span>years</span>
+                            </div>
+                            <div>
+                                <label for="durationMax">Max:</label>
+                                <input type="number" id="durationMax" min="0" max="45" value="2" step="0.5">
+                                <span>years</span>
+                            </div>
                         </div>
                         <div class="range-info">
                             <small>Showing <span id="filteredCount">0</span> of <span id="totalCount">0</span> gilts</small>
@@ -824,30 +1072,29 @@ export async function renderHomePage(request, env) {
                 </div>
             \`;
             
-            // Display table
+            // Display table with mobile-optimized headers
+            const isMobile = window.innerWidth <= 768;
             const tableHTML = \`
-                <div class="table-container" style="overflow-x: auto;">
-                    <table style="min-width: 1000px;">
+                <div class="table-container">
+                    <table>
                         <thead>
                             <tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">
-                                <th style="padding: 12px; text-align: left; border-right: 1px solid #e0e0e0;">Name</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Coupon</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Clean Price</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Dirty Price</th>
-
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">After-Tax IRR</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Equivalent Gross Savings Rate</th>
-                                <th style="padding: 12px; text-align: right;">Years</th>
+                                <th style="padding: 12px; text-align: left; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Gilt' : 'Name'}</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Coupon' : 'Coupon Rate'}</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Clean £' : 'Clean Price'}</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Dirty £' : 'Dirty Price'}</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'After-Tax' : 'After-Tax IRR'}</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Equiv Rate' : 'Equivalent Gross Savings Rate'}</th>
+                                <th style="padding: 12px; text-align: right;">\${isMobile ? 'Years' : 'Years to Maturity'}</th>
                             </tr>
                         </thead>
                         <tbody>
                             \${sortedResults.map((gilt, index) => \`
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
-                                    <td style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500;">\${gilt.name}</td>
+                                    <td class="clickable-cell" data-type="name" data-index="\${index}" style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500;">\${gilt.name}</td>
                                     <td class="clickable-cell" data-type="coupon" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${formatCouponRate(gilt.couponRate || 0)}</td>
                                     <td class="clickable-cell" data-type="clean-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.cleanPrice || 0).toFixed(2)}</td>
                                     <td class="clickable-cell" data-type="dirty-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.dirtyPrice || gilt.cleanPrice || 0).toFixed(2)}</td>
-
                                     <td class="clickable-cell" data-type="after-tax" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${(gilt.afterTaxYield || 0).toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="equivalent" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="years" data-index="\${index}" style="padding: 12px; text-align: right;">\${(gilt.yearsToMaturity || 0).toFixed(1)}</td>
