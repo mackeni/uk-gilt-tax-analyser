@@ -899,6 +899,10 @@ export async function renderHomePage(request, env) {
             return formatted + '%';
         }
         
+        // IMMEDIATE DEBUG - Check if JavaScript is loading
+        console.log('=== JAVASCRIPT FILE STARTED LOADING ===');
+        console.log('Current time:', new Date());
+        
         let currentGiltData = [];
         let currentResults = [];
         let currentSettings = {
@@ -910,13 +914,19 @@ export async function renderHomePage(request, env) {
         
         // Initialize app - use fallback data immediately when rate limited
         function initializeApp() {
-            console.log('Initializing app...');
+            console.log('=== APP INITIALIZATION STARTED ===');
+            console.log('Current settings:', currentSettings);
+            
             setupEventListeners();
             updateTaxSettings();
             
             // Skip API entirely and use fallback data for rate-limited scenarios
-            console.log('Loading fallback data due to API rate limits...');
-            loadFallbackData();
+            console.log('=== STARTING IMMEDIATE FALLBACK DATA LOAD ===');
+            
+            // Add a small delay to ensure DOM is ready
+            setTimeout(() => {
+                loadFallbackData();
+            }, 50);
         }
         
         function loadFallbackData() {
@@ -1676,6 +1686,7 @@ export async function renderHomePage(request, env) {
         
         // Add modal HTML and event listeners
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== DOM CONTENT LOADED ===');
             // Create modal HTML
             const modalHTML = \`
                 <div id="calculationModal" class="modal">
