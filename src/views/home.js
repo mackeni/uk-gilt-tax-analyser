@@ -1328,7 +1328,9 @@ export async function renderHomePage(request, env) {
             let currentTaxYear = today.getFullYear();
             
             // Calculate day by day - interest accrues but is only added annually
-            while (currentDate < endDate) {
+            // Start from tomorrow (exclude today) to match gilt settlement conventions
+            currentDate.setDate(currentDate.getDate() + 1);
+            while (currentDate <= endDate) {
                 // Calculate days in current year (actual calendar year)
                 const yearStart = new Date(currentDate.getFullYear(), 0, 1);
                 const nextYearStart = new Date(currentDate.getFullYear() + 1, 0, 1);
