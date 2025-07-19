@@ -813,8 +813,8 @@ export async function renderHomePage(request, env) {
                     <div class="metric-subtitle">\${bestGilt.name}</div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-label">💷 Best Equivalent Savings Rate</div>
-                    <div class="metric-value">\${(bestGilt.equivalentSavingsRate || 0).toFixed(2)}%</div>
+                    <div class="metric-label">💷 Best Equivalent Gross Savings Rate</div>
+                    <div class="metric-value">\${(bestGilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</div>
                     <div class="metric-subtitle">\${bestGilt.name}</div>
                 </div>
                 <div class="metric-card">
@@ -836,7 +836,7 @@ export async function renderHomePage(request, env) {
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Dirty Price</th>
 
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">After-Tax IRR</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Equivalent Gross</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Equivalent Gross Savings Rate</th>
                                 <th style="padding: 12px; text-align: right;">Years</th>
                             </tr>
                         </thead>
