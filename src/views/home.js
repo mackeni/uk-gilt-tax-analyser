@@ -844,6 +844,14 @@ export async function renderHomePage(request, env) {
                         <input type="number" id="savingsRate" value="4.5" min="0" max="20" step="0.1">
                     </div>
                     
+                    <div class="form-group">
+                        <label for="dealingCharge">Dealing Charge (£)</label>
+                        <input type="number" id="dealingCharge" value="5" min="0" max="1000" step="1">
+                        <div class="tax-info" style="margin-top: 10px; padding: 10px; font-size: 14px;">
+                            <p>💷 Transaction cost charged by your broker for purchasing gilts. This reduces your effective yield.</p>
+                        </div>
+                    </div>
+                    
                     <div class="tax-info" id="taxInfo">
                         <h4>Your Tax Settings:</h4>
                         <div id="taxDetails">
@@ -1044,7 +1052,8 @@ export async function renderHomePage(request, env) {
         let currentSettings = {
             taxBracket: 'additional_rate',
             investmentAmount: 10000,
-            savingsRate: 4.5
+            savingsRate: 4.5,
+            dealingCharge: 5
         };
         let durationFilter = { min: 0, max: 2 };
         
@@ -1122,6 +1131,7 @@ export async function renderHomePage(request, env) {
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
             document.getElementById('investmentAmount').addEventListener('input', updateInvestmentAmount);
             document.getElementById('savingsRate').addEventListener('input', updateSavingsRate);
+            document.getElementById('dealingCharge').addEventListener('input', updateDealingCharge);
             document.getElementById('refreshData').addEventListener('click', loadGiltData);
             
             // Duration filter listeners
@@ -1129,6 +1139,33 @@ export async function renderHomePage(request, env) {
             document.getElementById('durationMax').addEventListener('input', updateDurationFilter);
         }
         
+        function updateDealingCharge() {
+            const dealingCharge = parseFloat(document.getElementById('dealingCharge').value) || 5;
+            currentSettings.dealingCharge = dealingCharge;
+            
+            if (currentGiltData.length > 0) {
+                calculateTaxEfficiency();
+            }
+        }
+
+        function updateInvestmentAmount() {
+            const investmentAmount = parseFloat(document.getElementById('investmentAmount').value) || 10000;
+            currentSettings.investmentAmount = investmentAmount;
+            
+            if (currentGiltData.length > 0) {
+                calculateTaxEfficiency();
+            }
+        }
+
+        function updateSavingsRate() {
+            const savingsRate = parseFloat(document.getElementById('savingsRate').value) || 4.5;
+            currentSettings.savingsRate = savingsRate;
+            
+            if (currentGiltData.length > 0) {
+                calculateTaxEfficiency();
+            }
+        }
+
         async function updateTaxSettings() {
             const taxBracket = document.getElementById('taxBracket').value;
             currentSettings.taxBracket = taxBracket;
@@ -1483,10 +1520,12 @@ export async function renderHomePage(request, env) {
             console.log('Using tax rates:', taxInfo);
             
             return giltData.map(gilt => {
-                // Use cached calculations for expensive operations
-                const unitsOwned = getCachedComplexCalculation('unitsOwned', calculateUnitsOwned, investmentAmount, gilt.dirtyPrice);
+                // Include dealing charge in units calculation
+                const dealingCharge = currentSettings.dealingCharge || 5;
+                const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge
+                const unitsOwned = getCachedComplexCalculation('unitsOwned', calculateUnitsOwned, effectiveInvestmentAmount, gilt.dirtyPrice);
                 
-                // Calculate after-tax yield using IRR method with caching
+                // Calculate after-tax yield using IRR method with caching (includes dealing charge)
                 const afterTaxYield = getCachedComplexCalculation('afterTaxIRR', calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
                 
                 // Use cached equivalent rate calculation
@@ -1521,8 +1560,11 @@ export async function renderHomePage(request, env) {
             const couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
             gilt.couponSchedule = couponSchedule; // Store for tooltips
             
-            // Calculate IRR using Newton-Raphson method
-            const initialInvestment = (gilt.cleanPrice + gilt.accruedInterest) * unitsOwned / 100;
+            // Calculate initial investment INCLUDING dealing charge
+            const dealingCharge = currentSettings.dealingCharge || 5;
+            const giltPurchaseCost = (gilt.cleanPrice + gilt.accruedInterest) * unitsOwned / 100;
+            const initialInvestment = giltPurchaseCost + dealingCharge;
+            
             const cashFlows = couponSchedule.map(payment => ({
                 amount: payment.afterTaxAmount,
                 date: new Date(payment.date)
@@ -1535,7 +1577,7 @@ export async function renderHomePage(request, env) {
                 date: maturityDate
             });
             
-            // Calculate IRR
+            // Calculate IRR with dealing charge included in initial cost
             const irr = calculateIRR(initialInvestment, cashFlows);
             return irr * 100; // Convert to percentage
         }
@@ -1965,13 +2007,15 @@ export async function renderHomePage(request, env) {
                     contentHTML = \`
                         <div class="calculation-step">
                             <h4>After-Tax Yield for \${gilt.name}</h4>
-                            <p>This shows the Internal Rate of Return (IRR) calculated using actual payment dates and tax impacts.</p>
+                            <p>This shows the Internal Rate of Return (IRR) calculated using actual payment dates, tax impacts, and dealing charges.</p>
                         </div>
                         \${scheduleHTML}
                         <div class="calculation-step">
                             <h4>Calculation Method:</h4>
                             <p><strong>Method:</strong> IRR calculation using Newton-Raphson method</p>
                             <p><strong>Your Investment:</strong> £\${formatCurrency(currentSettings.investmentAmount || 10000)}</p>
+                            <p><strong>Dealing Charge:</strong> £\${(currentSettings.dealingCharge || 5).toFixed(2)}</p>
+                            <p><strong>Available for Gilts:</strong> £\${formatCurrency((currentSettings.investmentAmount || 10000) - (currentSettings.dealingCharge || 5))}</p>
                             <p><strong>Purchase Price:</strong> £\${gilt.dirtyPrice.toFixed(6)} per £100 (including accrued interest)</p>
                             <p><strong>Your Tax Rate:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ')} (\${getCurrentTaxRate()}%)</p>
                         </div>
@@ -1980,6 +2024,7 @@ export async function renderHomePage(request, env) {
                             <p><strong>\${gilt.afterTaxYield.toFixed(3)}%</strong> per year</p>
                             <p>This accounts for:</p>
                             <ul>
+                                <li>Dealing charge: £\${(currentSettings.dealingCharge || 5).toFixed(2)}</li>
                                 <li>Income tax on all coupon payments</li>
                                 <li>Tax-free principal repayment at maturity</li>
                                 <li>Exact timing of all cash flows</li>
