@@ -844,6 +844,44 @@ export async function renderHomePage(request, env) {
                         <input type="number" id="savingsRate" value="4.5" min="0" max="20" step="0.1">
                     </div>
                     
+                    <h3>💸 Transaction Costs</h3>
+                    <div class="form-group">
+                        <label for="brokerType">Broker Type</label>
+                        <select id="brokerType">
+                            <option value="low_cost" selected>Low Cost (£5 per trade)</option>
+                            <option value="percentage">Percentage Based (0.1%)</option>
+                            <option value="traditional">Traditional (£11.95 per trade)</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                    
+                    <div id="customCosts" style="display: none;">
+                        <div class="form-group">
+                            <label for="purchaseFee">Purchase Fee (£)</label>
+                            <input type="number" id="purchaseFee" value="5" min="0" max="100" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="saleFee">Sale Fee (£)</label>
+                            <input type="number" id="saleFee" value="5" min="0" max="100" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="percentageFee">Percentage Fee (%)</label>
+                            <input type="number" id="percentageFee" value="0" min="0" max="2" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bidAskSpread">Bid-Ask Spread (%)</label>
+                        <input type="number" id="bidAskSpread" value="0.05" min="0" max="1" step="0.01">
+                        <small style="color: #666; font-size: 0.8em;">Typical: 0.02-0.1% for liquid gilts</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="annualHoldingFee">Annual Holding Fee (%)</label>
+                        <input type="number" id="annualHoldingFee" value="0" min="0" max="1" step="0.01">
+                        <small style="color: #666; font-size: 0.8em;">Some brokers charge custody fees</small>
+                    </div>
+                    
                     <div class="tax-info" id="taxInfo">
                         <h4>Your Tax Settings:</h4>
                         <div id="taxDetails">
@@ -920,6 +958,50 @@ export async function renderHomePage(request, env) {
             // Format with max 3 decimal places, removing trailing zeros
             const formatted = rate.toFixed(3).replace(/\\.?0+$/, '');
             return formatted + '%';
+        }
+        
+        function getTransactionCosts() {
+            const brokerType = document.getElementById('brokerType').value;
+            const investmentAmount = parseFloat(document.getElementById('investmentAmount').value) || 10000;
+            const bidAskSpread = parseFloat(document.getElementById('bidAskSpread').value) || 0.05;
+            const annualHoldingFee = parseFloat(document.getElementById('annualHoldingFee').value) || 0;
+            
+            let purchaseFee = 0;
+            let saleFee = 0;
+            let percentageFee = 0;
+            
+            switch (brokerType) {
+                case 'low_cost':
+                    purchaseFee = 5;
+                    saleFee = 5;
+                    break;
+                case 'percentage':
+                    percentageFee = 0.1;
+                    break;
+                case 'traditional':
+                    purchaseFee = 11.95;
+                    saleFee = 11.95;
+                    break;
+                case 'custom':
+                    purchaseFee = parseFloat(document.getElementById('purchaseFee').value) || 0;
+                    saleFee = parseFloat(document.getElementById('saleFee').value) || 0;
+                    percentageFee = parseFloat(document.getElementById('percentageFee').value) || 0;
+                    break;
+            }
+            
+            // Calculate total transaction costs
+            const percentageCost = (percentageFee / 100) * investmentAmount;
+            const bidAskCost = (bidAskSpread / 100) * investmentAmount;
+            
+            return {
+                purchaseFee: purchaseFee + percentageCost,
+                saleFee: saleFee + percentageCost,
+                bidAskCost: bidAskCost,
+                annualHoldingFeeRate: annualHoldingFee / 100,
+                totalPurchaseCost: purchaseFee + percentageCost + (bidAskCost / 2), // Half spread on purchase
+                totalSaleCost: saleFee + percentageCost + (bidAskCost / 2), // Half spread on sale
+                brokerType: brokerType
+            };
         }
         
         function getCurrentTaxRate() {
@@ -1485,20 +1567,24 @@ export async function renderHomePage(request, env) {
             // Use confirmed PSA amount if available, otherwise use standard
             const psaAmount = currentSettings.psaAmount !== undefined ? currentSettings.psaAmount : taxInfo.psa;
             
+            // Get transaction costs
+            const transactionCosts = getTransactionCosts();
+            
             console.log('Using tax rates:', taxInfo);
+            console.log('Using transaction costs:', transactionCosts);
             
             return giltData.map(gilt => {
                 // Use cached calculations for expensive operations
                 const unitsOwned = getCachedComplexCalculation('unitsOwned', calculateUnitsOwned, investmentAmount, gilt.dirtyPrice);
                 
-                // Calculate after-tax yield using IRR method with caching
-                const afterTaxYield = getCachedComplexCalculation('afterTaxIRR', calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
+                // Calculate after-tax yield using IRR method with transaction costs
+                const afterTaxYield = getCachedComplexCalculation('afterTaxIRR', calculateAfterTaxIRRWithCosts, gilt, unitsOwned, incomeTaxRate, transactionCosts);
                 
                 // Use cached equivalent rate calculation
                 const equivalentGrossSavingsRate = getCachedComplexCalculation('equivalentRate', calculateEquivalentGrossSavingsRate, afterTaxYield, incomeTaxRate);
                 
-                // Calculate precise advantage using actual coupon schedule with caching
-                const giltTotalCashReceived = getCachedComplexCalculation('giltCash', calculateTotalCashFromGilt, gilt, unitsOwned, incomeTaxRate);
+                // Calculate precise advantage using actual coupon schedule with transaction costs
+                const giltTotalCashReceived = getCachedComplexCalculation('giltCash', calculateTotalCashFromGiltWithCosts, gilt, unitsOwned, incomeTaxRate, transactionCosts);
                 const savingsTotalCashReceived = getCachedComplexCalculation('savingsCash', calculateTotalCashFromSavings, investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
                 const extraIncome = giltTotalCashReceived - savingsTotalCashReceived;
                 
@@ -1521,22 +1607,29 @@ export async function renderHomePage(request, env) {
             });
         }
         
-        function calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate) {
+        function calculateAfterTaxIRRWithCosts(gilt, unitsOwned, incomeTaxRate, transactionCosts) {
             // Generate detailed coupon schedule and calculate IRR
             const couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
             gilt.couponSchedule = couponSchedule; // Store for tooltips
             
-            // Calculate IRR using Newton-Raphson method
-            const initialInvestment = (gilt.cleanPrice + gilt.accruedInterest) * unitsOwned / 100;
+            // Calculate initial investment including purchase costs
+            const baseInvestment = (gilt.cleanPrice + gilt.accruedInterest) * unitsOwned / 100;
+            const purchaseCosts = transactionCosts.totalPurchaseCost;
+            const initialInvestment = baseInvestment + purchaseCosts;
+            
+            // Add annual holding fees to coupon schedule
+            const holdingFeePerYear = baseInvestment * transactionCosts.annualHoldingFeeRate;
+            
             const cashFlows = couponSchedule.map(payment => ({
-                amount: payment.afterTaxAmount,
+                amount: payment.afterTaxAmount - (holdingFeePerYear / 2), // Deduct half-yearly holding fee
                 date: new Date(payment.date)
             }));
             
-            // Add principal repayment at maturity
+            // Add principal repayment at maturity minus sale costs
             const maturityDate = new Date(gilt.maturityDate);
+            const principalRepayment = unitsOwned - transactionCosts.totalSaleCost;
             cashFlows.push({
-                amount: unitsOwned, // £100 per £100 nominal (tax-free)
+                amount: principalRepayment, // Principal minus sale costs
                 date: maturityDate
             });
             
@@ -1545,20 +1638,48 @@ export async function renderHomePage(request, env) {
             return irr * 100; // Convert to percentage
         }
         
-        function calculateTotalCashFromGilt(gilt, unitsOwned, incomeTaxRate) {
-            // Use the stored coupon schedule to calculate total cash received
+        function calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate) {
+            // Legacy function for backward compatibility
+            const dummyCosts = {
+                totalPurchaseCost: 0,
+                totalSaleCost: 0,
+                annualHoldingFeeRate: 0
+            };
+            return calculateAfterTaxIRRWithCosts(gilt, unitsOwned, incomeTaxRate, dummyCosts);
+        }
+        
+        function calculateTotalCashFromGiltWithCosts(gilt, unitsOwned, incomeTaxRate, transactionCosts) {
+            // Calculate total cash received including all transaction costs
             if (!gilt.couponSchedule || gilt.couponSchedule.length === 0) {
-                return unitsOwned; // Just principal repayment
+                return unitsOwned - transactionCosts.totalPurchaseCost - transactionCosts.totalSaleCost;
             }
             
-            // Single-pass calculation with optimized loop
-            let totalCash = unitsOwned; // Start with principal repayment
+            const baseInvestment = (gilt.cleanPrice + gilt.accruedInterest) * unitsOwned / 100;
+            const holdingFeePerYear = baseInvestment * transactionCosts.annualHoldingFeeRate;
+            const totalHoldingFees = holdingFeePerYear * gilt.yearsToMaturity;
             
+            // Single-pass calculation with optimized loop
+            let totalCash = -transactionCosts.totalPurchaseCost; // Start with purchase costs (negative)
+            
+            // Add coupon payments minus holding fees
             for (let i = 0; i < gilt.couponSchedule.length; i++) {
                 totalCash += gilt.couponSchedule[i].afterTaxAmount;
             }
             
+            // Add principal repayment minus sale costs and holding fees
+            totalCash += unitsOwned - transactionCosts.totalSaleCost - totalHoldingFees;
+            
             return totalCash;
+        }
+        
+        function calculateTotalCashFromGilt(gilt, unitsOwned, incomeTaxRate) {
+            // Legacy function for backward compatibility
+            const dummyCosts = {
+                totalPurchaseCost: 0,
+                totalSaleCost: 0,
+                annualHoldingFeeRate: 0
+            };
+            return calculateTotalCashFromGiltWithCosts(gilt, unitsOwned, incomeTaxRate, dummyCosts);
         }
         
         function calculateTotalCashFromSavings(investmentAmount, savingsRate, incomeTaxRate, psaAmount, yearsToMaturity) {
@@ -2141,6 +2262,7 @@ export async function renderHomePage(request, env) {
                                 <p><small>• All coupon payments (after \${modalTaxRate}% income tax)</small></p>
                                 <p><small>• Principal repayment: £\${(gilt.unitsOwned || 0).toFixed(2)} (tax-free)</small></p>
                                 <p><small>• Based on actual payment schedule with exact dates</small></p>
+                                <p><small>• Includes all transaction costs (broker fees, bid-ask spread, holding fees)</small></p>
                             </div>
                         </div>
                         
@@ -2170,6 +2292,7 @@ export async function renderHomePage(request, env) {
                                     <li><strong>Partial Year PSA:</strong> PSA pro-rated based on actual days for partial years</li>
                                     <li><strong>Tax Rate:</strong> \${modalTaxRate}% on interest above available PSA allowance</li>
                                     <li><strong>Tax Timing:</strong> Deducted annually on interest earned</li>
+                                    <li><strong>Transaction Costs:</strong> No trading fees or custody charges assumed for savings</li>
                                 </ul>
                                 
                                 <div style="background: white; padding: 10px; border-radius: 3px; margin-top: 10px;">
@@ -2327,6 +2450,51 @@ export async function renderHomePage(request, env) {
             addCacheManagementButtons();
             
             initializeApp();
+        });
+        
+        function handleBrokerTypeChange() {
+            const brokerType = document.getElementById('brokerType').value;
+            const customCosts = document.getElementById('customCosts');
+            
+            if (brokerType === 'custom') {
+                customCosts.style.display = 'block';
+            } else {
+                customCosts.style.display = 'none';
+            }
+            
+            // Recalculate with new transaction costs
+            calculateTaxEfficiency();
+        }
+        
+        // Initialize application and set up all event listeners
+        function initializeApp() {
+            console.log('=== INITIALIZING APPLICATION ===');
+            
+            // Set up transaction cost event listeners
+            document.getElementById('brokerType').addEventListener('change', handleBrokerTypeChange);
+            document.getElementById('bidAskSpread').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
+            document.getElementById('annualHoldingFee').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
+            document.getElementById('purchaseFee').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
+            document.getElementById('saleFee').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
+            document.getElementById('percentageFee').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
+            
+            // Set up other event listeners (existing ones)
+            document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
+            document.getElementById('investmentAmount').addEventListener('input', updateInvestmentAmount);
+            document.getElementById('savingsRate').addEventListener('input', () => {
+                updateSavingsRate();
+                calculateTaxEfficiency();
+            });
+            document.getElementById('refreshData').addEventListener('click', loadGiltData);
+            
+            // Set up duration filter event listeners
+            document.getElementById('durationMin').addEventListener('input', handleDurationFilterChange);
+            document.getElementById('durationMax').addEventListener('input', handleDurationFilterChange);
+            
+            console.log('Event listeners set up successfully');
+            
+            // Load initial data
+            loadGiltData();
         });
         
         function addCacheManagementButtons() {
