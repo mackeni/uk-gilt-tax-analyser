@@ -1845,15 +1845,38 @@ export async function renderHomePage(request, env) {
                         
                         <div class="calculation-step">
                             <h4>Step 2: Total Cash from Savings Account</h4>
-                            <p><strong>Initial Investment:</strong> \${formatCurrency(investmentAmount)}</p>
-                            <p><strong>Savings Rate:</strong> \${savingsRate.toFixed(2)}%</p>
-                            <p><strong>Investment Period:</strong> \${(gilt.yearsToMaturity || 0).toFixed(1)} years</p>
+                            <p><strong>Initial Investment:</strong> £\${investmentAmount.toFixed(2)}</p>
+                            <p><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}%</p>
+                            <p><strong>Investment Period:</strong> \${(gilt.yearsToMaturity || 0).toFixed(1)} years (\${Math.round((gilt.yearsToMaturity || 0) * 365.25)} days)</p>
                             <p><strong>Total Cash Received:</strong> £\${savingsTotalCash.toFixed(2)}</p>
-                            <div style="margin-left: 20px; color: #666;">
-                                <p><small>• Annual gross interest: £\${annualSavingsInterest.toFixed(2)}</small></p>
-                                <p><small>• Personal Savings Allowance: £\${psaAmount.toFixed(2)}</small></p>
-                                <p><small>• Tax on excess interest (\${modalTaxRate}%): £\${taxOnSavings.toFixed(2)}</small></p>
-                                <p><small>• Net annual interest: £\${netSavingsIncome.toFixed(2)}</small></p>
+                            
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                                <h5 style="margin-top: 0;">Detailed Interest Calculation:</h5>
+                                <p><strong>Calculation Method:</strong> Daily compound interest with UK tax year compliance</p>
+                                <ul style="margin: 10px 0; padding-left: 20px; font-size: 12px;">
+                                    <li><strong>Daily Interest Rate:</strong> \${savingsRate.toFixed(2)}% ÷ 365.25 = \${(savingsRate / 365.25).toFixed(6)}% per day</li>
+                                    <li><strong>Compounding:</strong> Interest calculated and added daily to growing balance</li>
+                                    <li><strong>Tax Year:</strong> UK tax years (April 6 - April 5) with annual PSA of £\${psaAmount.toFixed(2)}</li>
+                                    <li><strong>Tax Rate:</strong> \${modalTaxRate}% on interest above PSA allowance</li>
+                                    <li><strong>Tax Timing:</strong> Deducted at end of each tax year</li>
+                                </ul>
+                                
+                                <div style="background: white; padding: 10px; border-radius: 3px; margin-top: 10px;">
+                                    <p style="margin: 0; font-size: 11px;"><strong>Formula per day:</strong></p>
+                                    <p style="margin: 5px 0; font-family: monospace; font-size: 10px;">
+                                        dailyInterest = currentBalance × (\${savingsRate.toFixed(2)}% ÷ 365.25)<br>
+                                        newBalance = currentBalance + dailyInterest
+                                    </p>
+                                    <p style="margin: 5px 0; font-size: 11px;"><strong>Annual tax calculation:</strong></p>
+                                    <p style="margin: 0; font-family: monospace; font-size: 10px;">
+                                        taxableInterest = max(0, yearlyInterest - £\${psaAmount.toFixed(2)})<br>
+                                        tax = taxableInterest × \${modalTaxRate}%
+                                    </p>
+                                </div>
+                                
+                                <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
+                                    <strong>Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit over \${(gilt.yearsToMaturity || 0).toFixed(1)} years
+                                </p>
                             </div>
                         </div>
                         
