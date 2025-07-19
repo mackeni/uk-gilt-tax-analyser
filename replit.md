@@ -534,7 +534,33 @@ This migration maintains all original functionality while dramatically improving
 - **Realistic Returns**: All calculations reflect true cost of gilt investments including broker fees
 - **Transparent Pricing**: Users see both gross investment amount and net amount available for gilt purchase
 
-### July 19, 2025 - Dealing Charge Disable Option Implementation
+### July 19, 2025 - Detailed Monthly Account Charge Schedule Implementation
+
+**Version ID**: f3a09ba3-93d4-4c78-a5a1-6227dffd67c2
+
+**Comprehensive Monthly Account Charge Modeling:**
+- **Complete Payment Schedule**: Enhanced IRR tooltips show detailed monthly account charges alongside coupon payments
+- **Linear Price Convergence**: Gilt price converges linearly from current price to £100 at maturity
+- **Accurate Charge Calculation**: Monthly charges based on actual gilt value at each month-end
+- **Maximum Charge Enforcement**: Charges capped at maximum monthly amount with clear indicators
+- **Chronological Display**: All payments (coupons and charges) sorted by date in single timeline
+- **Visual Differentiation**: Coupons in green, account charges in yellow highlighting
+- **Complete Totals**: Separate subtotals for account charges and grand totals including all costs
+
+**Technical Implementation:**
+- **Dynamic Gilt Valuation**: Calculates gilt price at each month based on linear convergence to par value
+- **Time-Based Calculations**: Accurate monthly charge dates from current date to maturity
+- **Charge Rate Application**: Monthly rate = annual rate ÷ 12, applied to gilt value
+- **Maximum Enforcement**: Charges limited to user-specified maximum (default £3.50/month)
+- **Integrated Display**: Charges show gilt price, portfolio value, and whether maximum cap applied
+
+**Enhanced User Experience:**
+- **Detailed Breakdown**: Each account charge shows gilt price and portfolio value at that date
+- **Clear Categorization**: Separate totals for coupon income, taxes, account charges, and net returns
+- **Professional Formatting**: Color-coded rows with complete financial transparency
+- **Real-World Accuracy**: Reflects actual broker platform charging methodology
+
+### July 19, 2025 - Previous: Dealing Charge Disable Option Implementation
 
 **Version ID**: 87681d4f-759e-4189-8836-e797ca97291d
 
