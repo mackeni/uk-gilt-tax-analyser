@@ -247,14 +247,13 @@ export async function renderHomePage(request, env) {
             padding: 8px 6px;
         }
         
-        /* Column width optimization */
-        .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 25%; } /* Name */
-        .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 10%; } /* Coupon */
-        .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 12%; } /* Clean Price */
-        .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 12%; } /* Dirty Price */
-        .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 12%; } /* After-Tax IRR */
-        .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 19%; } /* Equivalent Rate */
-        .table-container th:nth-child(7), .table-container td:nth-child(7) { width: 10%; } /* Years */
+        /* Column width optimization - 6 columns without coupon */
+        .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 30%; } /* Name */
+        .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 15%; } /* Clean Price */
+        .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 15%; } /* Dirty Price */
+        .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 15%; } /* After-Tax IRR */
+        .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 20%; } /* Equivalent Rate */
+        .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 5%; } /* Years */
         
         .modal {
             display: none;
@@ -514,14 +513,13 @@ export async function renderHomePage(request, env) {
                 white-space: nowrap;
             }
             
-            /* Mobile column width adjustments */
-            .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 30%; } /* Name - more space on mobile */
-            .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 12%; } /* Coupon */
-            .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 10%; } /* Clean Price - less space */
-            .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 10%; } /* Dirty Price - less space */
-            .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 12%; } /* After-Tax IRR */
-            .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 16%; } /* Equivalent Rate - shorter */
-            .table-container th:nth-child(7), .table-container td:nth-child(7) { width: 10%; } /* Years */
+            /* Mobile column width adjustments - 6 columns */
+            .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 35%; } /* Name */
+            .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 12%; } /* Clean Price */
+            .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 12%; } /* Dirty Price */
+            .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 15%; } /* After-Tax IRR */
+            .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 18%; } /* Equivalent Rate */
+            .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 8%; } /* Years */
             
             .clickable-cell {
                 min-height: 44px; /* Touch target size */
@@ -629,14 +627,13 @@ export async function renderHomePage(request, env) {
                 font-size: 9px;
             }
             
-            /* Ultra-compact mobile column widths */
-            .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 32%; } /* Name */
-            .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 11%; } /* Coupon */
-            .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 9%; } /* Clean Price */
-            .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 9%; } /* Dirty Price */
-            .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 11%; } /* After-Tax IRR */
-            .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 18%; } /* Equivalent Rate */
-            .table-container th:nth-child(7), .table-container td:nth-child(7) { width: 10%; } /* Years */
+            /* Ultra-compact mobile column widths - 6 columns */
+            .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 38%; } /* Name */
+            .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 12%; } /* Clean Price */
+            .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 12%; } /* Dirty Price */
+            .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 15%; } /* After-Tax IRR */
+            .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 16%; } /* Equivalent Rate */
+            .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 7%; } /* Years */
             
             .modal-content {
                 width: 98%;
@@ -1115,7 +1112,6 @@ export async function renderHomePage(request, env) {
                         <thead>
                             <tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">
                                 <th style="padding: 12px; text-align: left; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Gilt' : 'Name'}</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Coupon' : 'Coupon Rate'}</th>
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Clean £' : 'Clean Price'}</th>
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Dirty £' : 'Dirty Price'}</th>
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'After-Tax' : 'After-Tax IRR'}</th>
@@ -1127,7 +1123,6 @@ export async function renderHomePage(request, env) {
                             \${sortedResults.map((gilt, index) => \`
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
                                     <td class="clickable-cell" data-type="name" data-index="\${index}" style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500; text-align: left;">\${gilt.name}</td>
-                                    <td class="clickable-cell" data-type="coupon" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${formatCouponRate(gilt.couponRate || 0)}</td>
                                     <td class="clickable-cell" data-type="clean-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.cleanPrice || 0).toFixed(2)}</td>
                                     <td class="clickable-cell" data-type="dirty-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.dirtyPrice || gilt.cleanPrice || 0).toFixed(2)}</td>
                                     <td class="clickable-cell" data-type="after-tax" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${(gilt.afterTaxYield || 0).toFixed(2)}%</td>
