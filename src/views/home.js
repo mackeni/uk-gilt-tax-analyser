@@ -1318,36 +1318,46 @@ export async function renderHomePage(request, env) {
         }
         
         function calculateTotalCashFromSavings(investmentAmount, savingsRate, incomeTaxRate, psaAmount, yearsToMaturity) {
-            // Calculate annual compound interest with annual tax deductions
+            // Calculate using actual calendar days instead of proportional years
+            const today = new Date();
+            const endDate = new Date(today.getTime() + (yearsToMaturity * 365.25 * 24 * 60 * 60 * 1000));
+            
             let currentBalance = investmentAmount;
-            let totalTaxPaid = 0;
+            let currentDate = new Date(today);
+            let yearlyInterest = 0;
+            let currentTaxYear = today.getFullYear();
             
-            // Calculate for each complete year
-            const completeYears = Math.floor(yearsToMaturity);
-            for (let year = 1; year <= completeYears; year++) {
-                // Calculate gross interest for the year
-                const grossInterest = currentBalance * (savingsRate / 100);
+            // Calculate day by day using actual calendar days
+            while (currentDate < endDate) {
+                // Calculate days in current year (actual calendar year)
+                const yearStart = new Date(currentDate.getFullYear(), 0, 1);
+                const nextYearStart = new Date(currentDate.getFullYear() + 1, 0, 1);
+                const daysInYear = Math.round((nextYearStart - yearStart) / (24 * 60 * 60 * 1000));
                 
-                // Calculate tax on interest above PSA
-                const taxableInterest = Math.max(0, grossInterest - psaAmount);
-                const tax = taxableInterest * incomeTaxRate;
-                totalTaxPaid += tax;
+                // Daily interest based on actual days in this calendar year
+                const dailyRate = (savingsRate / 100) / daysInYear;
+                const dailyInterest = currentBalance * dailyRate;
                 
-                // Add net interest to balance
-                const netInterest = grossInterest - tax;
-                currentBalance += netInterest;
-            }
-            
-            // Handle partial final year
-            const partialYear = yearsToMaturity - completeYears;
-            if (partialYear > 0) {
-                const grossInterest = currentBalance * (savingsRate / 100) * partialYear;
-                const taxableInterest = Math.max(0, grossInterest - psaAmount);
-                const tax = taxableInterest * incomeTaxRate;
-                totalTaxPaid += tax;
+                currentBalance += dailyInterest;
+                yearlyInterest += dailyInterest;
                 
-                const netInterest = grossInterest - tax;
-                currentBalance += netInterest;
+                // Move to next day
+                currentDate.setDate(currentDate.getDate() + 1);
+                
+                // Check if we've moved to a new calendar year or reached end
+                const newTaxYear = currentDate.getFullYear();
+                if (newTaxYear !== currentTaxYear || currentDate >= endDate) {
+                    // Calculate tax on this year's interest
+                    const taxableInterest = Math.max(0, yearlyInterest - psaAmount);
+                    const tax = taxableInterest * incomeTaxRate;
+                    
+                    // Deduct tax from balance
+                    currentBalance -= tax;
+                    
+                    // Reset for next year
+                    yearlyInterest = 0;
+                    currentTaxYear = newTaxYear;
+                }
             }
             
             return currentBalance;
@@ -1842,31 +1852,33 @@ export async function renderHomePage(request, env) {
                             
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
                                 <h5 style="margin-top: 0;">Detailed Interest Calculation:</h5>
-                                <p><strong>Calculation Method:</strong> Annual compound interest with annual tax deductions</p>
+                                <p><strong>Calculation Method:</strong> Daily compound interest using actual calendar days</p>
                                 <ul style="margin: 10px 0; padding-left: 20px; font-size: 12px;">
-                                    <li><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}% compounded annually</li>
-                                    <li><strong>Compounding:</strong> Interest calculated and added annually to growing balance</li>
-                                    <li><strong>Personal Savings Allowance:</strong> £\${psaAmount.toFixed(2)} tax-free allowance per year</li>
+                                    <li><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}% applied daily</li>
+                                    <li><strong>Daily Calculation:</strong> Interest calculated daily using actual days in each calendar year</li>
+                                    <li><strong>Calendar Accuracy:</strong> 365 days in regular years, 366 in leap years</li>
+                                    <li><strong>Personal Savings Allowance:</strong> £\${psaAmount.toFixed(2)} tax-free allowance per calendar year</li>
                                     <li><strong>Tax Rate:</strong> \${modalTaxRate}% on interest above PSA allowance</li>
-                                    <li><strong>Tax Timing:</strong> Deducted annually on interest earned</li>
+                                    <li><strong>Tax Timing:</strong> Deducted at end of each calendar year</li>
                                 </ul>
                                 
                                 <div style="background: white; padding: 10px; border-radius: 3px; margin-top: 10px;">
-                                    <p style="margin: 0; font-size: 11px;"><strong>Formula per year:</strong></p>
+                                    <p style="margin: 0; font-size: 11px;"><strong>Formula per day:</strong></p>
                                     <p style="margin: 5px 0; font-family: monospace; font-size: 10px;">
-                                        grossInterest = currentBalance × \${savingsRate.toFixed(2)}%<br>
-                                        taxableInterest = max(0, grossInterest - £\${psaAmount.toFixed(2)})<br>
-                                        tax = taxableInterest × \${modalTaxRate}%<br>
-                                        newBalance = currentBalance + grossInterest - tax
+                                        daysInYear = actual days in calendar year (365 or 366)<br>
+                                        dailyRate = \${savingsRate.toFixed(2)}% ÷ daysInYear<br>
+                                        dailyInterest = currentBalance × dailyRate<br>
+                                        newBalance = currentBalance + dailyInterest
                                     </p>
-                                    <p style="margin: 5px 0; font-size: 11px;"><strong>Partial year calculation:</strong></p>
+                                    <p style="margin: 5px 0; font-size: 11px;"><strong>Annual tax calculation:</strong></p>
                                     <p style="margin: 0; font-family: monospace; font-size: 10px;">
-                                        partialInterest = currentBalance × \${savingsRate.toFixed(2)}% × partialYear
+                                        taxableInterest = max(0, yearlyInterest - £\${psaAmount.toFixed(2)})<br>
+                                        tax = taxableInterest × \${modalTaxRate}%
                                     </p>
                                 </div>
                                 
                                 <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
-                                    <strong>Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit over \${(gilt.yearsToMaturity || 0).toFixed(1)} years
+                                    <strong>Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit over \${(gilt.yearsToMaturity || 0).toFixed(6)} years
                                 </p>
                             </div>
                         </div>
