@@ -1167,23 +1167,18 @@ export async function renderHomePage(request, env) {
         async function calculateTaxEfficiency() {
             if (currentGiltData.length === 0) return;
             
+            console.log('Calculating tax efficiency locally...');
+            
             try {
-                const response = await fetch('/api/calculate-tax', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        giltData: currentGiltData,
-                        taxpayerType: currentSettings.taxBracket,
-                        investmentAmount: currentSettings.investmentAmount,
-                        savingsRate: currentSettings.savingsRate
-                    })
-                });
+                // Calculate tax efficiency locally without API calls
+                const results = calculateTaxEfficiencyLocal(
+                    currentGiltData,
+                    currentSettings.taxBracket,
+                    currentSettings.investmentAmount,
+                    currentSettings.savingsRate
+                );
                 
-                if (!response.ok) {
-                    throw new Error('Failed to calculate tax efficiency');
-                }
-                
-                const results = await response.json();
+                console.log('Local calculation results:', results.length, 'gilts processed');
                 currentResults = results;
                 
                 // Now show the data sections since we have complete results
@@ -1195,11 +1190,94 @@ export async function renderHomePage(request, env) {
                 displayResults(results);
                 
             } catch (error) {
-                console.error('Error calculating tax efficiency:', error);
+                console.error('Error calculating tax efficiency locally:', error);
                 const errorDiv = document.getElementById('error');
                 errorDiv.style.display = 'block';
                 errorDiv.textContent = 'Error calculating tax efficiency: ' + error.message;
             }
+        }
+        
+        function calculateTaxEfficiencyLocal(giltData, taxBracket, investmentAmount, savingsRate) {
+            console.log('Starting local tax calculations...');
+            
+            // Tax rates based on bracket
+            const taxRates = {
+                'basic_rate': { income: 20, psa: 1000 },
+                'higher_rate': { income: 40, psa: 500 },
+                'additional_rate': { income: 45, psa: 0 }
+            };
+            
+            const taxInfo = taxRates[taxBracket] || taxRates['additional_rate'];
+            const incomeTaxRate = taxInfo.income / 100;
+            const psaAmount = taxInfo.psa;
+            
+            console.log('Using tax rates:', taxInfo);
+            
+            return giltData.map(gilt => {
+                console.log('Processing gilt:', gilt.name);
+                
+                // Calculate units owned
+                const unitsOwned = investmentAmount / gilt.dirtyPrice * 100;
+                
+                // Calculate after-tax yield using simplified method
+                const afterTaxYield = calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate);
+                
+                // Calculate equivalent savings rate
+                const equivalentSavingsRate = calculateEquivalentSavingsRate(afterTaxYield, savingsRate, psaAmount, incomeTaxRate, investmentAmount);
+                
+                // Calculate extra income vs savings
+                const giltAnnualReturn = (afterTaxYield / 100) * investmentAmount;
+                const savingsAnnualReturn = (equivalentSavingsRate / 100) * investmentAmount;
+                const extraIncomeTotal = (giltAnnualReturn - savingsAnnualReturn) * gilt.yearsToMaturity;
+                
+                console.log('Gilt processed:', gilt.name, 'After-tax yield:', afterTaxYield.toFixed(3));
+                
+                return {
+                    ...gilt,
+                    afterTaxYield: afterTaxYield,
+                    equivalentSavingsRate: equivalentSavingsRate,
+                    extraIncomeTotal: extraIncomeTotal,
+                    unitsOwned: unitsOwned
+                };
+            });
+        }
+        
+        function calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate) {
+            // Simplified IRR calculation for client-side processing
+            const couponRate = gilt.couponRate / 100;
+            const cleanPrice = gilt.cleanPrice;
+            const yearsToMaturity = gilt.yearsToMaturity;
+            
+            // Semi-annual coupon payments
+            const semiAnnualCoupon = (couponRate / 2) * unitsOwned;
+            const taxOnCoupon = semiAnnualCoupon * incomeTaxRate;
+            const netCoupon = semiAnnualCoupon - taxOnCoupon;
+            
+            // Principal repayment (tax-free)
+            const principalRepayment = unitsOwned; // £100 per £100 nominal
+            
+            // Total after-tax cash flows
+            const totalNetCoupons = netCoupon * 2 * yearsToMaturity; // 2 payments per year
+            const totalCashReceived = totalNetCoupons + principalRepayment;
+            const initialInvestment = (cleanPrice + gilt.accruedInterest) * unitsOwned / 100;
+            
+            // Simple annual return calculation
+            const totalReturn = (totalCashReceived - initialInvestment) / initialInvestment;
+            const annualReturn = totalReturn / yearsToMaturity;
+            
+            return annualReturn * 100; // Convert to percentage
+        }
+        
+        function calculateEquivalentSavingsRate(afterTaxYield, savingsRate, psaAmount, incomeTaxRate, investmentAmount) {
+            // Calculate what savings rate would give same after-tax return
+            const targetAfterTaxReturn = (afterTaxYield / 100) * investmentAmount;
+            
+            // Work backwards from desired after-tax return to required gross rate
+            const annualInterest = targetAfterTaxReturn;
+            const taxableInterest = Math.max(0, annualInterest - psaAmount);
+            const grossInterestNeeded = annualInterest + (taxableInterest * incomeTaxRate);
+            
+            return (grossInterestNeeded / investmentAmount) * 100;
         }
         
         function displayResults(results) {
