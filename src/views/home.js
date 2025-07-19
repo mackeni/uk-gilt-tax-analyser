@@ -1348,7 +1348,7 @@ export async function renderHomePage(request, env) {
                 
                 // Check if we've moved to a new calendar year or reached end
                 const newTaxYear = currentDate.getFullYear();
-                if (newTaxYear !== currentTaxYear || currentDate >= endDate) {
+                if (newTaxYear !== currentTaxYear || currentDate > endDate) {
                     // Calculate tax on this year's accrued interest
                     const taxableInterest = Math.max(0, accruedInterest - psaAmount);
                     const tax = taxableInterest * incomeTaxRate;
