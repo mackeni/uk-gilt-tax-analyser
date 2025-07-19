@@ -852,6 +852,31 @@ export async function renderHomePage(request, env) {
                         </div>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="accountChargeEnabled">Monthly Account Charge</label>
+                        <select id="accountChargeEnabled">
+                            <option value="false">No monthly charge</option>
+                            <option value="true">Apply monthly charge</option>
+                        </select>
+                    </div>
+                    
+                    <div id="accountChargeSettings" style="display: none;">
+                        <div class="form-group">
+                            <label for="accountChargeRate">Annual Charge Rate (%)</label>
+                            <input type="number" id="accountChargeRate" value="0.25" min="0" max="5" step="0.05">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="accountChargeMax">Maximum Monthly Charge (£)</label>
+                            <input type="number" id="accountChargeMax" value="3.50" min="0" max="100" step="0.25">
+                        </div>
+                        
+                        <div class="tax-info" style="margin-top: 10px; padding: 10px; font-size: 14px;">
+                            <p>💷 Monthly platform fee based on gilt value at month-end. The gilt price is assumed to converge linearly to £100 at maturity.</p>
+                            <p><strong>Example:</strong> 0.25% annual (0.0208% monthly) capped at £3.50/month</p>
+                        </div>
+                    </div>
+                    
                     <div class="tax-info" id="taxInfo">
                         <h4>Your Tax Settings:</h4>
                         <div id="taxDetails">
@@ -1053,7 +1078,10 @@ export async function renderHomePage(request, env) {
             taxBracket: 'additional_rate',
             investmentAmount: 10000,
             savingsRate: 4.5,
-            dealingCharge: 5
+            dealingCharge: 5,
+            accountChargeEnabled: false,
+            accountChargeRate: 0.25,
+            accountChargeMax: 3.50
         };
         let durationFilter = { min: 0, max: 2 };
         
@@ -1137,6 +1165,11 @@ export async function renderHomePage(request, env) {
             // Duration filter listeners
             document.getElementById('durationMin').addEventListener('input', updateDurationFilter);
             document.getElementById('durationMax').addEventListener('input', updateDurationFilter);
+            
+            // Account charge listeners
+            document.getElementById('accountChargeEnabled').addEventListener('change', updateAccountChargeEnabled);
+            document.getElementById('accountChargeRate').addEventListener('input', updateAccountChargeSettings);
+            document.getElementById('accountChargeMax').addEventListener('input', updateAccountChargeSettings);
         }
         
         function updateDealingCharge() {
@@ -1160,6 +1193,33 @@ export async function renderHomePage(request, env) {
         function updateSavingsRate() {
             const savingsRate = parseFloat(document.getElementById('savingsRate').value) || 4.5;
             currentSettings.savingsRate = savingsRate;
+            
+            if (currentGiltData.length > 0) {
+                calculateTaxEfficiency();
+            }
+        }
+        
+        function updateAccountChargeEnabled() {
+            const enabled = document.getElementById('accountChargeEnabled').value === 'true';
+            currentSettings.accountChargeEnabled = enabled;
+            
+            // Show/hide account charge settings
+            const settingsDiv = document.getElementById('accountChargeSettings');
+            if (settingsDiv) {
+                settingsDiv.style.display = enabled ? 'block' : 'none';
+            }
+            
+            if (currentGiltData.length > 0) {
+                calculateTaxEfficiency();
+            }
+        }
+        
+        function updateAccountChargeSettings() {
+            const rate = parseFloat(document.getElementById('accountChargeRate').value) || 0.25;
+            const max = parseFloat(document.getElementById('accountChargeMax').value) || 3.50;
+            
+            currentSettings.accountChargeRate = rate;
+            currentSettings.accountChargeMax = max;
             
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
@@ -1570,6 +1630,27 @@ export async function renderHomePage(request, env) {
                 date: new Date(payment.date)
             }));
             
+            // Add account charges if enabled
+            if (currentSettings.accountChargeEnabled) {
+                const accountCharges = calculateAccountCharges(gilt, unitsOwned);
+                // Subtract account charges from cash flows (they reduce returns)
+                accountCharges.forEach(charge => {
+                    // Find cash flow for the same date or add new one
+                    const existingFlow = cashFlows.find(cf => cf.date.getTime() === charge.date.getTime());
+                    if (existingFlow) {
+                        existingFlow.amount -= charge.amount;
+                    } else {
+                        cashFlows.push({
+                            amount: -charge.amount, // Negative for cost
+                            date: charge.date
+                        });
+                    }
+                });
+                
+                // Store account charges for tooltip display
+                gilt.accountCharges = accountCharges;
+            }
+            
             // Add principal repayment at maturity
             const maturityDate = new Date(gilt.maturityDate);
             cashFlows.push({
@@ -1594,6 +1675,13 @@ export async function renderHomePage(request, env) {
             gilt.couponSchedule.forEach(payment => {
                 totalCash += payment.afterTaxAmount;
             });
+            
+            // Subtract account charges if enabled
+            if (currentSettings.accountChargeEnabled && gilt.accountCharges) {
+                gilt.accountCharges.forEach(charge => {
+                    totalCash -= charge.amount;
+                });
+            }
             
             // Add tax-free principal repayment at maturity
             totalCash += unitsOwned; // £100 per £100 nominal
@@ -1670,6 +1758,55 @@ export async function renderHomePage(request, env) {
             }
             
             return schedule;
+        }
+        
+        function calculateAccountCharges(gilt, unitsOwned) {
+            const accountCharges = [];
+            const today = new Date();
+            const maturityDate = new Date(gilt.maturityDate);
+            const yearsToMaturity = gilt.yearsToMaturity;
+            
+            // Calculate monthly dates from now until maturity
+            const monthlyCharges = [];
+            let currentDate = new Date(today);
+            currentDate.setDate(1); // Start from first day of current month
+            currentDate.setMonth(currentDate.getMonth() + 1); // Next month
+            
+            while (currentDate <= maturityDate) {
+                monthlyCharges.push(new Date(currentDate));
+                currentDate.setMonth(currentDate.getMonth() + 1);
+            }
+            
+            // Calculate charges for each month
+            monthlyCharges.forEach(chargeDate => {
+                const timeFromNow = (chargeDate - today) / (365.25 * 24 * 60 * 60 * 1000); // Years
+                const timeToMaturity = (maturityDate - chargeDate) / (365.25 * 24 * 60 * 60 * 1000); // Years
+                
+                // Linear price convergence from current price to 100
+                const currentPrice = gilt.cleanPrice;
+                const priceProgress = (yearsToMaturity - timeToMaturity) / yearsToMaturity;
+                const interpolatedPrice = currentPrice + (100 - currentPrice) * priceProgress;
+                
+                // Calculate gilt value at this time
+                const giltValue = (interpolatedPrice * unitsOwned) / 100;
+                
+                // Annual rate applied monthly
+                const monthlyRate = currentSettings.accountChargeRate / 100 / 12;
+                const monthlyCharge = giltValue * monthlyRate;
+                
+                // Apply monthly cap
+                const cappedCharge = Math.min(monthlyCharge, currentSettings.accountChargeMax);
+                
+                accountCharges.push({
+                    date: chargeDate,
+                    amount: cappedCharge,
+                    giltValue: giltValue,
+                    interpolatedPrice: interpolatedPrice,
+                    uncappedCharge: monthlyCharge
+                });
+            });
+            
+            return accountCharges;
         }
         
         function calculateIRR(initialInvestment, cashFlows) {

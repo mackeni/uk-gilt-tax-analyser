@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-HnPZ71/checked-fetch.js
+// .wrangler/tmp/bundle-Mi2Ugd/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-HnPZ71/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-Mi2Ugd/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-HnPZ71/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-Mi2Ugd/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-HnPZ71/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-Mi2Ugd/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4102,6 +4102,31 @@ async function renderHomePage(request, env) {
                         </div>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="accountChargeEnabled">Monthly Account Charge</label>
+                        <select id="accountChargeEnabled">
+                            <option value="false">No monthly charge</option>
+                            <option value="true">Apply monthly charge</option>
+                        </select>
+                    </div>
+                    
+                    <div id="accountChargeSettings" style="display: none;">
+                        <div class="form-group">
+                            <label for="accountChargeRate">Annual Charge Rate (%)</label>
+                            <input type="number" id="accountChargeRate" value="0.25" min="0" max="5" step="0.05">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="accountChargeMax">Maximum Monthly Charge (\xA3)</label>
+                            <input type="number" id="accountChargeMax" value="3.50" min="0" max="100" step="0.25">
+                        </div>
+                        
+                        <div class="tax-info" style="margin-top: 10px; padding: 10px; font-size: 14px;">
+                            <p>\u{1F4B7} Monthly platform fee based on gilt value at month-end. The gilt price is assumed to converge linearly to \xA3100 at maturity.</p>
+                            <p><strong>Example:</strong> 0.25% annual (0.0208% monthly) capped at \xA33.50/month</p>
+                        </div>
+                    </div>
+                    
                     <div class="tax-info" id="taxInfo">
                         <h4>Your Tax Settings:</h4>
                         <div id="taxDetails">
@@ -4303,7 +4328,10 @@ async function renderHomePage(request, env) {
             taxBracket: 'additional_rate',
             investmentAmount: 10000,
             savingsRate: 4.5,
-            dealingCharge: 5
+            dealingCharge: 5,
+            accountChargeEnabled: false,
+            accountChargeRate: 0.25,
+            accountChargeMax: 3.50
         };
         let durationFilter = { min: 0, max: 2 };
         
@@ -6379,7 +6407,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-HnPZ71/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-Mi2Ugd/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6413,7 +6441,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-HnPZ71/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-Mi2Ugd/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
