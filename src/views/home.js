@@ -1750,14 +1750,16 @@ export async function renderHomePage(request, env) {
             const tempSchedule = [];
             while (currentTime > todayTime) {
                 const grossAmount = semiAnnualCoupon;
-                const taxAmount = grossAmount * incomeTaxRate;
-                // Apply 2-decimal rounding to match IRR tooltip calculations
+                // Round gross amount to 2 decimal places
+                const roundedGrossAmount = Math.round(grossAmount * 100) / 100;
+                const taxAmount = roundedGrossAmount * incomeTaxRate;
+                // Apply 2-decimal rounding to tax amount
                 const roundedTaxAmount = Math.round(taxAmount * 100) / 100;
-                const roundedAfterTaxAmount = grossAmount - roundedTaxAmount;
+                const roundedAfterTaxAmount = roundedGrossAmount - roundedTaxAmount;
                 
                 tempSchedule.push({
                     date: new Date(currentTime).toISOString().split('T')[0],
-                    grossAmount: grossAmount,
+                    grossAmount: roundedGrossAmount,
                     taxAmount: roundedTaxAmount,
                     afterTaxAmount: roundedAfterTaxAmount
                 });
