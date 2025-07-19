@@ -908,7 +908,15 @@ export async function renderHomePage(request, env) {
         };
         let durationFilter = { min: 0, max: 2 };
         
-        // Initialize app (moved to end after modal creation)
+        // Initialize app - automatically load data on page load
+        function initializeApp() {
+            setupEventListeners();
+            updateTaxSettings();
+            
+            // Try API first, then immediate fallback if it fails
+            console.log('Initializing app with data loading...');
+            loadGiltData();
+        }
         
         function setupEventListeners() {
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
@@ -1003,7 +1011,7 @@ export async function renderHomePage(request, env) {
             try {
                 console.log('Fetching gilt data from /api/gilt-data...');
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+                const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout for rate limits
                 
                 const response = await fetch('/api/gilt-data', {
                     signal: controller.signal
@@ -1035,20 +1043,33 @@ export async function renderHomePage(request, env) {
             } catch (error) {
                 console.error('API failed, using fallback data:', error);
                 
-                // Use fallback data when API is rate-limited or unavailable
-                currentGiltData = getFallbackGiltData();
-                console.log('Using fallback data:', currentGiltData.length, 'gilts');
-                
-                loadingDiv.style.display = 'none';
-                document.getElementById('filterControls').style.display = 'block';
-                
-                // Show warning but continue with fallback data
-                const warningDiv = document.createElement('div');
-                warningDiv.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 14px;';
-                warningDiv.innerHTML = '⚠️ Using cached data due to API rate limits. Data may not be real-time.';
-                document.querySelector('.main-content').insertBefore(warningDiv, document.querySelector('.gilt-table'));
-                
-                calculateTaxEfficiency();
+                // Immediately use fallback data when API is rate-limited or unavailable
+                try {
+                    currentGiltData = getFallbackGiltData();
+                    console.log('Successfully loaded fallback data:', currentGiltData.length, 'gilts');
+                    
+                    loadingDiv.style.display = 'none';
+                    document.getElementById('filterControls').style.display = 'block';
+                    
+                    // Show warning but continue with fallback data
+                    const warningDiv = document.createElement('div');
+                    warningDiv.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 14px;';
+                    warningDiv.innerHTML = '⚠️ Using cached data due to API rate limits. Data may not be real-time.';
+                    const mainContent = document.querySelector('.main-content');
+                    const giltTable = document.querySelector('.gilt-table');
+                    if (mainContent && giltTable) {
+                        mainContent.insertBefore(warningDiv, giltTable);
+                    } else {
+                        document.body.appendChild(warningDiv);
+                    }
+                    
+                    calculateTaxEfficiency();
+                } catch (fallbackError) {
+                    console.error('Fallback data also failed:', fallbackError);
+                    loadingDiv.style.display = 'none';
+                    errorDiv.style.display = 'block';
+                    errorDiv.textContent = 'Unable to load gilt data. Please refresh the page.';
+                }
             }
         }
         
@@ -1541,8 +1562,7 @@ export async function renderHomePage(request, env) {
                 }
             });
             
-            setupEventListeners();
-            loadGiltData();
+            initializeApp();
         });
     </script>
 </body>
