@@ -899,6 +899,11 @@ export async function renderHomePage(request, env) {
             return formatted + '%';
         }
         
+        function getCurrentTaxRate() {
+            return currentSettings.taxBracket === 'basic_rate' ? 20 : 
+                   currentSettings.taxBracket === 'higher_rate' ? 40 : 45;
+        }
+        
         // IMMEDIATE DEBUG - Check if JavaScript is loading
         console.log('=== JAVASCRIPT FILE STARTED LOADING ===');
         console.log('Current time:', new Date());
@@ -1270,29 +1275,100 @@ export async function renderHomePage(request, env) {
         }
         
         function calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate) {
-            // Simplified IRR calculation for client-side processing
-            const couponRate = gilt.couponRate / 100;
-            const cleanPrice = gilt.cleanPrice;
-            const yearsToMaturity = gilt.yearsToMaturity;
+            // Generate detailed coupon schedule and calculate IRR
+            const couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
+            gilt.couponSchedule = couponSchedule; // Store for tooltips
             
-            // Semi-annual coupon payments
-            const semiAnnualCoupon = (couponRate / 2) * unitsOwned;
-            const taxOnCoupon = semiAnnualCoupon * incomeTaxRate;
-            const netCoupon = semiAnnualCoupon - taxOnCoupon;
+            // Calculate IRR using Newton-Raphson method
+            const initialInvestment = (gilt.cleanPrice + gilt.accruedInterest) * unitsOwned / 100;
+            const cashFlows = couponSchedule.map(payment => ({
+                amount: payment.afterTaxAmount,
+                date: new Date(payment.date)
+            }));
             
-            // Principal repayment (tax-free)
-            const principalRepayment = unitsOwned; // £100 per £100 nominal
+            // Add principal repayment at maturity
+            const maturityDate = new Date(gilt.maturityDate);
+            cashFlows.push({
+                amount: unitsOwned, // £100 per £100 nominal (tax-free)
+                date: maturityDate
+            });
             
-            // Total after-tax cash flows
-            const totalNetCoupons = netCoupon * 2 * yearsToMaturity; // 2 payments per year
-            const totalCashReceived = totalNetCoupons + principalRepayment;
-            const initialInvestment = (cleanPrice + gilt.accruedInterest) * unitsOwned / 100;
+            // Calculate IRR
+            const irr = calculateIRR(initialInvestment, cashFlows);
+            return irr * 100; // Convert to percentage
+        }
+        
+        function generateCouponSchedule(gilt, unitsOwned, incomeTaxRate) {
+            const schedule = [];
+            const maturityDate = new Date(gilt.maturityDate);
+            const today = new Date();
+            const semiAnnualCoupon = (gilt.couponRate / 2 / 100) * unitsOwned;
             
-            // Simple annual return calculation
-            const totalReturn = (totalCashReceived - initialInvestment) / initialInvestment;
-            const annualReturn = totalReturn / yearsToMaturity;
+            // Calculate coupon dates (semi-annual)
+            let currentDate = new Date(maturityDate);
             
-            return annualReturn * 100; // Convert to percentage
+            // Go back to find all coupon dates from maturity to today
+            while (currentDate > today) {
+                const paymentDate = new Date(currentDate);
+                const grossAmount = semiAnnualCoupon;
+                const taxAmount = grossAmount * incomeTaxRate;
+                const afterTaxAmount = grossAmount - taxAmount;
+                
+                schedule.unshift({
+                    date: paymentDate.toISOString().split('T')[0],
+                    grossAmount: grossAmount,
+                    taxAmount: taxAmount,
+                    afterTaxAmount: afterTaxAmount
+                });
+                
+                // Move back 6 months
+                currentDate.setMonth(currentDate.getMonth() - 6);
+            }
+            
+            return schedule.filter(payment => new Date(payment.date) > today);
+        }
+        
+        function calculateIRR(initialInvestment, cashFlows) {
+            // Newton-Raphson method for IRR calculation
+            let rate = 0.05; // Initial guess (5%)
+            const tolerance = 1e-7;
+            const maxIterations = 100;
+            
+            for (let i = 0; i < maxIterations; i++) {
+                let npv = -initialInvestment;
+                let npvDerivative = 0;
+                
+                cashFlows.forEach(cf => {
+                    const yearsFraction = (cf.date - new Date()) / (365.25 * 24 * 60 * 60 * 1000);
+                    if (yearsFraction > 0) {
+                        const discountFactor = Math.pow(1 + rate, yearsFraction);
+                        npv += cf.amount / discountFactor;
+                        npvDerivative -= cf.amount * yearsFraction / (discountFactor * (1 + rate));
+                    }
+                });
+                
+                if (Math.abs(npv) < tolerance) {
+                    return rate;
+                }
+                
+                if (Math.abs(npvDerivative) < tolerance) {
+                    break;
+                }
+                
+                rate = rate - npv / npvDerivative;
+                
+                // Keep rate within reasonable bounds
+                rate = Math.max(-0.99, Math.min(10, rate));
+            }
+            
+            // Fallback to simple calculation if IRR doesn't converge
+            const totalCashFlow = cashFlows.reduce((sum, cf) => sum + cf.amount, 0);
+            const avgYears = cashFlows.reduce((sum, cf) => {
+                const years = (cf.date - new Date()) / (365.25 * 24 * 60 * 60 * 1000);
+                return sum + years;
+            }, 0) / cashFlows.length;
+            
+            return ((totalCashFlow - initialInvestment) / initialInvestment) / avgYears;
         }
         
         function calculateEquivalentSavingsRate(afterTaxYield, savingsRate, psaAmount, incomeTaxRate, investmentAmount) {
