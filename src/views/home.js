@@ -1581,15 +1581,25 @@ export async function renderHomePage(request, env) {
                 (gilt.afterTaxYield || 0) > (best.afterTaxYield || 0) ? gilt : best, sortedResults[0]);
             
             metricsDiv.innerHTML = \`
-                <div class="metric-card">
-                    <div class="metric-label">💷 Best Option</div>
-                    <div class="metric-value">\${(bestGilt.afterTaxYield || 0).toFixed(2)}% yield</div>
-                    <div class="metric-subtitle">\${bestGilt.name}</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">💷 Extra Income</div>
-                    <div class="metric-value">\${formatCurrency(bestGilt.extraIncome || 0)}</div>
-                    <div class="metric-subtitle">vs. savings account</div>
+                <div class="metric-card" style="grid-column: 1 / -1; text-align: center; padding: 30px;">
+                    <div class="metric-label" style="font-size: 1.2em; margin-bottom: 15px;">💷 Best Investment Summary</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
+                        <div>
+                            <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Best Gilt</div>
+                            <div style="font-size: 1.1em; font-weight: bold; color: #2c3e50;">\${bestGilt.name}</div>
+                            <div style="font-size: 1.3em; font-weight: bold; color: #27ae60; margin-top: 5px;">\${(bestGilt.afterTaxYield || 0).toFixed(2)}%</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Equivalent Savings Rate</div>
+                            <div style="font-size: 1.3em; font-weight: bold; color: #3498db;">\${(bestGilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</div>
+                            <div style="font-size: 0.8em; color: #666; margin-top: 5px;">needed in savings account</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Extra Income</div>
+                            <div style="font-size: 1.3em; font-weight: bold; color: #e67e22;">\${formatCurrency(bestGilt.extraIncome || 0)}</div>
+                            <div style="font-size: 0.8em; color: #666; margin-top: 5px;">vs. typical savings</div>
+                        </div>
+                    </div>
                 </div>
             \`;
             
