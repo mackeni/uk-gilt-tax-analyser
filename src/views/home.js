@@ -1009,6 +1009,15 @@ export async function renderHomePage(request, env) {
                    currentSettings.taxBracket === 'higher_rate' ? 40 : 45;
         }
         
+        // Debounce utility function
+        function debounce(func, delay) {
+            let timeoutId;
+            return function(...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+        
         // Import consolidated utility functions synchronously at runtime
         let utilsLoaded = false;
         let utils = {};
@@ -2495,7 +2504,7 @@ export async function renderHomePage(request, env) {
             
             // Load initial data
             loadGiltData();
-        });
+        }
         
         function addCacheManagementButtons() {
             // Add debug info and cache stats buttons

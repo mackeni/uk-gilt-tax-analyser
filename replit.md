@@ -539,6 +539,43 @@ These optimizations maintain 100% calculation accuracy and presentation consiste
 - **Critical Path Optimization**: Most expensive operations (IRR, date calculations) significantly enhanced
 - **Maintained Accuracy**: All optimizations preserve mathematical precision and presentation consistency
 
+### July 19, 2025 - Comprehensive Transaction Costs Integration Complete
+
+**Version ID**: 42d3d248-c9af-41c8-9d7b-6bc631e39130
+**Deployment**: https://uk-gilt-tax-analyser-production.ian-a04.workers.dev
+
+**Transaction Cost System Features:**
+- **Multi-Broker Support**: Low cost (£5), percentage-based (0.1%), traditional (£11.95), and custom fee structures
+- **Comprehensive Cost Types**: Purchase fees, sale fees, bid-ask spreads (0.02-0.1%), and annual holding fees
+- **Realistic Market Data**: Based on 2025 UK broker research including Interactive Brokers, AJ Bell, Hargreaves Lansdown
+- **IRR Integration**: All transaction costs fully integrated into after-tax yield calculations using Newton-Raphson method
+
+**Cost Calculation Components:**
+- **Purchase Costs**: Broker commission + half bid-ask spread
+- **Holding Costs**: Annual custody fees applied over investment period
+- **Sale Costs**: Exit commission + half bid-ask spread
+- **Market Impact**: Bid-ask spreads reflecting actual market conditions (0.05% default)
+
+**User Interface Enhancements:**
+- **Transaction Cost Settings**: Complete broker type selection with custom fee options
+- **Interactive Tooltips**: Click-through explanations showing detailed cost breakdowns
+- **Real-Time Updates**: Live recalculation as cost parameters change
+- **Cost Transparency**: Total costs displayed as absolute amounts and percentage of investment
+
+**Technical Implementation:**
+- **Cost-Adjusted IRR**: Modified Newton-Raphson calculations include all transaction costs
+- **Authentic Market Costs**: Research-based fee structures reflecting 2025 UK gilt trading costs
+- **Performance Maintained**: Transaction cost calculations cached for optimal performance
+- **Complete Integration**: All cost components factored into advantage comparisons and yield calculations
+
+**Key Benefits:**
+- **Realistic Returns**: True after-cost yields replacing simplified calculations
+- **Investment Planning**: Accurate cost comparison across different brokers and investment amounts
+- **Market Authenticity**: Based on actual 2025 UK gilt trading costs and market conditions
+- **Complete Transparency**: Full visibility into all costs affecting investment returns
+
+This implementation provides UK investors with realistic transaction cost analysis, enabling accurate comparison between gilt investments and savings accounts with authentic market costs factored into all calculations.
+
 ### July 19, 2025 - API-Based Real-Time Data Integration Complete
 
 **Successfully Deployed Multi-Provider API System:**
