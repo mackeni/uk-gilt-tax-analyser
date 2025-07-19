@@ -2386,11 +2386,18 @@ export async function renderHomePage(request, env) {
                     const giltTotalCash = calculateTotalCashFromGilt(gilt, gilt.unitsOwned, modalTaxRate / 100);
                     const savingsTotalCash = calculateTotalCashFromSavings(investmentAmount, savingsRate, modalTaxRate / 100, psaAmount, gilt.yearsToMaturity);
                     
+                    // Calculate total monthly charges for display
+                    let totalMonthlyCharges = 0;
+                    if (currentSettings.accountChargeEnabled && gilt.accountCharges && gilt.accountCharges.length > 0) {
+                        totalMonthlyCharges = gilt.accountCharges.reduce((sum, c) => sum + c.amount, 0);
+                    }
+                    
                     // Debug log to verify charges are included
                     console.log('Gilt total cash calculation:', {
                         giltName: gilt.name,
                         accountChargesEnabled: currentSettings.accountChargeEnabled,
                         accountCharges: gilt.accountCharges ? gilt.accountCharges.length : 0,
+                        totalMonthlyCharges: totalMonthlyCharges,
                         totalCash: giltTotalCash
                     });
                     
@@ -2429,10 +2436,10 @@ export async function renderHomePage(request, env) {
                             <p><strong>Total Cash Received:</strong> £\${giltTotalCash.toFixed(2)}</p>
                             <div style="margin-left: 20px; color: #666;">
                                 <p><small>• All coupon payments (after \${modalTaxRate}% income tax)</small></p>
-                                \${currentSettings.accountChargeEnabled && gilt.accountCharges ? '<p><small>• Monthly account charges deducted: £' + gilt.accountCharges.reduce((sum, c) => sum + c.amount, 0).toFixed(2) + '</small></p>' : ''}
+                                \${currentSettings.accountChargeEnabled ? '<p><small>• Monthly account charges: ' + (totalMonthlyCharges > 0 ? '£' + totalMonthlyCharges.toFixed(2) + ' total deducted' : 'None calculated') + '</small></p>' : ''}
                                 <p><small>• Principal repayment: £\${(gilt.unitsOwned || 0).toFixed(2)} (tax-free)</small></p>
                                 <p><small>• Based on actual payment schedule with exact dates</small></p>
-                                \${currentSettings.accountChargeEnabled && gilt.accountCharges ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: £' + giltTotalCash.toFixed(2) + '</small></p>' : ''}
+                                \${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: £' + giltTotalCash.toFixed(2) + '</small></p>' : ''}
                             </div>
                         </div>
                         
