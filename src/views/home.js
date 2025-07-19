@@ -1619,6 +1619,7 @@ export async function renderHomePage(request, env) {
                     dirtyPrice: gilt.dirtyPrice,
                     accruedInterest: gilt.accruedInterest,
                     couponSchedule: gilt.couponSchedule,
+                    accountCharges: gilt.accountCharges, // Include account charges in returned object
                     afterTaxYield: afterTaxYield,
                     equivalentGrossSavingsRate: equivalentGrossSavingsRate,
                     extraIncome: extraIncome,
@@ -2397,8 +2398,10 @@ export async function renderHomePage(request, env) {
                         giltName: gilt.name,
                         accountChargesEnabled: currentSettings.accountChargeEnabled,
                         accountCharges: gilt.accountCharges ? gilt.accountCharges.length : 0,
+                        accountChargesArray: gilt.accountCharges,
                         totalMonthlyCharges: totalMonthlyCharges,
-                        totalCash: giltTotalCash
+                        totalCash: giltTotalCash,
+                        currentSettings: currentSettings
                     });
                     
                     // Calculate actual after-tax savings rate based on total returns
