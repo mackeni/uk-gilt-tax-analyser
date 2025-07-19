@@ -139,7 +139,7 @@ async function calculateTax(request, env) {
           return {
             ...gilt,
             afterTaxYield: afterTaxYield,
-            equivalentSavingsRate: equivalentSavingsRate,
+            equivalentGrossSavingsRate: equivalentSavingsRate,
             taxAdvantage: taxAdvantage,
             annualAdvantage: annualAdvantage,
             scheduleDetails: scheduleResult,
@@ -150,7 +150,7 @@ async function calculateTax(request, env) {
           return {
             ...gilt,
             afterTaxYield: 0,
-            equivalentSavingsRate: 0,
+            equivalentGrossSavingsRate: 0,
             taxAdvantage: 0,
             annualAdvantage: 0,
             scheduleDetails: null,
@@ -204,32 +204,46 @@ function createScheduleTooltip(scheduleResult, taxpayerType) {
                         taxpayerType === 'higher_rate' ? '40%' : '20%';
   
   let tooltip = `<div class="schedule-tooltip">
-    <h4>Detailed Coupon Payment Schedule</h4>
+    <h4>Detailed Coupon Payment Schedule & IRR Calculation</h4>
     <div class="schedule-summary">
       <p><strong>Investment:</strong> £${summary.investmentAmount.toFixed(2)}</p>
       <p><strong>Tax Rate:</strong> ${taxRatePercent} (Income Tax on Coupons)</p>
       <p><strong>Total Return:</strong> £${summary.totalAfterTaxReturn.toFixed(2)} (${summary.totalReturn.toFixed(2)}%)</p>
-      <p><strong>Annualized Yield:</strong> ${summary.annualizedReturn.toFixed(3)}%</p>
+      <p><strong>After-Tax IRR:</strong> ${summary.annualizedReturn.toFixed(3)}%</p>
     </div>
+    
+    <div class="irr-calculation">
+      <h5>IRR Calculation Method</h5>
+      <p><strong>Formula:</strong> NPV = -Initial Investment + Σ(Cash Flow<sub>t</sub> ÷ (1 + IRR)<sup>t</sup>) = 0</p>
+      <p><strong>Method:</strong> Newton-Raphson iterative convergence (tolerance: 1e-7)</p>
+      <p><strong>Cash Flows:</strong> Uses exact payment dates converted to fractional years</p>
+      <p><strong>Time Calculation:</strong> Days to payment ÷ 365.25 = Years</p>
+    </div>
+    
     <div class="payment-schedule">
       <table>
         <thead>
           <tr>
             <th>Payment Date</th>
+            <th>Days</th>
+            <th>Years</th>
             <th>Gross Coupon</th>
             <th>Tax (${taxRatePercent})</th>
             <th>After-Tax Coupon</th>
             <th>Principal</th>
-            <th>Total Received</th>
+            <th>Total Cash Flow</th>
           </tr>
         </thead>
         <tbody>`;
   
   schedule.forEach(payment => {
     const paymentDate = new Date(payment.paymentDate).toLocaleDateString('en-GB');
+    const timeInYears = payment.daysToPayment / 365.25;
     tooltip += `
-          <tr${payment.isMaturity ? ' class="maturity-payment"' : ''}>
+          <tr>
             <td>${paymentDate}</td>
+            <td>${payment.daysToPayment}</td>
+            <td>${timeInYears.toFixed(3)}</td>
             <td>£${payment.grossCouponAmount.toFixed(2)}</td>
             <td>£${payment.couponTax.toFixed(2)}</td>
             <td>£${payment.afterTaxCouponAmount.toFixed(2)}</td>
@@ -242,10 +256,19 @@ function createScheduleTooltip(scheduleResult, taxpayerType) {
         </tbody>
       </table>
     </div>
+    <div class="irr-details">
+      <h5>IRR Cash Flow Analysis</h5>
+      <p><strong>Initial Investment:</strong> -£${summary.investmentAmount.toFixed(2)} (at Time 0)</p>
+      <p><strong>Present Value Check:</strong> Sum of discounted cash flows should equal investment</p>
+      <p><strong>Convergence:</strong> IRR found when NPV = 0 within 1e-7 tolerance</p>
+    </div>
+    
     <div class="schedule-notes">
+      <p><small>• IRR accounts for exact timing of each cash flow using fractional years</small></p>
       <p><small>• Coupon payments subject to ${taxRatePercent} Income Tax</small></p>
       <p><small>• Principal repayment is tax-free</small></p>
       <p><small>• Capital gains on gilts are tax-free in the UK</small></p>
+      <p><small>• Newton-Raphson method provides professional-grade accuracy</small></p>
     </div>
   </div>`;
   

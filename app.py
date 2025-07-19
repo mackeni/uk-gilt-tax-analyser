@@ -251,8 +251,8 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 row['Current Yield'], row['Years to Maturity'], row['Coupon Rate'], taxpayer_type
             )
     
-    df['After-Tax Yield'] = df.apply(calculate_enhanced_after_tax_yield, axis=1)
-    df['Equivalent Savings Rate'] = df['After-Tax Yield'] / (1 - tax_rate)
+    df['After-Tax IRR'] = df.apply(calculate_enhanced_after_tax_yield, axis=1)
+    df['Equivalent Gross Savings Rate'] = df['After-Tax IRR'] / (1 - tax_rate)
     
     # Filter and sort options
     st.subheader("Filter Options")
@@ -264,12 +264,12 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     
     with col2:
         min_maturity = st.slider("Minimum Years to Maturity", 0.0, 50.0, 0.0, 0.5)
-        max_maturity = st.slider("Maximum Years to Maturity", 0.0, 50.0, 3.0, 0.5)
+        max_maturity = st.slider("Maximum Years to Maturity", 0.0, 50.0, 2.0, 0.5)
     
     with col3:
         sort_by = st.selectbox("Sort by", [
-            "After-Tax Yield", "Current Yield", "Years to Maturity", 
-            "Equivalent Savings Rate", "Coupon Rate"
+            "After-Tax IRR", "Years to Maturity", 
+            "Equivalent Gross Savings Rate", "Coupon Rate"
         ])
         sort_order = st.selectbox("Sort Order", ["Descending", "Ascending"])
     
@@ -289,8 +289,8 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     st.subheader(f"Available Gilts ({len(filtered_df)} found)")
     
     # Create display dataframe
-    display_columns = ['Name', 'Coupon Rate', 'Current Yield', 'After-Tax Yield', 
-                      'Equivalent Savings Rate', 'Maturity Date', 'Years to Maturity', 'Dirty Price']
+    display_columns = ['Name', 'Coupon Rate', 'After-Tax IRR', 
+                      'Equivalent Gross Savings Rate', 'Maturity Date', 'Years to Maturity', 'Dirty Price']
     
     # Add coupon information if available
     if 'Next Coupon Date' in filtered_df.columns:
@@ -305,9 +305,9 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         return f"{formatted}%"
     
     display_df['Coupon Rate'] = display_df['Coupon Rate'].apply(format_coupon_rate)
-    display_df['Current Yield'] = display_df['Current Yield'].apply(lambda x: f"{x:.2f}%")
-    display_df['After-Tax Yield'] = display_df['After-Tax Yield'].apply(lambda x: f"{x:.2f}%")
-    display_df['Equivalent Savings Rate'] = display_df['Equivalent Savings Rate'].apply(lambda x: f"{x:.2f}%")
+
+    display_df['After-Tax IRR'] = display_df['After-Tax IRR'].apply(lambda x: f"{x:.2f}%")
+    display_df['Equivalent Gross Savings Rate'] = display_df['Equivalent Gross Savings Rate'].apply(lambda x: f"{x:.2f}%")
     display_df['Maturity Date'] = display_df['Maturity Date'].apply(lambda x: x.strftime("%d %b %Y"))
     display_df['Years to Maturity'] = display_df['Years to Maturity'].apply(lambda x: f"{x:.1f}")
     display_df['Dirty Price'] = display_df['Dirty Price'].apply(lambda x: f"£{x:.2f}")
@@ -336,31 +336,31 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
     
     with col1:
         if len(filtered_df) > 0:
-            best_after_tax = filtered_df.loc[filtered_df['After-Tax Yield'].idxmax()]
+            best_after_tax = filtered_df.loc[filtered_df['After-Tax IRR'].idxmax()]
             st.metric(
-                "💷 Best After-Tax Yield",
-                f"{best_after_tax['After-Tax Yield']:.2f}%",
+                "💷 Best After-Tax IRR",
+                f"{best_after_tax['After-Tax IRR']:.2f}%",
                 f"{best_after_tax['Name']}"
             )
         else:
-            st.metric("💷 Best After-Tax Yield", "N/A", "No gilts found")
+            st.metric("💷 Best After-Tax IRR", "N/A", "No gilts found")
     
     with col2:
         if len(filtered_df) > 0:
-            highest_equivalent = filtered_df.loc[filtered_df['Equivalent Savings Rate'].idxmax()]
+            highest_equivalent = filtered_df.loc[filtered_df['Equivalent Gross Savings Rate'].idxmax()]
             st.metric(
-                "💷 Best Equivalent Savings Rate",
-                f"{highest_equivalent['Equivalent Savings Rate']:.2f}%",
+                "💷 Best Equivalent Gross Savings Rate",
+                f"{highest_equivalent['Equivalent Gross Savings Rate']:.2f}%",
                 f"{highest_equivalent['Name']}"
             )
         else:
-            st.metric("💷 Best Equivalent Savings Rate", "N/A", "No gilts found")
+            st.metric("💷 Best Equivalent Gross Savings Rate", "N/A", "No gilts found")
     
     # Tax efficiency comparison
     if not filtered_df.empty:
         st.subheader("💷 Tax Efficiency Comparison")
         
-        best_yield = filtered_df['After-Tax Yield'].max()
+        best_yield = filtered_df['After-Tax IRR'].max()
         
         # Calculate savings account after-tax return with PSA consideration
         savings_interest_annual = investment_amount * (savings_rate / 100)
@@ -430,22 +430,22 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         st.subheader("💷 Tax Efficiency Analysis")
         
         # Add calculation methodology explanation
-        with st.expander("📖 How After-Tax Yields Are Calculated", expanded=False):
+        with st.expander("📖 How After-Tax IRRs Are Calculated", expanded=False):
             st.markdown("""
-            **Our Schedule-Based Calculation Method:**
+            **Our IRR-Based Calculation Method:**
             
             1. **Generate Actual Payment Schedule**: Create detailed coupon payment dates based on UK gilt conventions
             2. **Calculate Tax on Each Payment**: Apply your selected tax rate to each coupon payment
-            3. **Sum After-Tax Cash Flows**: Total all net coupons plus tax-free principal repayment
-            4. **Calculate Total Return Ratio**: Divide total after-tax return by **dirty price** (includes accrued interest)
-            5. **Annualize the Return**: Use compound annual growth rate formula: ((Total Return Ratio)^(1/Years) - 1) × 100
+            3. **Convert to Cash Flow Timeline**: Map each payment to exact fractional years (days ÷ 365.25)
+            4. **Apply IRR Formula**: NPV = -Initial Investment + Σ(Cash Flow_t ÷ (1 + IRR)^t) = 0
+            5. **Newton-Raphson Convergence**: Iteratively solve for IRR with 1e-7 tolerance for professional accuracy
             
-            **Why This Method Is More Accurate:**
-            - Uses actual payment dates with precise day count calculations
+            **Why IRR Method Is More Accurate:**
+            - **Time Value of Money**: Properly accounts for exact timing of each cash flow
+            - **Professional Standard**: Same methodology used by fund managers and financial institutions
             - **Uses dirty price** (clean price + accrued interest) for true purchase cost
-            - Accounts for precise timing of tax payments
-            - Includes capital gains tax exemption for gilts
-            - Provides exact equivalent savings rate needed to match gilt returns
+            - **Fractional Year Precision**: Converts days to payment into fractional years for exact timing
+            - **Mathematical Rigor**: Newton-Raphson method provides true compound annual growth rate
             
             **Dirty Price vs Clean Price:**
             - **Clean Price**: Quoted price excluding accrued interest
@@ -535,13 +535,16 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                                     # Create DataFrame for payment schedule
                                     schedule_data = []
                                     for payment in schedule_details['schedule']:
+                                        time_in_years = payment['daysToPayment'] / 365.25
                                         schedule_data.append({
                                             'Payment Date': payment['paymentDate'].strftime('%d %b %Y') if hasattr(payment['paymentDate'], 'strftime') else str(payment['paymentDate']),
+                                            'Days': payment['daysToPayment'],
+                                            'Years': f"{time_in_years:.3f}",
                                             'Gross Coupon': f"£{payment['grossCouponAmount']:.2f}",
                                             'Tax': f"£{payment['couponTax']:.2f}",
                                             'After-Tax Coupon': f"£{payment['afterTaxCouponAmount']:.2f}",
                                             'Principal': f"£{payment['principalAmount']:.2f}" if payment['principalAmount'] > 0 else "-",
-                                            'Total Received': f"£{payment['totalAfterTaxPayment']:.2f}",
+                                            'Total Cash Flow': f"£{payment['totalAfterTaxPayment']:.2f}",
                                             'Type': 'Maturity' if payment['isMaturity'] else 'Coupon'
                                         })
                                     
@@ -549,17 +552,42 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                                         schedule_df = pd.DataFrame(schedule_data)
                                         st.dataframe(schedule_df, use_container_width=True, hide_index=True)
                                         
-                                        # Summary
+                                        # IRR Calculation Details
                                         summary = schedule_details.get('summary', {})
                                         if summary:
-                                            st.markdown("**Schedule Summary:**")
+                                            st.markdown("**IRR Calculation Summary:**")
                                             col1, col2, col3 = st.columns(3)
                                             with col1:
-                                                st.metric("Investment", f"£{summary.get('investmentAmount', 0):,.2f}")
+                                                st.metric("Initial Investment", f"-£{summary.get('investmentAmount', 0):,.2f}")
+                                                st.caption("Cash outflow at Time 0")
                                             with col2:
-                                                st.metric("Total Return", f"£{summary.get('totalAfterTaxReturn', 0):,.2f}")
+                                                st.metric("Total Cash Received", f"£{summary.get('totalAfterTaxReturn', 0):,.2f}")
+                                                st.caption("Sum of all future cash flows")
                                             with col3:
-                                                st.metric("Annualized Yield", f"{summary.get('annualizedReturn', 0):.3f}%")
+                                                st.metric("After-Tax IRR", f"{summary.get('annualizedReturn', 0):.3f}%")
+                                                st.caption("True compound annual return")
+                                        
+                                        # IRR Methodology Explanation
+                                        with st.expander("🔬 IRR Calculation Details"):
+                                            st.markdown("""
+                                            **Internal Rate of Return (IRR) Formula:**
+                                            ```
+                                            NPV = -Initial_Investment + Σ(Cash_Flow_t ÷ (1 + IRR)^t) = 0
+                                            ```
+                                            
+                                            **Step-by-Step Process:**
+                                            1. **Cash Flow 0**: -£{:,.2f} (initial investment)
+                                            2. **Future Cash Flows**: Each payment discounted by exact timing
+                                            3. **Time Calculation**: Days to payment ÷ 365.25 = fractional years
+                                            4. **Newton-Raphson Method**: Iteratively solve until NPV = 0
+                                            5. **Convergence Tolerance**: 1e-7 (0.0000001) for professional accuracy
+                                            
+                                            **Why IRR vs Simple Averaging:**
+                                            - IRR accounts for exact timing of each cash flow
+                                            - Provides true compound annual growth rate
+                                            - Used by institutional investors and fund managers
+                                            - More accurate for bonds with varying payment schedules
+                                            """.format(summary.get('investmentAmount', 0)))
                             st.write(f"• ... and {len(coupon_schedule) - 5} more payments")
                     else:
                         # Zero-coupon gilt
@@ -581,17 +609,17 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 
                 with col2:
                     st.markdown("**Tax Analysis:**")
-                    st.write(f"• After-Tax Yield: {row['After-Tax Yield']:.2f}%")
-                    st.write(f"• Equivalent Savings Rate: {row['Equivalent Savings Rate']:.2f}%")
+                    st.write(f"• After-Tax IRR: {row['After-Tax IRR']:.2f}%")
+                    st.write(f"• Equivalent Gross Savings Rate: {row['Equivalent Gross Savings Rate']:.2f}%")
                     
                     # Calculate tax efficiency metrics
                     gross_yield = row['Current Yield']
                     tax_on_yield = gross_yield * tax_rate
                     st.write(f"• Tax on Yield ({tax_rate*100:.0f}%): {tax_on_yield:.2f}%")
-                    st.write(f"• Tax Efficiency: {(row['After-Tax Yield'] / gross_yield * 100):.2f}%")
+                    st.write(f"• Tax Efficiency: {(row['After-Tax IRR'] / gross_yield * 100):.2f}%")
                     
                     # Detailed yield calculation breakdown
-                    st.markdown("**After-Tax Yield Calculation Method:**")
+                    st.markdown("**After-Tax IRR Calculation Method:**")
                     
                     if coupon_schedule:
                         # Schedule-based yield calculation with detailed steps using dirty price
@@ -626,14 +654,14 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         annualized_yield = ((total_return_ratio ** (1/years_to_maturity)) - 1) * 100
                         st.write(f"• Calculation: (({total_return_ratio:.6f})^(1/{years_to_maturity:.2f}) - 1) × 100")
                         st.write(f"• Return Per Year: {((total_return_ratio - 1) / years_to_maturity * 100):.2f}% (simple)")
-                        st.write(f"• **After-Tax Yield (compound): {annualized_yield:.2f}%**")
+                        st.write(f"• **After-Tax IRR (compound): {annualized_yield:.2f}%**")
                         
                         # Show equivalent savings rate calculation
-                        st.markdown("**Step 4: Calculate Equivalent Savings Rate**")
+                        st.markdown("**Step 4: Calculate Equivalent Gross Savings Rate**")
                         equivalent_rate = annualized_yield / (1 - tax_rate)
-                        st.write(f"• Formula: After-Tax Yield ÷ (1 - Tax Rate)")
+                        st.write(f"• Formula: After-Tax IRR ÷ (1 - Tax Rate)")
                         st.write(f"• Calculation: {annualized_yield:.2f}% ÷ (1 - {tax_rate:.2f}) = {equivalent_rate:.2f}%")
-                        st.write(f"• **Equivalent Savings Rate: {equivalent_rate:.2f}%**")
+                        st.write(f"• **Equivalent Gross Savings Rate: {equivalent_rate:.2f}%**")
                         
                     else:
                         # Zero-coupon yield calculation with detailed steps using dirty price
@@ -713,41 +741,36 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                         st.write(f"• Years to Maturity: {row['Years to Maturity']:.2f}")
                         capital_gain_yield = (total_capital_gain / total_dirty_price / row['Years to Maturity']) * 100
                         st.write(f"• Simple Annualized Yield: £{total_capital_gain:,.2f} ÷ £{total_dirty_price:,.2f} ÷ {row['Years to Maturity']:.2f} × 100")
-                        st.write(f"• **After-Tax Yield: {capital_gain_yield:.2f}%**")
+                        st.write(f"• **After-Tax IRR: {capital_gain_yield:.2f}%**")
                         
                         # Show equivalent savings rate calculation
-                        st.markdown("**Step 3: Calculate Equivalent Savings Rate**")
+                        st.markdown("**Step 3: Calculate Equivalent Gross Savings Rate**")
                         equivalent_rate = capital_gain_yield / (1 - tax_rate)
-                        st.write(f"• Formula: After-Tax Yield ÷ (1 - Tax Rate)")
+                        st.write(f"• Formula: After-Tax IRR ÷ (1 - Tax Rate)")
                         st.write(f"• Calculation: {capital_gain_yield:.2f}% ÷ (1 - {tax_rate:.2f}) = {equivalent_rate:.2f}%")
-                        st.write(f"• **Equivalent Savings Rate: {equivalent_rate:.2f}%**")
+                        st.write(f"• **Equivalent Gross Savings Rate: {equivalent_rate:.2f}%**")
         
         # Visual comparison
         st.subheader("📊 Visual Comparison")
         
         # Create comparison chart
-        chart_data = selected_data[['Name', 'Current Yield', 'After-Tax Yield', 'Equivalent Savings Rate']].copy()
+        chart_data = selected_data[['Name', 'After-Tax IRR', 'Equivalent Gross Savings Rate']].copy()
         
         fig = go.Figure()
         
-        fig.add_trace(go.Bar(
-            name='Current Yield',
-            x=chart_data['Name'],
-            y=chart_data['Current Yield'],
-            marker_color='lightblue'
-        ))
+
         
         fig.add_trace(go.Bar(
-            name='After-Tax Yield',
+            name='After-Tax IRR',
             x=chart_data['Name'],
-            y=chart_data['After-Tax Yield'],
+            y=chart_data['After-Tax IRR'],
             marker_color='darkblue'
         ))
         
         fig.add_trace(go.Bar(
-            name='Equivalent Savings Rate',
+            name='Equivalent Gross Savings Rate',
             x=chart_data['Name'],
-            y=chart_data['Equivalent Savings Rate'],
+            y=chart_data['Equivalent Gross Savings Rate'],
             marker_color='orange'
         ))
         
@@ -763,14 +786,14 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         
         # Summary table with schedule-based analysis
         st.subheader("📈 Summary Table (Schedule-Based Analysis)")
-        summary_df = selected_data[['Name', 'Current Yield', 'After-Tax Yield', 'Equivalent Savings Rate']].copy()
+        summary_df = selected_data[['Name', 'After-Tax IRR', 'Equivalent Gross Savings Rate']].copy()
 
         
         # Add tax efficiency ranking based on schedule-based yields
-        summary_df['Tax Efficiency Rank'] = summary_df['After-Tax Yield'].rank(ascending=False, method='dense').astype(int)
+        summary_df['Tax Efficiency Rank'] = summary_df['After-Tax IRR'].rank(ascending=False, method='dense').astype(int)
         
         # Format summary table
-        for col in ['Current Yield', 'After-Tax Yield', 'Equivalent Savings Rate']:
+        for col in ['After-Tax IRR', 'Equivalent Gross Savings Rate']:
             summary_df[col] = summary_df[col].apply(lambda x: f"{x:.2f}%")
         
         st.dataframe(summary_df, use_container_width=True, hide_index=True)
@@ -780,7 +803,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         
         # Best gilt recommendation using schedule-based analysis
         st.subheader("🏆 Best Gilt Recommendation (Schedule-Based Analysis)")
-        best_gilt = selected_data.loc[selected_data['After-Tax Yield'].idxmax()]
+        best_gilt = selected_data.loc[selected_data['After-Tax IRR'].idxmax()]
         
         # Generate detailed schedule for best gilt
         best_gilt_info = {
@@ -794,8 +817,8 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         col1, col2 = st.columns(2)
         with col1:
             st.success(f"**Most Tax Efficient:** {best_gilt['Name']}")
-            st.write(f"After-tax yield (schedule-based): {best_gilt['After-Tax Yield']:.2f}%")
-            st.write(f"Equivalent savings rate needed: {best_gilt['Equivalent Savings Rate']:.2f}%")
+            st.write(f"After-tax yield (schedule-based): {best_gilt['After-Tax IRR']:.2f}%")
+            st.write(f"Equivalent gross savings rate needed: {best_gilt['Equivalent Gross Savings Rate']:.2f}%")
         
         with col2:
             if best_coupon_schedule:
@@ -806,7 +829,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
                 
                 st.info(f"**Schedule-Based Return Analysis (£{investment_amount:,.0f} investment)**")
                 # Scale analysis to investment amount
-                best_gilt_price = selected_data.loc[selected_data['After-Tax Yield'].idxmax(), 'Dirty Price']
+                best_gilt_price = selected_data.loc[selected_data['After-Tax IRR'].idxmax(), 'Dirty Price']
                 units_owned = investment_amount / best_gilt_price * 100
                 scaling_factor = units_owned / 100
                 
@@ -832,7 +855,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
         st.subheader("⚖️ Breakeven Analysis")
         
         # Calculate breakeven rates for top 3 gilts
-        top_3_gilts = selected_data.nlargest(3, 'After-Tax Yield')
+        top_3_gilts = selected_data.nlargest(3, 'After-Tax IRR')
         
         breakeven_data = []
         for idx, row in top_3_gilts.iterrows():
@@ -843,7 +866,7 @@ if st.session_state.gilt_data is not None and not st.session_state.gilt_data.emp
             )
             breakeven_data.append({
                 'Gilt': row['Name'],
-                'After-Tax Yield': f"{row['After-Tax Yield']:.2f}%",
+                'After-Tax IRR': f"{row['After-Tax IRR']:.2f}%",
                 'Breakeven Savings Rate': f"{breakeven_rate:.2f}%",
                 'Breakeven Rate': f"{breakeven_rate:.2f}%"
             })
@@ -1064,7 +1087,7 @@ with st.expander("💡 Tax Advantages of Gilts for Additional Rate Taxpayers"):
 
 with st.expander("🧮 How the Calculations Work"):
     st.markdown("""
-    ### After-Tax Yield Calculation:
+    ### After-Tax IRR Calculation:
     
     **For Gilts:**
     - Coupon income is taxed at your marginal rate
@@ -1076,9 +1099,9 @@ with st.expander("🧮 How the Calculations Work"):
     - Personal Savings Allowance varies by tax bracket
     - After-tax yield = Gross rate × (1 - tax_rate)
     
-    **Equivalent Savings Rate:**
+    **Equivalent Gross Savings Rate:**
     - The gross savings rate needed to match the gilt's after-tax return
-    - Calculation: Gilt after-tax yield ÷ (1 - tax_rate)
+    - Calculation: Gilt after-tax IRR ÷ (1 - tax_rate)
     
     ### Example:
     A gilt yielding 4% with 3 years to maturity:

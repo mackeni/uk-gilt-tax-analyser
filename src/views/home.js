@@ -567,7 +567,7 @@ export async function renderHomePage(request, env) {
                             <input type="number" id="durationMin" min="0" max="45" value="0" step="0.5" style="width: 80px;">
                             <span style="margin: 0 15px;">to</span>
                             <label for="durationMax" style="margin-right: 10px;">Max:</label>
-                            <input type="number" id="durationMax" min="0" max="45" value="45" step="0.5" style="width: 80px;">
+                            <input type="number" id="durationMax" min="0" max="45" value="2" step="0.5" style="width: 80px;">
                             <span style="margin-left: 10px;">years</span>
                         </div>
                         <div class="range-info">
@@ -623,7 +623,7 @@ export async function renderHomePage(request, env) {
             investmentAmount: 10000,
             savingsRate: 4.5
         };
-        let durationFilter = { min: 0, max: 45 };
+        let durationFilter = { min: 0, max: 2 };
         
         // Initialize app (moved to end after modal creation)
         
@@ -834,9 +834,9 @@ export async function renderHomePage(request, env) {
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Coupon</th>
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Clean Price</th>
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Dirty Price</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Current</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">After-Tax</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Equivalent</th>
+
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">After-Tax IRR</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">Equivalent Gross</th>
                                 <th style="padding: 12px; text-align: right;">Years</th>
                             </tr>
                         </thead>
@@ -847,9 +847,9 @@ export async function renderHomePage(request, env) {
                                     <td class="clickable-cell" data-type="coupon" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${formatCouponRate(gilt.couponRate || 0)}</td>
                                     <td class="clickable-cell" data-type="clean-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.cleanPrice || 0).toFixed(2)}</td>
                                     <td class="clickable-cell" data-type="dirty-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.dirtyPrice || gilt.cleanPrice || 0).toFixed(2)}</td>
-                                    <td class="clickable-cell" data-type="current-yield" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.currentYield || 0).toFixed(2)}%</td>
+
                                     <td class="clickable-cell" data-type="after-tax" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${(gilt.afterTaxYield || 0).toFixed(2)}%</td>
-                                    <td class="clickable-cell" data-type="equivalent" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.equivalentSavingsRate || 0).toFixed(2)}%</td>
+                                    <td class="clickable-cell" data-type="equivalent" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="years" data-index="\${index}" style="padding: 12px; text-align: right;">\${(gilt.yearsToMaturity || 0).toFixed(1)}</td>
                                 </tr>
                             \`).join('')}
@@ -1012,24 +1012,32 @@ export async function renderHomePage(request, env) {
                     break;
                     
                 case 'equivalent':
-                    titleText = 'Equivalent Savings Rate';
+                    titleText = 'Equivalent Gross Savings Rate';
                     contentHTML = \`
                         <div class="calculation-step">
-                            <h4>Equivalent Savings Rate</h4>
+                            <h4>Equivalent Gross Savings Rate</h4>
                             <p>The gross interest rate a savings account would need to match this gilt's after-tax return.</p>
                         </div>
                         <div class="calculation-step">
-                            <h4>Formula:</h4>
+                            <h4>How It's Calculated:</h4>
                             <div class="calculation-formula">
-                                Equivalent Rate = After-Tax Yield ÷ (1 - Tax Rate)
+                                Formula: After-Tax IRR ÷ (1 - Income Tax Rate)
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                                <p><strong>Example Calculation:</strong></p>
+                                <ul style="margin: 10px 0; padding-left: 20px;">
+                                    <li>Gilt After-Tax IRR: \${gilt.afterTaxYield.toFixed(2)}%</li>
+                                    <li>Your Income Tax Rate: \${(taxRate * 100).toFixed(0)}%</li>
+                                    <li>Required Gross Rate: \${gilt.afterTaxYield.toFixed(2)}% ÷ (1 - \${taxRate.toFixed(2)}) = <strong>\${gilt.equivalentGrossSavingsRate.toFixed(2)}%</strong></li>
+                                </ul>
                             </div>
                         </div>
                         <div class="calculation-step">
-                            <h4>For \${gilt.name}:</h4>
-                            <div class="calculation-formula">
-                                Equivalent Rate = \${gilt.afterTaxYield.toFixed(2)}% ÷ (1 - 0.\${taxRate}) = \${gilt.equivalentSavingsRate.toFixed(2)}%
-                            </div>
-                            <p>A savings account would need to pay \${gilt.equivalentSavingsRate.toFixed(2)}% gross to match this gilt's \${gilt.afterTaxYield.toFixed(2)}% after-tax return.</p>
+                            <h4>Why This Matters:</h4>
+                            <p>• Savings accounts are taxed as income at your marginal rate (\${(taxRate * 100).toFixed(0)}%)</p>
+                            <p>• Gilt coupons are also taxed as income, but capital gains are tax-free</p>
+                            <p>• This calculation shows what savings rate you'd need to match the gilt's performance</p>
+                            <p>• If current savings rates are below \${gilt.equivalentGrossSavingsRate.toFixed(2)}%, this gilt offers better value</p>
                         </div>
                     \`;
                     break;
