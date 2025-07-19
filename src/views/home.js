@@ -920,18 +920,30 @@ export async function renderHomePage(request, env) {
         }
         
         function loadFallbackData() {
+            console.log('=== STARTING FALLBACK DATA LOAD ===');
             const loadingDiv = document.getElementById('loading');
             const errorDiv = document.getElementById('error');
             
-            loadingDiv.style.display = 'block';
-            errorDiv.style.display = 'none';
+            console.log('Loading div:', loadingDiv);
+            console.log('Error div:', errorDiv);
+            
+            if (loadingDiv) loadingDiv.style.display = 'block';
+            if (errorDiv) errorDiv.style.display = 'none';
             
             try {
+                console.log('Calling getFallbackGiltData...');
                 currentGiltData = getFallbackGiltData();
-                console.log('Successfully loaded fallback data:', currentGiltData.length, 'gilts');
+                console.log('=== FALLBACK DATA LOADED ===');
+                console.log('Current gilt data length:', currentGiltData ? currentGiltData.length : 'NULL');
+                console.log('First gilt:', currentGiltData ? currentGiltData[0] : 'NULL');
                 
-                loadingDiv.style.display = 'none';
-                document.getElementById('filterControls').style.display = 'block';
+                if (!currentGiltData || currentGiltData.length === 0) {
+                    throw new Error('Fallback data is empty or null');
+                }
+                
+                if (loadingDiv) loadingDiv.style.display = 'none';
+                const filterControls = document.getElementById('filterControls');
+                if (filterControls) filterControls.style.display = 'block';
                 
                 // Show warning about using cached data
                 const warningDiv = document.createElement('div');
@@ -944,12 +956,18 @@ export async function renderHomePage(request, env) {
                     mainContent.appendChild(warningDiv);
                 }
                 
+                console.log('Calling calculateTaxEfficiency...');
                 calculateTaxEfficiency();
             } catch (error) {
-                console.error('Fallback data failed:', error);
-                loadingDiv.style.display = 'none';
-                errorDiv.style.display = 'block';
-                errorDiv.textContent = 'Unable to load gilt data. Please refresh the page.';
+                console.error('=== FALLBACK DATA FAILED ===');
+                console.error('Error details:', error);
+                console.error('Error stack:', error.stack);
+                
+                if (loadingDiv) loadingDiv.style.display = 'none';
+                if (errorDiv) {
+                    errorDiv.style.display = 'block';
+                    errorDiv.textContent = 'Unable to load gilt data: ' + error.message;
+                }
             }
         }
         
@@ -1161,7 +1179,6 @@ export async function renderHomePage(request, env) {
             
             console.log('Final fallback data count:', processedData.length);
             return processedData;
-        }
         }
         
         async function calculateTaxEfficiency() {
