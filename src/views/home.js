@@ -2016,9 +2016,9 @@ export async function renderHomePage(request, env) {
                         <div class="calculation-step">
                             <h4>Calculation Method:</h4>
                             <p><strong>Method:</strong> IRR calculation using Newton-Raphson method</p>
-                            <p><strong>Your Investment:</strong> £\${formatCurrency(currentSettings.investmentAmount || 10000)}</p>
+                            <p><strong>Your Investment:</strong> \${formatCurrency(currentSettings.investmentAmount || 10000)}</p>
                             <p><strong>Dealing Charge:</strong> £\${(currentSettings.dealingCharge || 5).toFixed(2)}</p>
-                            <p><strong>Available for Gilts:</strong> £\${formatCurrency((currentSettings.investmentAmount || 10000) - (currentSettings.dealingCharge || 5))}</p>
+                            <p><strong>Available for Gilts:</strong> \${formatCurrency((currentSettings.investmentAmount || 10000) - (currentSettings.dealingCharge || 5))}</p>
                             <p><strong>Purchase Price:</strong> £\${gilt.dirtyPrice.toFixed(6)} per £100 (including accrued interest)</p>
                             <p><strong>Your Tax Rate:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ')} (\${getCurrentTaxRate()}%)</p>
                         </div>

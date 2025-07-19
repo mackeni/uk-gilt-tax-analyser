@@ -536,7 +536,15 @@ This migration maintains all original functionality while dramatically improving
 
 ### July 19, 2025 - Production Deployment Complete
 
-**Version ID**: c5d031be-bc49-4796-8043-f1e906e5e6af
+**Version ID**: 35b15d4c-f35d-4f72-82de-d2be3609815a
+
+**July 19, 2025 - IRR Tooltip Currency Display Fix:**
+- **Fixed Double £ Signs**: Removed duplicate currency symbols in IRR calculation tooltip
+- **Cleaned Display**: "Your Investment" and "Available for Gilts" now show single £ signs correctly
+- **Maintained Formatting**: All other currency displays remain properly formatted
+- **Production Deployed**: Fix confirmed working in live application
+
+**Previous Version**: c5d031be-bc49-4796-8043-f1e906e5e6af
 
 **Successful Cloudflare Workers Deployment:**
 - **Live URL**: https://uk-gilt-tax-analyser.ian-a04.workers.dev
