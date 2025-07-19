@@ -1579,30 +1579,83 @@ export async function renderHomePage(request, env) {
                     const taxRate = currentSettings.taxBracket === 'additional_rate' ? 45 : 
                                    currentSettings.taxBracket === 'higher_rate' ? 40 : 20;
                     
-                    titleText = 'After-Tax Yield with Detailed Schedule';
+                    titleText = 'After-Tax Yield Calculation with Detailed Payment Schedule';
                     
-                    // Check if we have schedule details from the API
-                    if (gilt.scheduleTooltip) {
-                        contentHTML = gilt.scheduleTooltip;
-                    } else {
-                        // Fallback to basic calculation
-                        contentHTML = \`
+                    // Generate payment schedule table
+                    let scheduleHTML = '';
+                    if (gilt.couponSchedule && gilt.couponSchedule.length > 0) {
+                        scheduleHTML = \`
                             <div class="calculation-step">
-                                <h4>After-Tax Yield Calculation</h4>
-                                <p>Shows your actual return after paying income tax on coupon payments. Capital gains on gilts are tax-free.</p>
-                            </div>
-                            <div class="calculation-step">
-                                <h4>Formula:</h4>
-                                <div class="calculation-formula">
-                                    After-Tax Yield = Coupon Rate × (1 - Tax Rate) + Capital Gains Yield
+                                <h4>Detailed Payment Schedule</h4>
+                                <div style="overflow-x: auto;">
+                                    <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                                        <thead>
+                                            <tr style="background: #f8f9fa;">
+                                                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Date</th>
+                                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Gross Coupon</th>
+                                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Income Tax</th>
+                                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Net Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                        \`;
+                        
+                        gilt.couponSchedule.forEach(payment => {
+                            const paymentDate = new Date(payment.date).toLocaleDateString('en-GB');
+                            scheduleHTML += \`
+                                <tr>
+                                    <td style="border: 1px solid #ddd; padding: 8px;">\${paymentDate}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${payment.grossAmount.toFixed(2)}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${payment.taxAmount.toFixed(2)}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${payment.afterTaxAmount.toFixed(2)}</strong></td>
+                                </tr>
+                            \`;
+                        });
+                        
+                        // Add principal repayment row
+                        const maturityDate = new Date(gilt.maturityDate).toLocaleDateString('en-GB');
+                        const principalAmount = currentSettings.investmentAmount / gilt.dirtyPrice * 100;
+                        scheduleHTML += \`
+                            <tr style="background: #e8f5e8;">
+                                <td style="border: 1px solid #ddd; padding: 8px;"><strong>\${maturityDate}</strong></td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;" colspan="2"><strong>Principal Repayment (Tax-Free)</strong></td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${principalAmount.toFixed(2)}</strong></td>
+                            </tr>
+                        \`;
+                        
+                        scheduleHTML += \`
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                            <div class="calculation-step">
-                                <h4>For \${gilt.name} (Tax Rate: \${taxRate}%):</h4>
-                                <div class="calculation-formula">
-                                    After-Tax Coupon = \${gilt.couponRate.toFixed(2)}% × (1 - 0.\${taxRate}) = \${(gilt.couponRate * (1 - taxRate/100)).toFixed(2)}%
-                                </div>
-                                \${gilt.cleanPrice !== 100 ? \`
+                        \`;
+                    }
+                    
+                    contentHTML = \`
+                        <div class="calculation-step">
+                            <h4>After-Tax Yield for \${gilt.name}</h4>
+                            <p>This shows the Internal Rate of Return (IRR) calculated using actual payment dates and tax impacts.</p>
+                        </div>
+                        \${scheduleHTML}
+                        <div class="calculation-step">
+                            <h4>Calculation Method:</h4>
+                            <p><strong>Method:</strong> IRR calculation using Newton-Raphson method</p>
+                            <p><strong>Your Investment:</strong> £\${formatCurrency(currentSettings.investmentAmount)}</p>
+                            <p><strong>Purchase Price:</strong> £\${gilt.dirtyPrice.toFixed(6)} per £100 (including accrued interest)</p>
+                            <p><strong>Your Tax Rate:</strong> \${currentSettings.taxBracket.replace('_', ' ')} (\${getCurrentTaxRate()}%)</p>
+                        </div>
+                        <div class="calculation-step" style="background: #f8f9fa; border-left: 4px solid #007bff; padding: 15px;">
+                            <h4>Final After-Tax Yield:</h4>
+                            <p><strong>\${gilt.afterTaxYield.toFixed(3)}%</strong> per year</p>
+                            <p>This accounts for:</p>
+                            <ul>
+                                <li>Income tax on all coupon payments</li>
+                                <li>Tax-free principal repayment at maturity</li>
+                                <li>Exact timing of all cash flows</li>
+                                <li>Your actual investment amount</li>
+                            </ul>
+                        </div>
+                    \`;
                                     <div class="calculation-formula">
                                         Capital Gains = (\${((100 - gilt.cleanPrice) / gilt.yearsToMaturity).toFixed(2)}% per year, tax-free)
                                     </div>
