@@ -2544,21 +2544,39 @@ export async function renderHomePage(request, env) {
         document.addEventListener('input', function(e) {
             if (e.target && e.target.id === 'dealingCharge') {
                 console.log('=== DEALING CHARGE CHANGED (DELEGATION) ===');
-                const dealingCharge = parseFloat(e.target.value) || 5;
-                console.log('New dealing charge:', dealingCharge);
+                console.log('Raw input value:', e.target.value);
+                console.log('Input type:', typeof e.target.value);
+                
+                // Handle empty string and convert properly
+                let dealingCharge;
+                if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+                    dealingCharge = 5; // Default when empty
+                } else {
+                    dealingCharge = parseFloat(e.target.value);
+                    if (isNaN(dealingCharge)) {
+                        dealingCharge = 5; // Default when invalid
+                    }
+                }
+                
+                console.log('Parsed dealing charge:', dealingCharge);
                 console.log('Previous dealing charge:', currentSettings.dealingCharge);
                 
-                currentSettings.dealingCharge = dealingCharge;
-                
-                // Clear cache since dealing charge affects calculations
-                clearAllCaches();
-                console.log('Cache cleared for dealing charge update');
-                
-                if (currentGiltData.length > 0) {
-                    console.log('Recalculating with new dealing charge...');
-                    calculateTaxEfficiency();
+                // Only update if the value actually changed
+                if (currentSettings.dealingCharge !== dealingCharge) {
+                    currentSettings.dealingCharge = dealingCharge;
+                    
+                    // Clear cache since dealing charge affects calculations
+                    clearAllCaches();
+                    console.log('Cache cleared for dealing charge update');
+                    
+                    if (currentGiltData.length > 0) {
+                        console.log('Recalculating with new dealing charge...');
+                        calculateTaxEfficiency();
+                    } else {
+                        console.log('No gilt data available for recalculation');
+                    }
                 } else {
-                    console.log('No gilt data available for recalculation');
+                    console.log('Dealing charge unchanged, skipping recalculation');
                 }
             }
         });

@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-z2kMNu/checked-fetch.js
+// .wrangler/tmp/bundle-mwytyU/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-z2kMNu/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-mwytyU/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-z2kMNu/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-mwytyU/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-z2kMNu/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-mwytyU/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5794,21 +5794,39 @@ async function renderHomePage(request, env) {
         document.addEventListener('input', function(e) {
             if (e.target && e.target.id === 'dealingCharge') {
                 console.log('=== DEALING CHARGE CHANGED (DELEGATION) ===');
-                const dealingCharge = parseFloat(e.target.value) || 5;
-                console.log('New dealing charge:', dealingCharge);
+                console.log('Raw input value:', e.target.value);
+                console.log('Input type:', typeof e.target.value);
+                
+                // Handle empty string and convert properly
+                let dealingCharge;
+                if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+                    dealingCharge = 5; // Default when empty
+                } else {
+                    dealingCharge = parseFloat(e.target.value);
+                    if (isNaN(dealingCharge)) {
+                        dealingCharge = 5; // Default when invalid
+                    }
+                }
+                
+                console.log('Parsed dealing charge:', dealingCharge);
                 console.log('Previous dealing charge:', currentSettings.dealingCharge);
                 
-                currentSettings.dealingCharge = dealingCharge;
-                
-                // Clear cache since dealing charge affects calculations
-                clearAllCaches();
-                console.log('Cache cleared for dealing charge update');
-                
-                if (currentGiltData.length > 0) {
-                    console.log('Recalculating with new dealing charge...');
-                    calculateTaxEfficiency();
+                // Only update if the value actually changed
+                if (currentSettings.dealingCharge !== dealingCharge) {
+                    currentSettings.dealingCharge = dealingCharge;
+                    
+                    // Clear cache since dealing charge affects calculations
+                    clearAllCaches();
+                    console.log('Cache cleared for dealing charge update');
+                    
+                    if (currentGiltData.length > 0) {
+                        console.log('Recalculating with new dealing charge...');
+                        calculateTaxEfficiency();
+                    } else {
+                        console.log('No gilt data available for recalculation');
+                    }
                 } else {
-                    console.log('No gilt data available for recalculation');
+                    console.log('Dealing charge unchanged, skipping recalculation');
                 }
             }
         });
@@ -6590,7 +6608,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-z2kMNu/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-mwytyU/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6624,7 +6642,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-z2kMNu/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-mwytyU/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
