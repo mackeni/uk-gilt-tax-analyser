@@ -994,8 +994,9 @@ export async function renderHomePage(request, env) {
                 warningDiv.id = 'rate-limit-warning';
                 
                 const mainContent = document.querySelector('.main-content');
-                if (mainContent && !document.getElementById('rate-limit-warning')) {
-                    mainContent.appendChild(warningDiv);
+                const controlsSection = document.querySelector('.controls-section');
+                if (mainContent && controlsSection && !document.getElementById('rate-limit-warning')) {
+                    mainContent.insertBefore(warningDiv, controlsSection);
                 }
                 
                 console.log('Calling calculateTaxEfficiency...');
@@ -1241,14 +1242,13 @@ export async function renderHomePage(request, env) {
                     
                     // Show warning but continue with fallback data
                     const warningDiv = document.createElement('div');
+                    warningDiv.id = 'api-warning';
                     warningDiv.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 14px;';
                     warningDiv.innerHTML = '⚠️ Using cached data due to API rate limits. Data may not be real-time.';
                     const mainContent = document.querySelector('.main-content');
-                    const giltTable = document.querySelector('.gilt-table');
-                    if (mainContent && giltTable) {
-                        mainContent.insertBefore(warningDiv, giltTable);
-                    } else {
-                        document.body.appendChild(warningDiv);
+                    const controlsSection = document.querySelector('.controls-section');
+                    if (mainContent && controlsSection && !document.getElementById('api-warning')) {
+                        mainContent.insertBefore(warningDiv, controlsSection);
                     }
                     
                     calculateTaxEfficiency();
