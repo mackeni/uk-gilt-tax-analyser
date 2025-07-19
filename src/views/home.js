@@ -890,6 +890,15 @@ export async function renderHomePage(request, env) {
                             <p><strong>Capital Gains Tax on Gilts:</strong> 0% (exempt)</p>
                         </div>
                     </div>
+                    
+                    <div class="tax-info" id="transactionCostInfo" style="background: #fff3cd; border: 1px solid #ffeaa7; margin-top: 10px;">
+                        <h4>Transaction Cost Summary:</h4>
+                        <div id="transactionCostDetails">
+                            <p><strong>Broker:</strong> <span id="brokerDisplay">Low Cost (£5 per trade)</span></p>
+                            <p><strong>Total Costs:</strong> <span id="totalCostDisplay">£15.00</span></p>
+                            <p><small>Includes purchase, sale, and holding fees</small></p>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="sidebar">
@@ -2452,6 +2461,24 @@ export async function renderHomePage(request, env) {
             initializeApp();
         });
         
+        function updateTransactionCostDisplay() {
+            const transactionCosts = getTransactionCosts();
+            const investmentAmount = parseFloat(document.getElementById('investmentAmount').value) || 10000;
+            const baseInvestment = investmentAmount; // Simplified for display
+            const totalCosts = transactionCosts.totalPurchaseCost + transactionCosts.totalSaleCost + 
+                             (baseInvestment * transactionCosts.annualHoldingFeeRate * 2); // Assume 2-year average
+            
+            const brokerLabels = {
+                'low_cost': 'Low Cost (£5 per trade)',
+                'percentage': 'Percentage Based (0.1%)',
+                'traditional': 'Traditional (£11.95 per trade)',
+                'custom': 'Custom'
+            };
+            
+            document.getElementById('brokerDisplay').textContent = brokerLabels[transactionCosts.brokerType] || 'Custom';
+            document.getElementById('totalCostDisplay').textContent = formatCurrency(totalCosts);
+        }
+        
         function handleBrokerTypeChange() {
             const brokerType = document.getElementById('brokerType').value;
             const customCosts = document.getElementById('customCosts');
@@ -2462,7 +2489,8 @@ export async function renderHomePage(request, env) {
                 customCosts.style.display = 'none';
             }
             
-            // Recalculate with new transaction costs
+            // Update display and recalculate
+            updateTransactionCostDisplay();
             calculateTaxEfficiency();
         }
         
@@ -2472,11 +2500,29 @@ export async function renderHomePage(request, env) {
             
             // Set up transaction cost event listeners
             document.getElementById('brokerType').addEventListener('change', handleBrokerTypeChange);
-            document.getElementById('bidAskSpread').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
-            document.getElementById('annualHoldingFee').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
-            document.getElementById('purchaseFee').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
-            document.getElementById('saleFee').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
-            document.getElementById('percentageFee').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
+            document.getElementById('bidAskSpread').addEventListener('input', debounce(() => {
+                updateTransactionCostDisplay();
+                calculateTaxEfficiency();
+            }, 500));
+            document.getElementById('annualHoldingFee').addEventListener('input', debounce(() => {
+                updateTransactionCostDisplay();
+                calculateTaxEfficiency();
+            }, 500));
+            document.getElementById('purchaseFee').addEventListener('input', debounce(() => {
+                updateTransactionCostDisplay();
+                calculateTaxEfficiency();
+            }, 500));
+            document.getElementById('saleFee').addEventListener('input', debounce(() => {
+                updateTransactionCostDisplay();
+                calculateTaxEfficiency();
+            }, 500));
+            document.getElementById('percentageFee').addEventListener('input', debounce(() => {
+                updateTransactionCostDisplay();
+                calculateTaxEfficiency();
+            }, 500));
+            
+            // Initialize transaction cost display
+            updateTransactionCostDisplay();
             
             // Set up other event listeners (existing ones)
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
