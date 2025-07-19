@@ -1847,7 +1847,11 @@ export async function renderHomePage(request, env) {
                             <h4>Step 2: Total Cash from Savings Account</h4>
                             <p><strong>Initial Investment:</strong> £\${investmentAmount.toFixed(2)}</p>
                             <p><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}%</p>
-                            <p><strong>Investment Period:</strong> \${Math.round((gilt.yearsToMaturity || 0) * 365.25)} days</p>
+                            <p><strong>Investment Period:</strong> \${(() => {
+                                const today = new Date();
+                                const endDate = new Date(today.getTime() + ((gilt.yearsToMaturity || 0) * 365.25 * 24 * 60 * 60 * 1000));
+                                return Math.round((endDate - today) / (24 * 60 * 60 * 1000));
+                            })()} days</p>
                             <p><strong>Total Cash Received:</strong> £\${savingsTotalCash.toFixed(2)}</p>
                             
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
