@@ -1399,14 +1399,19 @@ export async function renderHomePage(request, env) {
                 { name: "Treasury 4.75% 2030", couponRate: 4.75, cleanPrice: 103.37, currentYield: 4.046, maturityDate: "2030-12-07" }
             ];
             
+            // Pre-calculate common values once for all gilts
+            const todayTime = today.getTime();
+            const msPerYear = 365.25 * 24 * 60 * 60 * 1000;
+            
             const processedData = fallbackData.map(gilt => {
-                // Use cached calculations for fallback data processing
-                const yearsToMaturity = getCachedComplexCalculation('fallbackYears', calculateYearsToMaturity, gilt.maturityDate, today);
+                // Optimized years calculation avoiding expensive date operations
+                const maturityTime = new Date(gilt.maturityDate).getTime();
+                const yearsToMaturity = Math.max(0, (maturityTime - todayTime) / msPerYear);
                 
                 // Calculate basic accrued interest using consolidated function with caching
                 const lastPaymentDate = getCachedComplexCalculation('fallbackLastCoupon', findLastCouponDate, gilt.maturityDate, today);
                 const accruedInterest = getCachedComplexCalculation('fallbackAccrued', calculateAccruedInterest, gilt.couponRate, lastPaymentDate, today);
-                const dirtyPrice = getCachedComplexCalculation('fallbackDirty', calculateDirtyPrice, gilt.cleanPrice, accruedInterest);
+                const dirtyPrice = gilt.cleanPrice + (accruedInterest || 0);
                 
                 const processedGilt = {
                     ...gilt,
@@ -1542,19 +1547,16 @@ export async function renderHomePage(request, env) {
         
         function calculateTotalCashFromGilt(gilt, unitsOwned, incomeTaxRate) {
             // Use the stored coupon schedule to calculate total cash received
-            if (!gilt.couponSchedule) {
-                return 0;
+            if (!gilt.couponSchedule || gilt.couponSchedule.length === 0) {
+                return unitsOwned; // Just principal repayment
             }
             
-            let totalCash = 0;
+            // Single-pass calculation with optimized loop
+            let totalCash = unitsOwned; // Start with principal repayment
             
-            // Sum all after-tax coupon payments
-            gilt.couponSchedule.forEach(payment => {
-                totalCash += payment.afterTaxAmount;
-            });
-            
-            // Add tax-free principal repayment at maturity
-            totalCash += unitsOwned; // £100 per £100 nominal
+            for (let i = 0; i < gilt.couponSchedule.length; i++) {
+                totalCash += gilt.couponSchedule[i].afterTaxAmount;
+            }
             
             return totalCash;
         }
@@ -1631,23 +1633,51 @@ export async function renderHomePage(request, env) {
         }
         
         function calculateIRR(initialInvestment, cashFlows) {
-            // Newton-Raphson method for IRR calculation
-            let rate = 0.05; // Initial guess (5%)
+            // Pre-compute constants and years fractions once
+            const nowTime = Date.now();
+            const msPerYear = 365.25 * 24 * 60 * 60 * 1000;
             const tolerance = 1e-7;
-            const maxIterations = 100;
+            const maxIterations = 50; // Reduced from 100 for efficiency
+            
+            // Pre-calculate years fractions and filter positive cash flows
+            const validCashFlows = [];
+            let totalCashFlow = 0;
+            let totalWeightedYears = 0;
+            
+            for (let i = 0; i < cashFlows.length; i++) {
+                const cf = cashFlows[i];
+                const yearsFraction = (cf.date.getTime() - nowTime) / msPerYear;
+                if (yearsFraction > 0) {
+                    validCashFlows.push({
+                        amount: cf.amount,
+                        years: yearsFraction
+                    });
+                    totalCashFlow += cf.amount;
+                    totalWeightedYears += yearsFraction;
+                }
+            }
+            
+            if (validCashFlows.length === 0) {
+                return 0; // No valid future cash flows
+            }
+            
+            // Newton-Raphson method with optimized calculations
+            let rate = 0.05; // Initial guess (5%)
             
             for (let i = 0; i < maxIterations; i++) {
                 let npv = -initialInvestment;
                 let npvDerivative = 0;
+                const onePlusRate = 1 + rate;
                 
-                cashFlows.forEach(cf => {
-                    const yearsFraction = (cf.date - new Date()) / (365.25 * 24 * 60 * 60 * 1000);
-                    if (yearsFraction > 0) {
-                        const discountFactor = Math.pow(1 + rate, yearsFraction);
-                        npv += cf.amount / discountFactor;
-                        npvDerivative -= cf.amount * yearsFraction / (discountFactor * (1 + rate));
-                    }
-                });
+                // Single loop with optimized calculations
+                for (let j = 0; j < validCashFlows.length; j++) {
+                    const cf = validCashFlows[j];
+                    const discountFactor = Math.pow(onePlusRate, cf.years);
+                    const discountedValue = cf.amount / discountFactor;
+                    
+                    npv += discountedValue;
+                    npvDerivative -= discountedValue * cf.years / onePlusRate;
+                }
                 
                 if (Math.abs(npv) < tolerance) {
                     return rate;
@@ -1663,14 +1693,9 @@ export async function renderHomePage(request, env) {
                 rate = Math.max(-0.99, Math.min(10, rate));
             }
             
-            // Fallback to simple calculation if IRR doesn't converge
-            const totalCashFlow = cashFlows.reduce((sum, cf) => sum + cf.amount, 0);
-            const avgYears = cashFlows.reduce((sum, cf) => {
-                const years = (cf.date - new Date()) / (365.25 * 24 * 60 * 60 * 1000);
-                return sum + years;
-            }, 0) / cashFlows.length;
-            
-            return ((totalCashFlow - initialInvestment) / initialInvestment) / avgYears;
+            // Optimized fallback calculation
+            const avgYears = totalWeightedYears / validCashFlows.length;
+            return avgYears > 0 ? ((totalCashFlow - initialInvestment) / initialInvestment) / avgYears : 0;
         }
         
         function calculateEquivalentSavingsRate(afterTaxYield, savingsRate, psaAmount, incomeTaxRate, investmentAmount) {
@@ -1695,10 +1720,32 @@ export async function renderHomePage(request, env) {
                 gilt.yearsToMaturity <= durationFilter.max
             );
             
-            // Sort by years to maturity (increasing duration)
-            const sortedResults = filteredResults.sort((a, b) => 
-                a.yearsToMaturity - b.yearsToMaturity
-            );
+            // Combined filtering, sorting, and best gilt finding in single pass
+            const sortedResults = [];
+            let bestGilt = null;
+            let bestYield = -Infinity;
+            
+            for (let i = 0; i < results.length; i++) {
+                const gilt = results[i];
+                if (gilt.yearsToMaturity >= durationFilter.min && gilt.yearsToMaturity <= durationFilter.max) {
+                    // Insert in sorted position (optimized for small arrays)
+                    let insertIndex = sortedResults.length;
+                    for (let j = sortedResults.length - 1; j >= 0; j--) {
+                        if (sortedResults[j].yearsToMaturity <= gilt.yearsToMaturity) {
+                            break;
+                        }
+                        insertIndex = j;
+                    }
+                    sortedResults.splice(insertIndex, 0, gilt);
+                    
+                    // Track best gilt during processing
+                    const yield = gilt.afterTaxYield || 0;
+                    if (yield > bestYield) {
+                        bestYield = yield;
+                        bestGilt = gilt;
+                    }
+                }
+            }
             
             // Update filter count display
             document.getElementById('filteredCount').textContent = sortedResults.length;
@@ -1711,8 +1758,15 @@ export async function renderHomePage(request, env) {
                 return;
             }
             
-            const bestGilt = sortedResults.reduce((best, gilt) => 
-                (gilt.afterTaxYield || 0) > (best.afterTaxYield || 0) ? gilt : best, sortedResults[0]);
+            // Use already computed bestGilt from sorting loop
+            if (!bestGilt && sortedResults.length > 0) {
+                bestGilt = sortedResults[0];
+                for (let i = 1; i < sortedResults.length; i++) {
+                    if ((sortedResults[i].afterTaxYield || 0) > (bestGilt.afterTaxYield || 0)) {
+                        bestGilt = sortedResults[i];
+                    }
+                }
+            }
             
             metricsDiv.innerHTML = \`
                 <div class="metric-card" style="grid-column: 1 / -1; text-align: center; padding: 30px;">
