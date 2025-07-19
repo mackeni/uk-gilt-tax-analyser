@@ -1318,37 +1318,49 @@ export async function renderHomePage(request, env) {
         }
         
         function calculateTotalCashFromSavings(investmentAmount, savingsRate, incomeTaxRate, psaAmount, yearsToMaturity) {
-            // Calculate compound interest with annual tax deductions
-            let totalCash = investmentAmount;
-            let cumulativeTaxableInterest = 0;
+            // Calculate exact compound interest with daily compounding and annual tax deductions
+            const today = new Date();
+            const endDate = new Date(today.getTime() + (yearsToMaturity * 365.25 * 24 * 60 * 60 * 1000));
             
-            for (let year = 1; year <= Math.floor(yearsToMaturity); year++) {
-                const grossInterest = totalCash * (savingsRate / 100);
-                cumulativeTaxableInterest += grossInterest;
+            let currentBalance = investmentAmount;
+            let annualGrossInterest = 0;
+            let currentYear = today.getFullYear();
+            
+            // Daily interest rate (annual rate / days in year)
+            const dailyRate = savingsRate / 100 / 365.25;
+            
+            // Calculate day by day with compound interest
+            let currentDate = new Date(today);
+            
+            while (currentDate < endDate) {
+                // Add daily compound interest
+                const dailyInterest = currentBalance * dailyRate;
+                currentBalance += dailyInterest;
+                annualGrossInterest += dailyInterest;
                 
-                // Calculate tax on cumulative interest above PSA
-                const taxableAmount = Math.max(0, cumulativeTaxableInterest - psaAmount);
-                const totalTax = taxableAmount * incomeTaxRate;
-                const netInterest = cumulativeTaxableInterest - totalTax;
+                // Move to next day
+                currentDate.setDate(currentDate.getDate() + 1);
                 
-                totalCash = investmentAmount + netInterest;
-                cumulativeTaxableInterest = grossInterest; // Reset for next year
+                // Check if we've moved to a new tax year (April 6th in UK)
+                const newYear = currentDate.getFullYear();
+                const isNewTaxYear = (currentDate.getMonth() === 3 && currentDate.getDate() >= 6) && 
+                                   (currentYear !== newYear || (currentDate.getMonth() === 3 && currentDate.getDate() === 6));
+                
+                if (isNewTaxYear || currentDate >= endDate) {
+                    // Calculate tax on this tax year's interest
+                    const taxableInterest = Math.max(0, annualGrossInterest - psaAmount);
+                    const tax = taxableInterest * incomeTaxRate;
+                    
+                    // Deduct tax from balance
+                    currentBalance -= tax;
+                    
+                    // Reset for next tax year
+                    annualGrossInterest = 0;
+                    currentYear = newYear;
+                }
             }
             
-            // Handle partial final year
-            const partialYear = yearsToMaturity - Math.floor(yearsToMaturity);
-            if (partialYear > 0) {
-                const grossInterest = totalCash * (savingsRate / 100) * partialYear;
-                cumulativeTaxableInterest += grossInterest;
-                
-                const taxableAmount = Math.max(0, cumulativeTaxableInterest - psaAmount);
-                const totalTax = taxableAmount * incomeTaxRate;
-                const netInterest = cumulativeTaxableInterest - totalTax;
-                
-                totalCash = investmentAmount + netInterest;
-            }
-            
-            return totalCash;
+            return currentBalance;
         }
         
         function generateCouponSchedule(gilt, unitsOwned, incomeTaxRate) {
