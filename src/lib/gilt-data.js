@@ -115,11 +115,12 @@ export class GiltDataFetcher {
         { name: "Treasury 4.25% 2039", couponRate: 4.25, cleanPrice: 91.8, currentYield: 5.069, maturityDate: "2039-09-07" }
       ];
 
-      // Calculate years to maturity for each gilt
+      // Calculate years to maturity for each gilt using consolidated utility
+      const { calculateYearsToMaturity } = await import('./utils.js');
       const today = new Date();
+      
       return authenticGiltData.map(gilt => {
-        const maturityDate = new Date(gilt.maturityDate);
-        const yearsToMaturity = (maturityDate - today) / (365.25 * 24 * 60 * 60 * 1000);
+        const yearsToMaturity = calculateYearsToMaturity(gilt.maturityDate, today);
         
         return {
           ...gilt,

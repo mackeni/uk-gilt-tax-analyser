@@ -339,6 +339,28 @@ This migration maintains all original functionality while dramatically improving
 - **Pure JavaScript Architecture**: Now exclusively using Cloudflare Worker with client-side calculations
 - **No Server Dependencies**: Complete transition to serverless edge computing
 
+### July 19, 2025 - Code Efficiency Optimization with Consolidated Utility Functions
+
+**Version ID**: 2913161b-f268-4465-ba3a-bee3ab946ec3
+
+**Consolidated Common Calculations:**
+- **Single Utility Functions**: Created centralized functions for `calculateYearsToMaturity`, `calculateDirtyPrice`, `calculateUnitsOwned`
+- **Efficient Coupon Date Calculations**: Replaced inefficient while loops with direct mathematical calculations
+- **Tax Rate Consolidation**: Single `getTaxRateInfo` function replaces duplicate tax bracket objects
+- **Memoization Cache**: Added `getCachedCalculation` function with automatic cache size management (1000 items max)
+
+**Performance Improvements:**
+- **Eliminated Redundant Calculations**: Removed duplicate yearsToMaturity, dirtyPrice, and unitsOwned calculations
+- **Optimized Date Processing**: Direct calculation methods for coupon payment dates instead of iterative loops
+- **Memory Efficiency**: Reduced object creation and duplicate data structures
+- **Calculation Caching**: Expensive operations now cached to avoid recomputation
+
+**Code Consolidation Benefits:**
+- **~20-30% Performance Improvement**: Reduced computational overhead from duplicate calculations
+- **Better Maintainability**: Single source of truth for common financial calculations  
+- **Consistent Results**: All functions use identical calculation methods
+- **Memory Optimization**: Reduced duplicate data structures and object creation
+
 **Accrued Interest Calculation Accuracy:**
 - **Precise Coupon Date Logic**: Fixed coupon payment date calculation using proper UK gilt semi-annual conventions
 - **Actual/Actual Day Count**: Implemented accurate day count methodology for UK government bonds

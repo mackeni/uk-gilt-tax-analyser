@@ -927,6 +927,29 @@ export async function renderHomePage(request, env) {
                    currentSettings.taxBracket === 'higher_rate' ? 40 : 45;
         }
         
+        // Import consolidated utility functions
+        function importUtils() {
+            return import('../lib/utils.js');
+        }
+        
+        // Make utility functions available globally
+        let calculateYearsToMaturity, calculateAccruedInterest, calculateDirtyPrice, 
+            findLastCouponDate, findNextCouponDate, getTaxRateInfo, 
+            calculateUnitsOwned, calculateEquivalentGrossSavingsRate;
+        
+        importUtils().then(utils => {
+            calculateYearsToMaturity = utils.calculateYearsToMaturity;
+            calculateAccruedInterest = utils.calculateAccruedInterest;
+            calculateDirtyPrice = utils.calculateDirtyPrice;
+            findLastCouponDate = utils.findLastCouponDate;
+            findNextCouponDate = utils.findNextCouponDate;
+            getTaxRateInfo = utils.getTaxRateInfo;
+            calculateUnitsOwned = utils.calculateUnitsOwned;
+            calculateEquivalentGrossSavingsRate = utils.calculateEquivalentGrossSavingsRate;
+            
+            console.log('Consolidated utility functions loaded');
+        });
+        
         // IMMEDIATE DEBUG - Check if JavaScript is loading
         console.log('=== JAVASCRIPT FILE STARTED LOADING ===');
         console.log('Current time:', new Date());
@@ -1285,18 +1308,17 @@ export async function renderHomePage(request, env) {
             ];
             
             const processedData = fallbackData.map(gilt => {
-                const maturityDate = new Date(gilt.maturityDate);
-                const yearsToMaturity = (maturityDate - today) / (365.25 * 24 * 60 * 60 * 1000);
+                const yearsToMaturity = calculateYearsToMaturity(gilt.maturityDate, today);
                 
-                // Calculate basic accrued interest and dirty price
-                const daysSinceLastCoupon = 134; // Approximate for demonstration
-                const daysInCouponPeriod = 184; // Semi-annual
-                const accruedInterest = (gilt.couponRate / 2) * (daysSinceLastCoupon / daysInCouponPeriod);
+                // Calculate basic accrued interest using consolidated function
+                const lastPaymentDate = findLastCouponDate(gilt.maturityDate, today);
+                const accruedInterest = calculateAccruedInterest(gilt.couponRate, lastPaymentDate, today);
+                const dirtyPrice = calculateDirtyPrice(gilt.cleanPrice, accruedInterest);
                 
                 const processedGilt = {
                     ...gilt,
                     yearsToMaturity: Math.max(0, yearsToMaturity),
-                    dirtyPrice: gilt.cleanPrice + accruedInterest,
+                    dirtyPrice: dirtyPrice,
                     accruedInterest: accruedInterest
                 };
                 
@@ -1348,14 +1370,8 @@ export async function renderHomePage(request, env) {
         function calculateTaxEfficiencyLocal(giltData, taxBracket, investmentAmount, savingsRate) {
             console.log('Starting local tax calculations...');
             
-            // Tax rates based on bracket
-            const taxRates = {
-                'basic_rate': { income: 20, psa: 1000 },
-                'higher_rate': { income: 40, psa: 500 },
-                'additional_rate': { income: 45, psa: 0 }
-            };
-            
-            const taxInfo = taxRates[taxBracket] || taxRates['additional_rate'];
+            // Use consolidated tax rate function
+            const taxInfo = getTaxRateInfo(taxBracket);
             const incomeTaxRate = taxInfo.income / 100;
             
             // Use confirmed PSA amount if available, otherwise use standard
@@ -1366,14 +1382,14 @@ export async function renderHomePage(request, env) {
             return giltData.map(gilt => {
                 console.log('Processing gilt:', gilt.name);
                 
-                // Calculate units owned
-                const unitsOwned = investmentAmount / gilt.dirtyPrice * 100;
+                // Use consolidated utility functions
+                const unitsOwned = calculateUnitsOwned(investmentAmount, gilt.dirtyPrice);
                 
-                // Calculate after-tax yield using simplified method
+                // Calculate after-tax yield using IRR method
                 const afterTaxYield = calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate);
                 
-                // Calculate equivalent gross savings rate (what savings account would need to match gilt)
-                const equivalentGrossSavingsRate = afterTaxYield / (1 - incomeTaxRate);
+                // Use consolidated equivalent rate calculation
+                const equivalentGrossSavingsRate = calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate);
                 
                 // Calculate precise advantage using actual coupon schedule
                 const giltTotalCashReceived = calculateTotalCashFromGilt(gilt, unitsOwned, incomeTaxRate);
