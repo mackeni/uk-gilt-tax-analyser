@@ -2522,7 +2522,12 @@ export async function renderHomePage(request, env) {
             }, 500));
             
             // Initialize transaction cost display
-            updateTransactionCostDisplay();
+            try {
+                updateTransactionCostDisplay();
+                console.log('Transaction cost display updated successfully');
+            } catch (error) {
+                console.error('Error updating transaction cost display:', error);
+            }
             
             // Set up other event listeners (existing ones)
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
