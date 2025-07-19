@@ -1825,7 +1825,7 @@ export async function renderHomePage(request, env) {
                         
                         <div class="calculation-step">
                             <h4>Your Current Settings</h4>
-                            <p><strong>Investment Amount:</strong> \${formatCurrency(investmentAmount)}</p>
+                            <p><strong>Investment Amount:</strong> £\${investmentAmount.toFixed(2)}</p>
                             <p><strong>Your Tax Bracket:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ').toUpperCase()} (\${modalTaxRate}%)</p>
                             <p><strong>Personal Savings Allowance:</strong> \${formatCurrency(psaAmount)}</p>
                             <p><strong>Savings Account Rate:</strong> \${savingsRate.toFixed(2)}%</p>
@@ -1901,7 +1901,7 @@ export async function renderHomePage(request, env) {
                             </div>
                             <p><strong>Gilt Total Return:</strong> £\${(giltTotalCash - investmentAmount).toFixed(2)} profit</p>
                             <p><strong>Savings Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit</p>
-                            <p><strong>Total Advantage:</strong> £\${extraIncomeTotal.toFixed(2)} over \${(gilt.yearsToMaturity || 0).toFixed(1)} years</p>
+                            <p><strong>Total Advantage:</strong> £\${extraIncomeTotal.toFixed(2)} over \${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
                             <p style="margin-top: 15px; font-weight: bold; color: \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'};">
                                 \${advantagePercent >= 0 ? 
                                     \`This gilt will earn you £\${Math.abs(extraIncomeTotal).toFixed(2)} MORE than a savings account.\` : 
