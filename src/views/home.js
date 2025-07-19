@@ -1257,16 +1257,10 @@ export async function renderHomePage(request, env) {
                 // Calculate equivalent gross savings rate (what savings account would need to match gilt)
                 const equivalentGrossSavingsRate = afterTaxYield / (1 - incomeTaxRate);
                 
-                // Calculate advantage over current savings account
-                const savingsRateDecimal = savingsRate / 100;
-                const annualSavingsInterest = savingsRateDecimal * investmentAmount;
-                const taxableInterest = Math.max(0, annualSavingsInterest - psaAmount);
-                const taxOnSavings = taxableInterest * incomeTaxRate;
-                const netSavingsIncome = annualSavingsInterest - taxOnSavings;
-                
-                const giltAnnualIncome = (afterTaxYield / 100) * investmentAmount;
-                const extraIncomeAnnual = giltAnnualIncome - netSavingsIncome;
-                const extraIncome = extraIncomeAnnual * (gilt.yearsToMaturity || 1);
+                // Calculate precise advantage using actual coupon schedule
+                const giltTotalCashReceived = calculateTotalCashFromGilt(gilt, unitsOwned, incomeTaxRate);
+                const savingsTotalCashReceived = calculateTotalCashFromSavings(investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
+                const extraIncome = giltTotalCashReceived - savingsTotalCashReceived;
                 
                 console.log('Gilt processed:', gilt.name, 'After-tax yield:', afterTaxYield.toFixed(3));
                 
@@ -1302,6 +1296,38 @@ export async function renderHomePage(request, env) {
             // Calculate IRR
             const irr = calculateIRR(initialInvestment, cashFlows);
             return irr * 100; // Convert to percentage
+        }
+        
+        function calculateTotalCashFromGilt(gilt, unitsOwned, incomeTaxRate) {
+            // Use the stored coupon schedule to calculate total cash received
+            if (!gilt.couponSchedule) {
+                return 0;
+            }
+            
+            let totalCash = 0;
+            
+            // Sum all after-tax coupon payments
+            gilt.couponSchedule.forEach(payment => {
+                totalCash += payment.afterTaxAmount;
+            });
+            
+            // Add tax-free principal repayment at maturity
+            totalCash += unitsOwned; // £100 per £100 nominal
+            
+            return totalCash;
+        }
+        
+        function calculateTotalCashFromSavings(investmentAmount, savingsRate, incomeTaxRate, psaAmount, yearsToMaturity) {
+            const annualGrossInterest = (savingsRate / 100) * investmentAmount;
+            const taxableInterest = Math.max(0, annualGrossInterest - psaAmount);
+            const annualTax = taxableInterest * incomeTaxRate;
+            const annualNetInterest = annualGrossInterest - annualTax;
+            
+            // Calculate total over the investment period
+            const totalNetInterest = annualNetInterest * yearsToMaturity;
+            const totalCash = investmentAmount + totalNetInterest; // Principal + interest
+            
+            return totalCash;
         }
         
         function generateCouponSchedule(gilt, unitsOwned, incomeTaxRate) {
@@ -1732,11 +1758,14 @@ export async function renderHomePage(request, env) {
                     const netSavingsIncome = annualSavingsInterest - taxOnSavings;
                     const afterTaxSavingsRate = (netSavingsIncome / investmentAmount) * 100;
                     
+                    // Calculate precise total cash flows
+                    const giltTotalCash = calculateTotalCashFromGilt(gilt, gilt.unitsOwned, modalTaxRate / 100);
+                    const savingsTotalCash = calculateTotalCashFromSavings(investmentAmount, savingsRate, modalTaxRate / 100, psaAmount, gilt.yearsToMaturity);
+                    const extraIncomeTotal = gilt.extraIncome || (giltTotalCash - savingsTotalCash);
+                    
                     const giltReturn = gilt.afterTaxYield || 0;
-                    const giltAnnualIncome = (giltReturn / 100) * investmentAmount;
+                    const afterTaxSavingsRate = (netSavingsIncome / investmentAmount) * 100;
                     const advantagePercent = giltReturn - afterTaxSavingsRate;
-                    const extraIncomeAnnual = giltAnnualIncome - netSavingsIncome;
-                    const extraIncomeTotal = extraIncomeAnnual * (gilt.yearsToMaturity || 1);
                     
                     contentHTML = \`
                         <div class="calculation-step">
@@ -1754,35 +1783,42 @@ export async function renderHomePage(request, env) {
                         </div>
                         
                         <div class="calculation-step">
-                            <h4>Step 1: Gilt Investment Returns</h4>
+                            <h4>Step 1: Total Cash from Gilt Investment</h4>
                             <p><strong>Gilt:</strong> \${gilt.name}</p>
-                            <p><strong>After-Tax Annual Return:</strong> \${giltReturn.toFixed(3)}%</p>
-                            <p><strong>Annual Income from Gilt:</strong> \${formatCurrency(giltAnnualIncome)}</p>
-                            <p><small>• Coupon payments are taxed at \${modalTaxRate}% as income</small></p>
-                            <p><small>• Capital gains/losses on gilts are tax-free</small></p>
+                            <p><strong>Initial Investment:</strong> \${formatCurrency(investmentAmount)}</p>
+                            <p><strong>Total Cash Received:</strong> \${formatCurrency(giltTotalCash)}</p>
+                            <div style="margin-left: 20px; color: #666;">
+                                <p><small>• All coupon payments (after \${modalTaxRate}% income tax)</small></p>
+                                <p><small>• Principal repayment: \${formatCurrency(gilt.unitsOwned || 0)} (tax-free)</small></p>
+                                <p><small>• Based on actual payment schedule with exact dates</small></p>
+                            </div>
                         </div>
                         
                         <div class="calculation-step">
-                            <h4>Step 2: Savings Account Returns</h4>
-                            <p><strong>Gross Annual Interest:</strong> \${formatCurrency(annualSavingsInterest)} (\${savingsRate.toFixed(2)}%)</p>
-                            <p><strong>Less: Personal Savings Allowance:</strong> -\${formatCurrency(Math.min(annualSavingsInterest, psaAmount))}</p>
-                            <p><strong>Taxable Interest:</strong> \${formatCurrency(taxableInterest)}</p>
-                            <p><strong>Tax on Interest (\${modalTaxRate}%):</strong> -\${formatCurrency(taxOnSavings)}</p>
-                            <p><strong>Net Annual Income:</strong> \${formatCurrency(netSavingsIncome)}</p>
-                            <p><strong>Effective Rate:</strong> \${afterTaxSavingsRate.toFixed(3)}%</p>
+                            <h4>Step 2: Total Cash from Savings Account</h4>
+                            <p><strong>Initial Investment:</strong> \${formatCurrency(investmentAmount)}</p>
+                            <p><strong>Savings Rate:</strong> \${savingsRate.toFixed(2)}%</p>
+                            <p><strong>Investment Period:</strong> \${(gilt.yearsToMaturity || 0).toFixed(1)} years</p>
+                            <p><strong>Total Cash Received:</strong> \${formatCurrency(savingsTotalCash)}</p>
+                            <div style="margin-left: 20px; color: #666;">
+                                <p><small>• Annual gross interest: \${formatCurrency(annualSavingsInterest)}</small></p>
+                                <p><small>• Personal Savings Allowance: \${formatCurrency(psaAmount)}</small></p>
+                                <p><small>• Tax on excess interest (\${modalTaxRate}%): \${formatCurrency(taxOnSavings)}</small></p>
+                                <p><small>• Net annual interest: \${formatCurrency(netSavingsIncome)}</small></p>
+                            </div>
                         </div>
                         
                         <div class="calculation-step" style="background: #f8f9fa; border-left: 4px solid \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'}; padding: 15px;">
                             <h4>Step 3: Final Calculation</h4>
                             <div class="calculation-formula" style="background: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                                 <strong>Formula:</strong><br>
-                                Extra Income = (Gilt Annual Income - Savings Annual Income) × Years to Maturity<br><br>
+                                Extra Income = Total Cash from Gilt - Total Cash from Savings<br><br>
                                 <strong>Calculation:</strong><br>
-                                (\${formatCurrency(giltAnnualIncome)} - \${formatCurrency(netSavingsIncome)}) × \${(gilt.yearsToMaturity || 0).toFixed(1)} years<br>
-                                = \${formatCurrency(extraIncomeAnnual)} × \${(gilt.yearsToMaturity || 0).toFixed(1)}<br>
+                                \${formatCurrency(giltTotalCash)} - \${formatCurrency(savingsTotalCash)}<br>
                                 = <strong>\${formatCurrency(extraIncomeTotal)}</strong>
                             </div>
-                            <p><strong>Annual Advantage:</strong> \${formatCurrency(extraIncomeAnnual)} per year</p>
+                            <p><strong>Gilt Total Return:</strong> \${formatCurrency(giltTotalCash - investmentAmount)} profit</p>
+                            <p><strong>Savings Total Return:</strong> \${formatCurrency(savingsTotalCash - investmentAmount)} profit</p>
                             <p><strong>Total Advantage:</strong> \${formatCurrency(extraIncomeTotal)} over \${(gilt.yearsToMaturity || 0).toFixed(1)} years</p>
                             <p style="margin-top: 15px; font-weight: bold; color: \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'};">
                                 \${advantagePercent >= 0 ? 
