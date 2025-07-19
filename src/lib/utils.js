@@ -31,6 +31,10 @@ export function formatCouponRate(rate) {
 }
 
 export function calculateYearsToMaturity(maturityDate, referenceDate = null) {
+  return getCachedCalculation('yearsToMaturity', _calculateYearsToMaturity, maturityDate, referenceDate);
+}
+
+function _calculateYearsToMaturity(maturityDate, referenceDate = null) {
   if (!referenceDate) {
     referenceDate = new Date();
   }
@@ -81,6 +85,10 @@ export function calculateCouponPaymentDates(maturityDate, numPayments = 20) {
 }
 
 export function findLastCouponDate(maturityDate, referenceDate = null) {
+  return getCachedCalculation('lastCouponDate', _findLastCouponDate, maturityDate, referenceDate);
+}
+
+function _findLastCouponDate(maturityDate, referenceDate = null) {
   if (!referenceDate) {
     referenceDate = new Date();
   }
@@ -98,6 +106,10 @@ export function findLastCouponDate(maturityDate, referenceDate = null) {
 }
 
 export function findNextCouponDate(maturityDate, referenceDate = null) {
+  return getCachedCalculation('nextCouponDate', _findNextCouponDate, maturityDate, referenceDate);
+}
+
+function _findNextCouponDate(maturityDate, referenceDate = null) {
   if (!referenceDate) {
     referenceDate = new Date();
   }
@@ -115,6 +127,10 @@ export function findNextCouponDate(maturityDate, referenceDate = null) {
 }
 
 export function calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
+  return getCachedCalculation('accruedInterest', _calculateAccruedInterest, couponRate, lastPaymentDate, settlementDate);
+}
+
+function _calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
   if (!settlementDate) {
     settlementDate = new Date();
   }
@@ -147,26 +163,81 @@ export function calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate
   return afterTaxYield / (1 - incomeTaxRate);
 }
 
-// Memoization cache for expensive calculations
+// Enhanced memoization cache for expensive calculations
 const calculationCache = new Map();
+const cacheStats = { hits: 0, misses: 0 };
 
 export function getCachedCalculation(key, calculationFn, ...args) {
   const cacheKey = `${key}_${JSON.stringify(args)}`;
   
   if (calculationCache.has(cacheKey)) {
+    cacheStats.hits++;
+    console.log(`Cache hit for ${key} (${cacheStats.hits}/${cacheStats.hits + cacheStats.misses} hit rate)`);
     return calculationCache.get(cacheKey);
   }
   
+  cacheStats.misses++;
   const result = calculationFn(...args);
   calculationCache.set(cacheKey, result);
   
   // Limit cache size to prevent memory issues
-  if (calculationCache.size > 1000) {
-    const firstKey = calculationCache.keys().next().value;
-    calculationCache.delete(firstKey);
+  if (calculationCache.size > 2000) {
+    // Remove oldest 500 entries
+    const keysToDelete = Array.from(calculationCache.keys()).slice(0, 500);
+    keysToDelete.forEach(key => calculationCache.delete(key));
+    console.log(`Cache cleanup: removed ${keysToDelete.length} entries`);
   }
   
   return result;
+}
+
+// Cache for complex calculations with TTL (time-to-live)
+const timedCache = new Map();
+
+export function getCachedCalculationWithTTL(key, calculationFn, ttlMs = 300000, ...args) { // 5 minute default TTL
+  const cacheKey = `${key}_${JSON.stringify(args)}`;
+  const now = Date.now();
+  
+  if (timedCache.has(cacheKey)) {
+    const cached = timedCache.get(cacheKey);
+    if (now - cached.timestamp < ttlMs) {
+      console.log(`TTL cache hit for ${key}`);
+      return cached.value;
+    } else {
+      timedCache.delete(cacheKey);
+    }
+  }
+  
+  const result = calculationFn(...args);
+  timedCache.set(cacheKey, { value: result, timestamp: now });
+  
+  // Cleanup expired entries
+  if (timedCache.size > 100) {
+    for (const [k, v] of timedCache.entries()) {
+      if (now - v.timestamp >= ttlMs) {
+        timedCache.delete(k);
+      }
+    }
+  }
+  
+  return result;
+}
+
+export function clearCache() {
+  calculationCache.clear();
+  timedCache.clear();
+  cacheStats.hits = 0;
+  cacheStats.misses = 0;
+  console.log('All caches cleared');
+}
+
+export function getCacheStats() {
+  return {
+    ...cacheStats,
+    cacheSize: calculationCache.size,
+    timedCacheSize: timedCache.size,
+    hitRate: cacheStats.hits / (cacheStats.hits + cacheStats.misses) || 0
+  };
 }
 
 export function sortData(data, sortBy, ascending = true) {

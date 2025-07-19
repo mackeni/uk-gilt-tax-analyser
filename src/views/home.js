@@ -940,7 +940,7 @@ export async function renderHomePage(request, env) {
             return utils;
         }
         
-        // Make utility functions available with error checking
+        // Enhanced utility functions with caching and error checking
         function calculateYearsToMaturity(maturityDate, referenceDate) {
             if (!utilsLoaded) throw new Error('Utils not loaded yet');
             return utils.calculateYearsToMaturity(maturityDate, referenceDate);
@@ -979,6 +979,47 @@ export async function renderHomePage(request, env) {
         function calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate) {
             if (!utilsLoaded) throw new Error('Utils not loaded yet');
             return utils.calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate);
+        }
+        
+        // Cache for complex calculations
+        const complexCalculationCache = new Map();
+        
+        function getCachedComplexCalculation(key, calculationFn, ...args) {
+            const cacheKey = key + '_' + JSON.stringify(args);
+            
+            if (complexCalculationCache.has(cacheKey)) {
+                console.log('Complex calculation cache hit for ' + key);
+                return complexCalculationCache.get(cacheKey);
+            }
+            
+            const result = calculationFn(...args);
+            complexCalculationCache.set(cacheKey, result);
+            
+            // Limit cache size
+            if (complexCalculationCache.size > 500) {
+                const keysToDelete = Array.from(complexCalculationCache.keys()).slice(0, 100);
+                keysToDelete.forEach(k => complexCalculationCache.delete(k));
+            }
+            
+            return result;
+        }
+        
+        function getCacheStats() {
+            if (!utilsLoaded) return null;
+            const utilsStats = utils.getCacheStats ? utils.getCacheStats() : null;
+            return {
+                utilsCache: utilsStats,
+                complexCache: { size: complexCalculationCache.size },
+                total: (utilsStats?.cacheSize || 0) + complexCalculationCache.size
+            };
+        }
+        
+        function clearAllCaches() {
+            complexCalculationCache.clear();
+            if (utilsLoaded && utils.clearCache) {
+                utils.clearCache();
+            }
+            console.log('All caches cleared');
         }
         
         // IMMEDIATE DEBUG - Check if JavaScript is loading
@@ -1346,12 +1387,13 @@ export async function renderHomePage(request, env) {
             ];
             
             const processedData = fallbackData.map(gilt => {
-                const yearsToMaturity = calculateYearsToMaturity(gilt.maturityDate, today);
+                // Use cached calculations for fallback data processing
+                const yearsToMaturity = getCachedComplexCalculation('fallbackYears', calculateYearsToMaturity, gilt.maturityDate, today);
                 
-                // Calculate basic accrued interest using consolidated function
-                const lastPaymentDate = findLastCouponDate(gilt.maturityDate, today);
-                const accruedInterest = calculateAccruedInterest(gilt.couponRate, lastPaymentDate, today);
-                const dirtyPrice = calculateDirtyPrice(gilt.cleanPrice, accruedInterest);
+                // Calculate basic accrued interest using consolidated function with caching
+                const lastPaymentDate = getCachedComplexCalculation('fallbackLastCoupon', findLastCouponDate, gilt.maturityDate, today);
+                const accruedInterest = getCachedComplexCalculation('fallbackAccrued', calculateAccruedInterest, gilt.couponRate, lastPaymentDate, today);
+                const dirtyPrice = getCachedComplexCalculation('fallbackDirty', calculateDirtyPrice, gilt.cleanPrice, accruedInterest);
                 
                 const processedGilt = {
                     ...gilt,
@@ -1430,18 +1472,18 @@ export async function renderHomePage(request, env) {
             return giltData.map(gilt => {
                 console.log('Processing gilt:', gilt.name);
                 
-                // Use consolidated utility functions
-                const unitsOwned = calculateUnitsOwned(investmentAmount, gilt.dirtyPrice);
+                // Use cached calculations for expensive operations
+                const unitsOwned = getCachedComplexCalculation('unitsOwned', calculateUnitsOwned, investmentAmount, gilt.dirtyPrice);
                 
-                // Calculate after-tax yield using IRR method
-                const afterTaxYield = calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate);
+                // Calculate after-tax yield using IRR method with caching
+                const afterTaxYield = getCachedComplexCalculation('afterTaxIRR', calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
                 
-                // Use consolidated equivalent rate calculation
-                const equivalentGrossSavingsRate = calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate);
+                // Use cached equivalent rate calculation
+                const equivalentGrossSavingsRate = getCachedComplexCalculation('equivalentRate', calculateEquivalentGrossSavingsRate, afterTaxYield, incomeTaxRate);
                 
-                // Calculate precise advantage using actual coupon schedule
-                const giltTotalCashReceived = calculateTotalCashFromGilt(gilt, unitsOwned, incomeTaxRate);
-                const savingsTotalCashReceived = calculateTotalCashFromSavings(investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
+                // Calculate precise advantage using actual coupon schedule with caching
+                const giltTotalCashReceived = getCachedComplexCalculation('giltCash', calculateTotalCashFromGilt, gilt, unitsOwned, incomeTaxRate);
+                const savingsTotalCashReceived = getCachedComplexCalculation('savingsCash', calculateTotalCashFromSavings, investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
                 const extraIncome = giltTotalCashReceived - savingsTotalCashReceived;
                 
                 console.log('Gilt processed:', gilt.name, 'After-tax yield:', afterTaxYield.toFixed(3));
@@ -2222,8 +2264,47 @@ export async function renderHomePage(request, env) {
                 }
             });
             
+            // Add cache management and debug buttons
+            addCacheManagementButtons();
+            
             initializeApp();
         });
+        
+        function addCacheManagementButtons() {
+            // Add debug info and cache stats buttons
+            const debugButton = document.createElement('button');
+            debugButton.textContent = '📊 Debug';
+            debugButton.className = 'cache-debug-button';
+            debugButton.style.cssText = 'margin: 2px; padding: 6px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; font-size: 12px;';
+            debugButton.onclick = () => {
+                console.log('=== DEBUG INFO ===');
+                console.log('Current gilt data:', currentGiltData?.length || 0, 'items');
+                console.log('Current results:', currentResults?.length || 0, 'items');
+                console.log('Current settings:', currentSettings);
+                console.log('Duration filter:', durationFilter);
+                const stats = getCacheStats();
+                console.log('Cache stats:', stats);
+                if (stats) {
+                    alert('Cache Stats:\\nUtils Cache: ' + (stats.utilsCache?.cacheSize || 0) + ' items\\nComplex Cache: ' + stats.complexCache.size + ' items\\nTotal Items: ' + stats.total + '\\nHit Rate: ' + (stats.utilsCache?.hitRate * 100 || 0).toFixed(1) + '%');
+                }
+                console.log('==================');
+            };
+            
+            const cacheButton = document.createElement('button');
+            cacheButton.textContent = '🗑️ Clear Cache';
+            cacheButton.className = 'cache-clear-button';
+            cacheButton.style.cssText = 'margin: 2px; padding: 6px 12px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; cursor: pointer; font-size: 12px;';
+            cacheButton.onclick = () => {
+                clearAllCaches();
+                alert('All caches cleared! Calculations will be recomputed on next update.');
+            };
+            
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 1000; display: flex; flex-direction: column;';
+            buttonContainer.appendChild(debugButton);
+            buttonContainer.appendChild(cacheButton);
+            document.body.appendChild(buttonContainer);
+        }
     </script>
 </body>
 </html>

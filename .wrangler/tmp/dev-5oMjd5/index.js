@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-17kNO1/checked-fetch.js
+// .wrangler/tmp/bundle-JGU0b8/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-17kNO1/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-JGU0b8/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2508,6 +2508,7 @@ __export(utils_exports, {
   calculateInvestmentMetrics: () => calculateInvestmentMetrics,
   calculateUnitsOwned: () => calculateUnitsOwned,
   calculateYearsToMaturity: () => calculateYearsToMaturity,
+  clearCache: () => clearCache,
   createDataTable: () => createDataTable,
   debounce: () => debounce,
   filterData: () => filterData,
@@ -2517,7 +2518,9 @@ __export(utils_exports, {
   formatCurrency: () => formatCurrency,
   formatPercentage: () => formatPercentage,
   generateChartData: () => generateChartData,
+  getCacheStats: () => getCacheStats,
   getCachedCalculation: () => getCachedCalculation,
+  getCachedCalculationWithTTL: () => getCachedCalculationWithTTL,
   getTaxRateInfo: () => getTaxRateInfo,
   sortData: () => sortData,
   throttle: () => throttle,
@@ -2543,6 +2546,9 @@ function formatCouponRate(rate) {
   return `${formatted}%`;
 }
 function calculateYearsToMaturity(maturityDate, referenceDate = null) {
+  return getCachedCalculation("yearsToMaturity", _calculateYearsToMaturity, maturityDate, referenceDate);
+}
+function _calculateYearsToMaturity(maturityDate, referenceDate = null) {
   if (!referenceDate) {
     referenceDate = /* @__PURE__ */ new Date();
   }
@@ -2581,6 +2587,9 @@ function calculateCouponPaymentDates(maturityDate, numPayments = 20) {
   return paymentDates;
 }
 function findLastCouponDate(maturityDate, referenceDate = null) {
+  return getCachedCalculation("lastCouponDate", _findLastCouponDate, maturityDate, referenceDate);
+}
+function _findLastCouponDate(maturityDate, referenceDate = null) {
   if (!referenceDate) {
     referenceDate = /* @__PURE__ */ new Date();
   }
@@ -2593,6 +2602,9 @@ function findLastCouponDate(maturityDate, referenceDate = null) {
   return null;
 }
 function findNextCouponDate(maturityDate, referenceDate = null) {
+  return getCachedCalculation("nextCouponDate", _findNextCouponDate, maturityDate, referenceDate);
+}
+function _findNextCouponDate(maturityDate, referenceDate = null) {
   if (!referenceDate) {
     referenceDate = /* @__PURE__ */ new Date();
   }
@@ -2605,6 +2617,9 @@ function findNextCouponDate(maturityDate, referenceDate = null) {
   return new Date(maturityDate);
 }
 function calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
+  return getCachedCalculation("accruedInterest", _calculateAccruedInterest, couponRate, lastPaymentDate, settlementDate);
+}
+function _calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
   if (!settlementDate) {
     settlementDate = /* @__PURE__ */ new Date();
   }
@@ -2631,15 +2646,57 @@ function calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate) {
 function getCachedCalculation(key, calculationFn, ...args) {
   const cacheKey = `${key}_${JSON.stringify(args)}`;
   if (calculationCache.has(cacheKey)) {
+    cacheStats.hits++;
+    console.log(`Cache hit for ${key} (${cacheStats.hits}/${cacheStats.hits + cacheStats.misses} hit rate)`);
     return calculationCache.get(cacheKey);
   }
+  cacheStats.misses++;
   const result = calculationFn(...args);
   calculationCache.set(cacheKey, result);
-  if (calculationCache.size > 1e3) {
-    const firstKey = calculationCache.keys().next().value;
-    calculationCache.delete(firstKey);
+  if (calculationCache.size > 2e3) {
+    const keysToDelete = Array.from(calculationCache.keys()).slice(0, 500);
+    keysToDelete.forEach((key2) => calculationCache.delete(key2));
+    console.log(`Cache cleanup: removed ${keysToDelete.length} entries`);
   }
   return result;
+}
+function getCachedCalculationWithTTL(key, calculationFn, ttlMs = 3e5, ...args) {
+  const cacheKey = `${key}_${JSON.stringify(args)}`;
+  const now = Date.now();
+  if (timedCache.has(cacheKey)) {
+    const cached = timedCache.get(cacheKey);
+    if (now - cached.timestamp < ttlMs) {
+      console.log(`TTL cache hit for ${key}`);
+      return cached.value;
+    } else {
+      timedCache.delete(cacheKey);
+    }
+  }
+  const result = calculationFn(...args);
+  timedCache.set(cacheKey, { value: result, timestamp: now });
+  if (timedCache.size > 100) {
+    for (const [k, v] of timedCache.entries()) {
+      if (now - v.timestamp >= ttlMs) {
+        timedCache.delete(k);
+      }
+    }
+  }
+  return result;
+}
+function clearCache() {
+  calculationCache.clear();
+  timedCache.clear();
+  cacheStats.hits = 0;
+  cacheStats.misses = 0;
+  console.log("All caches cleared");
+}
+function getCacheStats() {
+  return {
+    ...cacheStats,
+    cacheSize: calculationCache.size,
+    timedCacheSize: timedCache.size,
+    hitRate: cacheStats.hits / (cacheStats.hits + cacheStats.misses) || 0
+  };
 }
 function sortData(data, sortBy, ascending = true) {
   return [...data].sort((a, b) => {
@@ -2744,7 +2801,7 @@ function throttle(func, limit) {
     }
   };
 }
-var calculationCache;
+var calculationCache, cacheStats, timedCache;
 var init_utils = __esm({
   "src/lib/utils.js"() {
     init_checked_fetch();
@@ -2753,16 +2810,25 @@ var init_utils = __esm({
     __name(formatPercentage, "formatPercentage");
     __name(formatCouponRate, "formatCouponRate");
     __name(calculateYearsToMaturity, "calculateYearsToMaturity");
+    __name(_calculateYearsToMaturity, "_calculateYearsToMaturity");
     __name(calculateDirtyPrice, "calculateDirtyPrice");
     __name(calculateUnitsOwned, "calculateUnitsOwned");
     __name(calculateCouponPaymentDates, "calculateCouponPaymentDates");
     __name(findLastCouponDate, "findLastCouponDate");
+    __name(_findLastCouponDate, "_findLastCouponDate");
     __name(findNextCouponDate, "findNextCouponDate");
+    __name(_findNextCouponDate, "_findNextCouponDate");
     __name(calculateAccruedInterest, "calculateAccruedInterest");
+    __name(_calculateAccruedInterest, "_calculateAccruedInterest");
     __name(getTaxRateInfo, "getTaxRateInfo");
     __name(calculateEquivalentGrossSavingsRate, "calculateEquivalentGrossSavingsRate");
     calculationCache = /* @__PURE__ */ new Map();
+    cacheStats = { hits: 0, misses: 0 };
     __name(getCachedCalculation, "getCachedCalculation");
+    timedCache = /* @__PURE__ */ new Map();
+    __name(getCachedCalculationWithTTL, "getCachedCalculationWithTTL");
+    __name(clearCache, "clearCache");
+    __name(getCacheStats, "getCacheStats");
     __name(sortData, "sortData");
     __name(filterData, "filterData");
     __name(generateChartData, "generateChartData");
@@ -2774,11 +2840,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-17kNO1/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-JGU0b8/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-17kNO1/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-JGU0b8/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4118,7 +4184,7 @@ async function renderHomePage(request, env) {
             return utils;
         }
         
-        // Make utility functions available with error checking
+        // Enhanced utility functions with caching and error checking
         function calculateYearsToMaturity(maturityDate, referenceDate) {
             if (!utilsLoaded) throw new Error('Utils not loaded yet');
             return utils.calculateYearsToMaturity(maturityDate, referenceDate);
@@ -4157,6 +4223,47 @@ async function renderHomePage(request, env) {
         function calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate) {
             if (!utilsLoaded) throw new Error('Utils not loaded yet');
             return utils.calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate);
+        }
+        
+        // Cache for complex calculations
+        const complexCalculationCache = new Map();
+        
+        function getCachedComplexCalculation(key, calculationFn, ...args) {
+            const cacheKey = key + '_' + JSON.stringify(args);
+            
+            if (complexCalculationCache.has(cacheKey)) {
+                console.log('Complex calculation cache hit for ' + key);
+                return complexCalculationCache.get(cacheKey);
+            }
+            
+            const result = calculationFn(...args);
+            complexCalculationCache.set(cacheKey, result);
+            
+            // Limit cache size
+            if (complexCalculationCache.size > 500) {
+                const keysToDelete = Array.from(complexCalculationCache.keys()).slice(0, 100);
+                keysToDelete.forEach(k => complexCalculationCache.delete(k));
+            }
+            
+            return result;
+        }
+        
+        function getCacheStats() {
+            if (!utilsLoaded) return null;
+            const utilsStats = utils.getCacheStats ? utils.getCacheStats() : null;
+            return {
+                utilsCache: utilsStats,
+                complexCache: { size: complexCalculationCache.size },
+                total: (utilsStats?.cacheSize || 0) + complexCalculationCache.size
+            };
+        }
+        
+        function clearAllCaches() {
+            complexCalculationCache.clear();
+            if (utilsLoaded && utils.clearCache) {
+                utils.clearCache();
+            }
+            console.log('All caches cleared');
         }
         
         // IMMEDIATE DEBUG - Check if JavaScript is loading
@@ -4524,12 +4631,13 @@ async function renderHomePage(request, env) {
             ];
             
             const processedData = fallbackData.map(gilt => {
-                const yearsToMaturity = calculateYearsToMaturity(gilt.maturityDate, today);
+                // Use cached calculations for fallback data processing
+                const yearsToMaturity = getCachedComplexCalculation('fallbackYears', calculateYearsToMaturity, gilt.maturityDate, today);
                 
-                // Calculate basic accrued interest using consolidated function
-                const lastPaymentDate = findLastCouponDate(gilt.maturityDate, today);
-                const accruedInterest = calculateAccruedInterest(gilt.couponRate, lastPaymentDate, today);
-                const dirtyPrice = calculateDirtyPrice(gilt.cleanPrice, accruedInterest);
+                // Calculate basic accrued interest using consolidated function with caching
+                const lastPaymentDate = getCachedComplexCalculation('fallbackLastCoupon', findLastCouponDate, gilt.maturityDate, today);
+                const accruedInterest = getCachedComplexCalculation('fallbackAccrued', calculateAccruedInterest, gilt.couponRate, lastPaymentDate, today);
+                const dirtyPrice = getCachedComplexCalculation('fallbackDirty', calculateDirtyPrice, gilt.cleanPrice, accruedInterest);
                 
                 const processedGilt = {
                     ...gilt,
@@ -4608,18 +4716,18 @@ async function renderHomePage(request, env) {
             return giltData.map(gilt => {
                 console.log('Processing gilt:', gilt.name);
                 
-                // Use consolidated utility functions
-                const unitsOwned = calculateUnitsOwned(investmentAmount, gilt.dirtyPrice);
+                // Use cached calculations for expensive operations
+                const unitsOwned = getCachedComplexCalculation('unitsOwned', calculateUnitsOwned, investmentAmount, gilt.dirtyPrice);
                 
-                // Calculate after-tax yield using IRR method
-                const afterTaxYield = calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate);
+                // Calculate after-tax yield using IRR method with caching
+                const afterTaxYield = getCachedComplexCalculation('afterTaxIRR', calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
                 
-                // Use consolidated equivalent rate calculation
-                const equivalentGrossSavingsRate = calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate);
+                // Use cached equivalent rate calculation
+                const equivalentGrossSavingsRate = getCachedComplexCalculation('equivalentRate', calculateEquivalentGrossSavingsRate, afterTaxYield, incomeTaxRate);
                 
-                // Calculate precise advantage using actual coupon schedule
-                const giltTotalCashReceived = calculateTotalCashFromGilt(gilt, unitsOwned, incomeTaxRate);
-                const savingsTotalCashReceived = calculateTotalCashFromSavings(investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
+                // Calculate precise advantage using actual coupon schedule with caching
+                const giltTotalCashReceived = getCachedComplexCalculation('giltCash', calculateTotalCashFromGilt, gilt, unitsOwned, incomeTaxRate);
+                const savingsTotalCashReceived = getCachedComplexCalculation('savingsCash', calculateTotalCashFromSavings, investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
                 const extraIncome = giltTotalCashReceived - savingsTotalCashReceived;
                 
                 console.log('Gilt processed:', gilt.name, 'After-tax yield:', afterTaxYield.toFixed(3));
@@ -5400,8 +5508,47 @@ async function renderHomePage(request, env) {
                 }
             });
             
+            // Add cache management and debug buttons
+            addCacheManagementButtons();
+            
             initializeApp();
         });
+        
+        function addCacheManagementButtons() {
+            // Add debug info and cache stats buttons
+            const debugButton = document.createElement('button');
+            debugButton.textContent = '\u{1F4CA} Debug';
+            debugButton.className = 'cache-debug-button';
+            debugButton.style.cssText = 'margin: 2px; padding: 6px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; font-size: 12px;';
+            debugButton.onclick = () => {
+                console.log('=== DEBUG INFO ===');
+                console.log('Current gilt data:', currentGiltData?.length || 0, 'items');
+                console.log('Current results:', currentResults?.length || 0, 'items');
+                console.log('Current settings:', currentSettings);
+                console.log('Duration filter:', durationFilter);
+                const stats = getCacheStats();
+                console.log('Cache stats:', stats);
+                if (stats) {
+                    alert('Cache Stats:\\nUtils Cache: ' + (stats.utilsCache?.cacheSize || 0) + ' items\\nComplex Cache: ' + stats.complexCache.size + ' items\\nTotal Items: ' + stats.total + '\\nHit Rate: ' + (stats.utilsCache?.hitRate * 100 || 0).toFixed(1) + '%');
+                }
+                console.log('==================');
+            };
+            
+            const cacheButton = document.createElement('button');
+            cacheButton.textContent = '\u{1F5D1}\uFE0F Clear Cache';
+            cacheButton.className = 'cache-clear-button';
+            cacheButton.style.cssText = 'margin: 2px; padding: 6px 12px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; cursor: pointer; font-size: 12px;';
+            cacheButton.onclick = () => {
+                clearAllCaches();
+                alert('All caches cleared! Calculations will be recomputed on next update.');
+            };
+            
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 1000; display: flex; flex-direction: column;';
+            buttonContainer.appendChild(debugButton);
+            buttonContainer.appendChild(cacheButton);
+            document.body.appendChild(buttonContainer);
+        }
     <\/script>
 </body>
 </html>
@@ -6173,7 +6320,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-17kNO1/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-JGU0b8/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6207,7 +6354,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-17kNO1/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-JGU0b8/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
