@@ -3,7 +3,7 @@
  * Converted from Streamlit application
  */
 
-import { GiltDataFetcher } from './lib/gilt-data-live';
+import { GiltDataFetcher } from './lib/gilt-data.js';
 import { TaxCalculator } from './lib/tax-calculator';
 import { CouponScheduler } from './lib/coupon-scheduler';
 import { formatCurrency, formatPercentage, calculateYearsToMaturity } from './lib/utils';
@@ -69,8 +69,8 @@ async function handleAPIRequest(request, env, path) {
 
 async function getGiltData(request, env) {
   try {
-    const fetcher = new GiltDataFetcher();
-    const data = await fetcher.fetchGiltData();
+    const fetcher = new GiltDataFetcher(env);
+    const data = await fetcher.getGiltData();
     
     return new Response(JSON.stringify(data), {
       headers: { 
