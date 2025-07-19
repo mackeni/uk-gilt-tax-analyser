@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-FgLy3V/checked-fetch.js
+// .wrangler/tmp/bundle-FgpnSZ/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-FgLy3V/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-FgpnSZ/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2418,7 +2418,7 @@ var init_coupon_scheduler = __esm({
       }
       calculateAfterTaxCashFlows(schedule, taxRate) {
         return schedule.map((payment) => {
-          const couponTax = payment.couponAmount * taxRate;
+          const couponTax = Math.round(payment.couponAmount * taxRate * 100) / 100;
           const afterTaxCoupon = payment.couponAmount - couponTax;
           const afterTaxTotal = afterTaxCoupon + payment.principalAmount;
           return {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-FgLy3V/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-FgpnSZ/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-FgLy3V/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-FgpnSZ/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -3067,7 +3067,7 @@ var TaxCalculator = class {
     const afterTaxSchedule = couponSchedule.map((payment) => {
       const scaledCouponAmount = payment.couponAmount * unitsOwned;
       const scaledPrincipalAmount = payment.principalAmount * unitsOwned;
-      const couponTax = scaledCouponAmount * incomeTaxRate;
+      const couponTax = Math.round(scaledCouponAmount * incomeTaxRate * 100) / 100;
       const afterTaxCoupon = scaledCouponAmount - couponTax;
       return {
         paymentDate: payment.paymentDate,
@@ -5366,9 +5366,9 @@ async function renderHomePage(request, env) {
                                     const giltPrice = 100 + (gilt.cleanPrice - 100) * convergenceFactor;
                                     const giltValue = initialUnits * giltPrice / 100;
                                     
-                                    // Calculate monthly charge
+                                    // Calculate monthly charge with 2-decimal rounding
                                     const rawCharge = giltValue * monthlyRate;
-                                    const actualCharge = Math.min(rawCharge, maxMonthlyCharge);
+                                    const actualCharge = Math.round(Math.min(rawCharge, maxMonthlyCharge) * 100) / 100;
                                     
                                     monthlyChargeSchedule.push({
                                         date: chargeDate,
@@ -5665,9 +5665,9 @@ async function renderHomePage(request, env) {
                                 const giltPrice = 100 + (gilt.cleanPrice - 100) * convergenceFactor;
                                 const giltValue = initialUnits * giltPrice / 100;
                                 
-                                // Calculate monthly charge
+                                // Calculate monthly charge with 2-decimal rounding
                                 const rawCharge = giltValue * monthlyRate;
-                                const actualCharge = Math.min(rawCharge, maxMonthlyCharge);
+                                const actualCharge = Math.round(Math.min(rawCharge, maxMonthlyCharge) * 100) / 100;
                                 totalMonthlyCharges += actualCharge;
                             }
                         }
@@ -6752,7 +6752,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-FgLy3V/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-FgpnSZ/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6786,7 +6786,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-FgLy3V/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-FgpnSZ/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

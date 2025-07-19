@@ -56,7 +56,7 @@ export class TaxCalculator {
     const afterTaxSchedule = couponSchedule.map(payment => {
       const scaledCouponAmount = payment.couponAmount * unitsOwned;
       const scaledPrincipalAmount = payment.principalAmount * unitsOwned;
-      const couponTax = scaledCouponAmount * incomeTaxRate;
+      const couponTax = Math.round(scaledCouponAmount * incomeTaxRate * 100) / 100;
       const afterTaxCoupon = scaledCouponAmount - couponTax;
       
       return {

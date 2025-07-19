@@ -2116,9 +2116,9 @@ export async function renderHomePage(request, env) {
                                     const giltPrice = 100 + (gilt.cleanPrice - 100) * convergenceFactor;
                                     const giltValue = initialUnits * giltPrice / 100;
                                     
-                                    // Calculate monthly charge
+                                    // Calculate monthly charge with 2-decimal rounding
                                     const rawCharge = giltValue * monthlyRate;
-                                    const actualCharge = Math.min(rawCharge, maxMonthlyCharge);
+                                    const actualCharge = Math.round(Math.min(rawCharge, maxMonthlyCharge) * 100) / 100;
                                     
                                     monthlyChargeSchedule.push({
                                         date: chargeDate,
@@ -2415,9 +2415,9 @@ export async function renderHomePage(request, env) {
                                 const giltPrice = 100 + (gilt.cleanPrice - 100) * convergenceFactor;
                                 const giltValue = initialUnits * giltPrice / 100;
                                 
-                                // Calculate monthly charge
+                                // Calculate monthly charge with 2-decimal rounding
                                 const rawCharge = giltValue * monthlyRate;
-                                const actualCharge = Math.min(rawCharge, maxMonthlyCharge);
+                                const actualCharge = Math.round(Math.min(rawCharge, maxMonthlyCharge) * 100) / 100;
                                 totalMonthlyCharges += actualCharge;
                             }
                         }

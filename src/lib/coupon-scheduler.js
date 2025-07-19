@@ -47,7 +47,7 @@ export class CouponScheduler {
 
   calculateAfterTaxCashFlows(schedule, taxRate) {
     return schedule.map(payment => {
-      const couponTax = payment.couponAmount * taxRate;
+      const couponTax = Math.round(payment.couponAmount * taxRate * 100) / 100;
       const afterTaxCoupon = payment.couponAmount - couponTax;
       const afterTaxTotal = afterTaxCoupon + payment.principalAmount;
       
