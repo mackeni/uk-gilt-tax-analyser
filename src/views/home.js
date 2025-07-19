@@ -2546,7 +2546,9 @@ export async function renderHomePage(request, env) {
             
             // Load initial data
             loadGiltData();
-        });
+        }
+        
+
         
         function addCacheManagementButtons() {
             // Add debug info and cache stats buttons
@@ -2563,7 +2565,7 @@ export async function renderHomePage(request, env) {
                 const stats = getCacheStats();
                 console.log('Cache stats:', stats);
                 if (stats) {
-                    alert('Cache Stats:\\nUtils Cache: ' + (stats.utilsCache?.cacheSize || 0) + ' items\\nComplex Cache: ' + stats.complexCache.size + ' items\\nTotal Items: ' + stats.total + '\\nHit Rate: ' + (stats.utilsCache?.hitRate * 100 || 0).toFixed(1) + '%');
+                    alert('Cache Stats:\nUtils Cache: ' + (stats.utilsCache?.cacheSize || 0) + ' items\nComplex Cache: ' + stats.complexCache.size + ' items\nTotal Items: ' + stats.total + '\nHit Rate: ' + (stats.utilsCache?.hitRate * 100 || 0).toFixed(1) + '%');
                 }
                 console.log('==================');
             };
