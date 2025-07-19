@@ -16,6 +16,11 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     
+    // Handle lib files (JavaScript modules)
+    if (path.startsWith('/lib/')) {
+      return await handleLibFile(request, env, path);
+    }
+    
     // Handle static files
     if (path.startsWith('/static/')) {
       return await handleStaticFile(request, env);
@@ -37,6 +42,196 @@ export default {
     }
   },
 };
+
+async function handleLibFile(request, env, path) {
+  // Serve JavaScript module files
+  if (path === '/lib/utils.js') {
+    const utilsContent = `
+// UK Gilt Tax Efficiency Analyser - Utility Functions
+export function formatCurrency(amount, maxDigits = 2) {
+    if (amount === 0) return '£0.00';
+    if (!amount && amount !== 0) return 'N/A';
+    
+    const absAmount = Math.abs(amount);
+    const sign = amount < 0 ? '-' : '';
+    
+    if (absAmount >= 1e9) {
+        return \`\${sign}£\${(absAmount / 1e9).toFixed(maxDigits)}B\`;
+    } else if (absAmount >= 1e6) {
+        return \`\${sign}£\${(absAmount / 1e6).toFixed(maxDigits)}M\`;
+    } else if (absAmount >= 1e3 && maxDigits <= 2) {
+        return \`\${sign}£\${absAmount.toFixed(2).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',')}\`;
+    } else {
+        return \`\${sign}£\${absAmount.toFixed(2).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',')}\`;
+    }
+}
+
+export function formatPercentage(rate, digits = 2) {
+    if (rate === 0) return '0.00%';
+    if (!rate && rate !== 0) return 'N/A';
+    
+    const percentage = rate * 100;
+    return \`\${percentage.toFixed(digits)}%\`;
+}
+
+export function formatCouponRate(rate) {
+    if (!rate && rate !== 0) return 'N/A';
+    
+    // Show up to 3 decimal places but remove trailing zeros
+    const formatted = rate.toFixed(3).replace(/\\.?0+$/, '');
+    return \`\${formatted}%\`;
+}
+
+export function calculateYearsToMaturity(maturityDate, referenceDate = null) {
+    if (!referenceDate) {
+        referenceDate = new Date();
+    }
+    
+    const maturity = typeof maturityDate === 'string' ? new Date(maturityDate) : maturityDate;
+    
+    if (isNaN(maturity.getTime())) {
+        return NaN;
+    }
+    
+    const timeDifference = maturity - referenceDate;
+    const years = timeDifference / (1000 * 60 * 60 * 24 * 365.25);
+    
+    return Math.max(0, years);
+}
+
+export function calculateDirtyPrice(cleanPrice, accruedInterest) {
+    if (isNaN(cleanPrice) || isNaN(accruedInterest)) {
+        return cleanPrice || 0;
+    }
+    return cleanPrice + accruedInterest;
+}
+
+export function calculateUnitsOwned(investmentAmount, dirtyPrice) {
+    if (isNaN(investmentAmount) || isNaN(dirtyPrice) || dirtyPrice === 0) {
+        return 0;
+    }
+    return (investmentAmount / dirtyPrice) * 100;
+}
+
+export function calculateCouponPaymentDates(maturityDate, numPayments = 20) {
+    const maturity = new Date(maturityDate);
+    const paymentDates = [];
+    
+    // Calculate payments going backwards from maturity (more efficient than loop)
+    for (let i = 0; i < numPayments; i++) {
+        const paymentDate = new Date(maturity);
+        paymentDate.setMonth(maturity.getMonth() - (i * 6));
+        
+        if (paymentDate > new Date('2020-01-01')) {
+            paymentDates.unshift(paymentDate);
+        } else {
+            break;
+        }
+    }
+    
+    return paymentDates;
+}
+
+export function findLastCouponDate(maturityDate, referenceDate = null) {
+    if (!referenceDate) {
+        referenceDate = new Date();
+    }
+    
+    const paymentDates = calculateCouponPaymentDates(maturityDate);
+    
+    // Find last payment before reference date (more efficient than loop)
+    for (let i = paymentDates.length - 1; i >= 0; i--) {
+        if (paymentDates[i] <= referenceDate) {
+            return paymentDates[i];
+        }
+    }
+    
+    return null;
+}
+
+export function findNextCouponDate(maturityDate, referenceDate = null) {
+    if (!referenceDate) {
+        referenceDate = new Date();
+    }
+    
+    const paymentDates = calculateCouponPaymentDates(maturityDate);
+    
+    // Find first payment after reference date
+    for (let i = 0; i < paymentDates.length; i++) {
+        if (paymentDates[i] > referenceDate) {
+            return paymentDates[i];
+        }
+    }
+    
+    return new Date(maturityDate);
+}
+
+export function calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
+    if (!settlementDate) {
+        settlementDate = new Date();
+    }
+    
+    const lastPayment = new Date(lastPaymentDate);
+    const daysSinceLastPayment = Math.floor((settlementDate - lastPayment) / (1000 * 60 * 60 * 24));
+    
+    // UK gilts use Actual/Actual day count convention with semi-annual payments
+    const daysInSemiAnnualPeriod = 184; // Approximate semi-annual period
+    const accruedFraction = daysSinceLastPayment / daysInSemiAnnualPeriod;
+    
+    // Return semi-annual coupon amount multiplied by accrued fraction
+    return (couponRate / 2) * accruedFraction;
+}
+
+export function getTaxRateInfo(taxBracket) {
+    const taxRates = {
+        'basic_rate': { income: 20, psa: 1000 },
+        'higher_rate': { income: 40, psa: 500 },
+        'additional_rate': { income: 45, psa: 0 }
+    };
+    
+    return taxRates[taxBracket] || taxRates['additional_rate'];
+}
+
+export function calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate) {
+    if (incomeTaxRate >= 1) {
+        return 0;
+    }
+    return afterTaxYield / (1 - incomeTaxRate);
+}
+
+// Memoization cache for expensive calculations
+const calculationCache = new Map();
+
+export function getCachedCalculation(key, calculationFn, ...args) {
+    const cacheKey = \`\${key}_\${JSON.stringify(args)}\`;
+    
+    if (calculationCache.has(cacheKey)) {
+        return calculationCache.get(cacheKey);
+    }
+    
+    const result = calculationFn(...args);
+    calculationCache.set(cacheKey, result);
+    
+    // Limit cache size to prevent memory issues
+    if (calculationCache.size > 1000) {
+        const firstKey = calculationCache.keys().next().value;
+        calculationCache.delete(firstKey);
+    }
+    
+    return result;
+}
+    `;
+    
+    return new Response(utilsContent, {
+      headers: {
+        'Content-Type': 'application/javascript',
+        'Cache-Control': 'public, max-age=3600'
+      }
+    });
+  }
+  
+  return new Response('Library file not found', { status: 404 });
+}
 
 async function handleStaticFile(request, env) {
   // In a real implementation, you'd serve from R2 or KV

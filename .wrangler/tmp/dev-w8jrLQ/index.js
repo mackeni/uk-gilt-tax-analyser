@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-gblSiq/checked-fetch.js
+// .wrangler/tmp/bundle-17kNO1/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-gblSiq/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-17kNO1/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2774,11 +2774,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-gblSiq/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-17kNO1/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-gblSiq/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-17kNO1/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4465,7 +4465,7 @@ async function renderHomePage(request, env) {
                 
                 // Immediately use fallback data when API is rate-limited or unavailable
                 try {
-                    currentGiltData = getFallbackGiltData();
+                    currentGiltData = await getFallbackGiltData();
                     console.log('Successfully loaded fallback data:', currentGiltData.length, 'gilts');
                     
                     loadingDiv.style.display = 'none';
@@ -4492,8 +4492,12 @@ async function renderHomePage(request, env) {
             }
         }
         
-        function getFallbackGiltData() {
+        async function getFallbackGiltData() {
             console.log('Creating fallback gilt data...');
+            
+            // Ensure utils are loaded before processing fallback data
+            await ensureUtilsLoaded();
+            
             const today = new Date();
             console.log('Today date:', today);
             const fallbackData = [
@@ -4581,6 +4585,13 @@ async function renderHomePage(request, env) {
         
         async function calculateTaxEfficiencyLocal(giltData, taxBracket, investmentAmount, savingsRate) {
             console.log('Starting local tax calculations...');
+            console.log('Gilt data type:', typeof giltData, 'Is array:', Array.isArray(giltData), 'Length:', giltData?.length);
+            
+            // Ensure giltData is an array
+            if (!Array.isArray(giltData)) {
+                console.error('giltData is not an array:', giltData);
+                return [];
+            }
             
             // Ensure utils are loaded
             await ensureUtilsLoaded();
@@ -5664,6 +5675,9 @@ var src_default = {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname;
+    if (path.startsWith("/lib/")) {
+      return await handleLibFile(request, env, path);
+    }
     if (path.startsWith("/static/")) {
       return await handleStaticFile(request, env);
     }
@@ -5680,6 +5694,193 @@ var src_default = {
     }
   }
 };
+async function handleLibFile(request, env, path) {
+  if (path === "/lib/utils.js") {
+    const utilsContent = `
+// UK Gilt Tax Efficiency Analyser - Utility Functions
+export function formatCurrency(amount, maxDigits = 2) {
+    if (amount === 0) return '\xA30.00';
+    if (!amount && amount !== 0) return 'N/A';
+    
+    const absAmount = Math.abs(amount);
+    const sign = amount < 0 ? '-' : '';
+    
+    if (absAmount >= 1e9) {
+        return \`\${sign}\xA3\${(absAmount / 1e9).toFixed(maxDigits)}B\`;
+    } else if (absAmount >= 1e6) {
+        return \`\${sign}\xA3\${(absAmount / 1e6).toFixed(maxDigits)}M\`;
+    } else if (absAmount >= 1e3 && maxDigits <= 2) {
+        return \`\${sign}\xA3\${absAmount.toFixed(2).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',')}\`;
+    } else {
+        return \`\${sign}\xA3\${absAmount.toFixed(2).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',')}\`;
+    }
+}
+
+export function formatPercentage(rate, digits = 2) {
+    if (rate === 0) return '0.00%';
+    if (!rate && rate !== 0) return 'N/A';
+    
+    const percentage = rate * 100;
+    return \`\${percentage.toFixed(digits)}%\`;
+}
+
+export function formatCouponRate(rate) {
+    if (!rate && rate !== 0) return 'N/A';
+    
+    // Show up to 3 decimal places but remove trailing zeros
+    const formatted = rate.toFixed(3).replace(/\\.?0+$/, '');
+    return \`\${formatted}%\`;
+}
+
+export function calculateYearsToMaturity(maturityDate, referenceDate = null) {
+    if (!referenceDate) {
+        referenceDate = new Date();
+    }
+    
+    const maturity = typeof maturityDate === 'string' ? new Date(maturityDate) : maturityDate;
+    
+    if (isNaN(maturity.getTime())) {
+        return NaN;
+    }
+    
+    const timeDifference = maturity - referenceDate;
+    const years = timeDifference / (1000 * 60 * 60 * 24 * 365.25);
+    
+    return Math.max(0, years);
+}
+
+export function calculateDirtyPrice(cleanPrice, accruedInterest) {
+    if (isNaN(cleanPrice) || isNaN(accruedInterest)) {
+        return cleanPrice || 0;
+    }
+    return cleanPrice + accruedInterest;
+}
+
+export function calculateUnitsOwned(investmentAmount, dirtyPrice) {
+    if (isNaN(investmentAmount) || isNaN(dirtyPrice) || dirtyPrice === 0) {
+        return 0;
+    }
+    return (investmentAmount / dirtyPrice) * 100;
+}
+
+export function calculateCouponPaymentDates(maturityDate, numPayments = 20) {
+    const maturity = new Date(maturityDate);
+    const paymentDates = [];
+    
+    // Calculate payments going backwards from maturity (more efficient than loop)
+    for (let i = 0; i < numPayments; i++) {
+        const paymentDate = new Date(maturity);
+        paymentDate.setMonth(maturity.getMonth() - (i * 6));
+        
+        if (paymentDate > new Date('2020-01-01')) {
+            paymentDates.unshift(paymentDate);
+        } else {
+            break;
+        }
+    }
+    
+    return paymentDates;
+}
+
+export function findLastCouponDate(maturityDate, referenceDate = null) {
+    if (!referenceDate) {
+        referenceDate = new Date();
+    }
+    
+    const paymentDates = calculateCouponPaymentDates(maturityDate);
+    
+    // Find last payment before reference date (more efficient than loop)
+    for (let i = paymentDates.length - 1; i >= 0; i--) {
+        if (paymentDates[i] <= referenceDate) {
+            return paymentDates[i];
+        }
+    }
+    
+    return null;
+}
+
+export function findNextCouponDate(maturityDate, referenceDate = null) {
+    if (!referenceDate) {
+        referenceDate = new Date();
+    }
+    
+    const paymentDates = calculateCouponPaymentDates(maturityDate);
+    
+    // Find first payment after reference date
+    for (let i = 0; i < paymentDates.length; i++) {
+        if (paymentDates[i] > referenceDate) {
+            return paymentDates[i];
+        }
+    }
+    
+    return new Date(maturityDate);
+}
+
+export function calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
+    if (!settlementDate) {
+        settlementDate = new Date();
+    }
+    
+    const lastPayment = new Date(lastPaymentDate);
+    const daysSinceLastPayment = Math.floor((settlementDate - lastPayment) / (1000 * 60 * 60 * 24));
+    
+    // UK gilts use Actual/Actual day count convention with semi-annual payments
+    const daysInSemiAnnualPeriod = 184; // Approximate semi-annual period
+    const accruedFraction = daysSinceLastPayment / daysInSemiAnnualPeriod;
+    
+    // Return semi-annual coupon amount multiplied by accrued fraction
+    return (couponRate / 2) * accruedFraction;
+}
+
+export function getTaxRateInfo(taxBracket) {
+    const taxRates = {
+        'basic_rate': { income: 20, psa: 1000 },
+        'higher_rate': { income: 40, psa: 500 },
+        'additional_rate': { income: 45, psa: 0 }
+    };
+    
+    return taxRates[taxBracket] || taxRates['additional_rate'];
+}
+
+export function calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate) {
+    if (incomeTaxRate >= 1) {
+        return 0;
+    }
+    return afterTaxYield / (1 - incomeTaxRate);
+}
+
+// Memoization cache for expensive calculations
+const calculationCache = new Map();
+
+export function getCachedCalculation(key, calculationFn, ...args) {
+    const cacheKey = \`\${key}_\${JSON.stringify(args)}\`;
+    
+    if (calculationCache.has(cacheKey)) {
+        return calculationCache.get(cacheKey);
+    }
+    
+    const result = calculationFn(...args);
+    calculationCache.set(cacheKey, result);
+    
+    // Limit cache size to prevent memory issues
+    if (calculationCache.size > 1000) {
+        const firstKey = calculationCache.keys().next().value;
+        calculationCache.delete(firstKey);
+    }
+    
+    return result;
+}
+    `;
+    return new Response(utilsContent, {
+      headers: {
+        "Content-Type": "application/javascript",
+        "Cache-Control": "public, max-age=3600"
+      }
+    });
+  }
+  return new Response("Library file not found", { status: 404 });
+}
+__name(handleLibFile, "handleLibFile");
 async function handleStaticFile(request, env) {
   return new Response("Static file not found", { status: 404 });
 }
@@ -5972,7 +6173,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-gblSiq/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-17kNO1/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6006,7 +6207,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-gblSiq/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-17kNO1/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

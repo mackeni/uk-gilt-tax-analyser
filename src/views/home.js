@@ -1287,7 +1287,7 @@ export async function renderHomePage(request, env) {
                 
                 // Immediately use fallback data when API is rate-limited or unavailable
                 try {
-                    currentGiltData = getFallbackGiltData();
+                    currentGiltData = await getFallbackGiltData();
                     console.log('Successfully loaded fallback data:', currentGiltData.length, 'gilts');
                     
                     loadingDiv.style.display = 'none';
@@ -1314,8 +1314,12 @@ export async function renderHomePage(request, env) {
             }
         }
         
-        function getFallbackGiltData() {
+        async function getFallbackGiltData() {
             console.log('Creating fallback gilt data...');
+            
+            // Ensure utils are loaded before processing fallback data
+            await ensureUtilsLoaded();
+            
             const today = new Date();
             console.log('Today date:', today);
             const fallbackData = [
@@ -1403,6 +1407,13 @@ export async function renderHomePage(request, env) {
         
         async function calculateTaxEfficiencyLocal(giltData, taxBracket, investmentAmount, savingsRate) {
             console.log('Starting local tax calculations...');
+            console.log('Gilt data type:', typeof giltData, 'Is array:', Array.isArray(giltData), 'Length:', giltData?.length);
+            
+            // Ensure giltData is an array
+            if (!Array.isArray(giltData)) {
+                console.error('giltData is not an array:', giltData);
+                return [];
+            }
             
             // Ensure utils are loaded
             await ensureUtilsLoaded();
