@@ -1829,7 +1829,7 @@ export async function renderHomePage(request, env) {
                             <p><strong>Your Tax Bracket:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ').toUpperCase()} (\${modalTaxRate}%)</p>
                             <p><strong>Personal Savings Allowance:</strong> \${formatCurrency(psaAmount)}</p>
                             <p><strong>Savings Account Rate:</strong> \${savingsRate.toFixed(2)}%</p>
-                            <p><strong>Investment Period:</strong> \${(gilt.yearsToMaturity || 0).toFixed(1)} years</p>
+                            <p><strong>Investment Period:</strong> \${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
                         </div>
                         
                         <div class="calculation-step">
@@ -1885,7 +1885,7 @@ export async function renderHomePage(request, env) {
                                 </div>
                                 
                                 <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
-                                    <strong>Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit over \${(gilt.yearsToMaturity || 0).toFixed(6)} years
+                                    <strong>Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit over \${(gilt.yearsToMaturity || 0).toFixed(2)} years
                                 </p>
                             </div>
                         </div>
