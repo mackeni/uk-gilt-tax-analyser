@@ -1910,35 +1910,44 @@ export async function renderHomePage(request, env) {
             
             // If this is the savings breakdown, populate the year-by-year section
             if (type === 'advantage' && gilt) {
-                const breakdownDiv = document.getElementById('savingsBreakdown');
-                if (breakdownDiv) {
-                    let breakdown = '';
-                    let balance = investmentAmount;
-                    const completeYears = Math.floor(gilt.yearsToMaturity);
-                    
-                    for (let year = 1; year <= completeYears; year++) {
-                        const grossInterest = balance * (savingsRate / 100);
-                        const taxableInterest = Math.max(0, grossInterest - psaAmount);
-                        const tax = taxableInterest * (modalTaxRate / 100);
-                        const netInterest = grossInterest - tax;
-                        balance += netInterest;
+                setTimeout(() => {
+                    const breakdownDiv = document.getElementById('savingsBreakdown');
+                    if (breakdownDiv) {
+                        // Use the same variables as defined above for consistency
+                        const savingsRateLocal = currentSettings.savingsRate || 4.5;
+                        const psaAmountLocal = currentSettings.taxBracket === 'basic_rate' ? 1000 : 
+                                            currentSettings.taxBracket === 'higher_rate' ? 500 : 0;
+                        const modalTaxRateLocal = getCurrentTaxRate();
+                        const investmentAmountLocal = currentSettings.investmentAmount || 10000;
                         
-                        breakdown += 'Year ' + year + ': £' + balance.toFixed(2) + ' (gross interest: £' + grossInterest.toFixed(2) + ', tax: £' + tax.toFixed(2) + ')<br>';
-                    }
-                    
-                    const partialYear = gilt.yearsToMaturity - completeYears;
-                    if (partialYear > 0) {
-                        const grossInterest = balance * (savingsRate / 100) * partialYear;
-                        const taxableInterest = Math.max(0, grossInterest - (psaAmount * partialYear));
-                        const tax = taxableInterest * (modalTaxRate / 100);
-                        const netInterest = grossInterest - tax;
-                        balance += netInterest;
+                        let breakdown = '';
+                        let balance = investmentAmountLocal;
+                        const completeYears = Math.floor(gilt.yearsToMaturity);
                         
-                        breakdown += 'Partial Year (' + partialYear.toFixed(6) + '): £' + balance.toFixed(2) + ' (gross interest: £' + grossInterest.toFixed(2) + ', tax: £' + tax.toFixed(2) + ')';
+                        for (let year = 1; year <= completeYears; year++) {
+                            const grossInterest = balance * (savingsRateLocal / 100);
+                            const taxableInterest = Math.max(0, grossInterest - psaAmountLocal);
+                            const tax = taxableInterest * (modalTaxRateLocal / 100);
+                            const netInterest = grossInterest - tax;
+                            balance += netInterest;
+                            
+                            breakdown += 'Year ' + year + ': £' + balance.toFixed(2) + ' (gross interest: £' + grossInterest.toFixed(2) + ', tax: £' + tax.toFixed(2) + ')<br>';
+                        }
+                        
+                        const partialYear = gilt.yearsToMaturity - completeYears;
+                        if (partialYear > 0) {
+                            const grossInterest = balance * (savingsRateLocal / 100) * partialYear;
+                            const taxableInterest = Math.max(0, grossInterest - (psaAmountLocal * partialYear));
+                            const tax = taxableInterest * (modalTaxRateLocal / 100);
+                            const netInterest = grossInterest - tax;
+                            balance += netInterest;
+                            
+                            breakdown += 'Partial Year (' + partialYear.toFixed(6) + '): £' + balance.toFixed(2) + ' (gross interest: £' + grossInterest.toFixed(2) + ', tax: £' + tax.toFixed(2) + ')';
+                        }
+                        
+                        breakdownDiv.innerHTML = breakdown;
                     }
-                    
-                    breakdownDiv.innerHTML = breakdown;
-                }
+                }, 100);
             }
             
             modal.style.display = 'block';
