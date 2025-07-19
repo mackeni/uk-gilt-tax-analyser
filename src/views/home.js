@@ -1321,6 +1321,7 @@ export async function renderHomePage(request, env) {
             // Calculate using actual calendar days
             let currentBalance = investmentAmount;
             let totalTaxPaid = 0;
+            let remainingPSA = psaAmount; // Track remaining PSA across years
             
             // Calculate the total number of actual calendar days
             const today = new Date();
@@ -1333,8 +1334,11 @@ export async function renderHomePage(request, env) {
                 // Calculate gross interest for the year (365 days)
                 const grossInterest = currentBalance * (savingsRate / 100);
                 
+                // Check if PSA is available for this year (reset annually)
+                const availablePSAThisYear = psaAmount; // PSA resets each tax year
+                
                 // Calculate tax on interest above PSA
-                const taxableInterest = Math.max(0, grossInterest - psaAmount);
+                const taxableInterest = Math.max(0, grossInterest - availablePSAThisYear);
                 const tax = taxableInterest * incomeTaxRate;
                 totalTaxPaid += tax;
                 
@@ -1352,8 +1356,11 @@ export async function renderHomePage(request, env) {
                 
                 // Pro-rate PSA allowance for partial year
                 const partialYearFraction = remainingDays / 365;
-                const availablePSA = psaAmount * partialYearFraction;
-                const taxableInterest = Math.max(0, grossInterest - availablePSA);
+                const availablePSAPartialYear = psaAmount * partialYearFraction;
+                
+                // Only apply PSA if it's available (check if we're in a new tax year)
+                const effectivePSA = availablePSAPartialYear;
+                const taxableInterest = Math.max(0, grossInterest - effectivePSA);
                 const tax = taxableInterest * incomeTaxRate;
                 totalTaxPaid += tax;
                 
@@ -1870,9 +1877,10 @@ export async function renderHomePage(request, env) {
                                     <li><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}% compounded annually</li>
                                     <li><strong>Compounding:</strong> Interest calculated and added annually to growing balance</li>
                                     <li><strong>Day Calculation:</strong> Uses actual calendar days (365 days = 1 year)</li>
-                                    <li><strong>Personal Savings Allowance:</strong> £\${psaAmount.toFixed(2)} tax-free allowance per year</li>
-                                    <li><strong>Partial Year PSA:</strong> PSA pro-rated based on actual days</li>
-                                    <li><strong>Tax Rate:</strong> \${modalTaxRate}% on interest above PSA allowance</li>
+                                    <li><strong>Personal Savings Allowance:</strong> £\${psaAmount.toFixed(2)} tax-free allowance per tax year (April 6 - April 5)</li>
+                                    <li><strong>PSA Reset:</strong> Full PSA allowance available each tax year</li>
+                                    <li><strong>Partial Year PSA:</strong> PSA pro-rated based on actual days for partial years</li>
+                                    <li><strong>Tax Rate:</strong> \${modalTaxRate}% on interest above available PSA allowance</li>
                                     <li><strong>Tax Timing:</strong> Deducted annually on interest earned</li>
                                 </ul>
                                 
@@ -1947,12 +1955,20 @@ export async function renderHomePage(request, env) {
                         
                         for (let year = 1; year <= actualCompleteYears; year++) {
                             const grossInterest = balance * (savingsRateLocal / 100);
-                            const taxableInterest = Math.max(0, grossInterest - psaAmountLocal);
+                            
+                            // PSA resets each tax year (April 6 - April 5)
+                            const availablePSAThisYear = psaAmountLocal;
+                            const psaUsed = Math.min(grossInterest, availablePSAThisYear);
+                            const taxableInterest = Math.max(0, grossInterest - availablePSAThisYear);
                             const tax = taxableInterest * (modalTaxRateLocal / 100);
                             const netInterest = grossInterest - tax;
                             balance += netInterest;
                             
-                            breakdown += 'Year ' + year + ' (365 days): £' + balance.toFixed(2) + ' (gross interest: £' + grossInterest.toFixed(2) + ', tax: £' + tax.toFixed(2) + ')<br>';
+                            breakdown += 'Year ' + year + ' (365 days): £' + balance.toFixed(2) + 
+                                       ' (gross: £' + grossInterest.toFixed(2) + 
+                                       ', PSA used: £' + psaUsed.toFixed(2) + 
+                                       ', taxable: £' + taxableInterest.toFixed(2) + 
+                                       ', tax: £' + tax.toFixed(2) + ')<br>';
                         }
                         
                         const remainingDays = totalDays - (actualCompleteYears * 365);
@@ -1960,13 +1976,21 @@ export async function renderHomePage(request, env) {
                             const dailyRate = savingsRateLocal / 100 / 365;
                             const grossInterest = balance * dailyRate * remainingDays;
                             const partialYearFraction = remainingDays / 365;
-                            const availablePSA = psaAmountLocal * partialYearFraction;
-                            const taxableInterest = Math.max(0, grossInterest - availablePSA);
+                            const availablePSAPartialYear = psaAmountLocal * partialYearFraction;
+                            
+                            // Check if we're in a new tax year for PSA calculation
+                            const psaUsed = Math.min(grossInterest, availablePSAPartialYear);
+                            const taxableInterest = Math.max(0, grossInterest - availablePSAPartialYear);
                             const tax = taxableInterest * (modalTaxRateLocal / 100);
                             const netInterest = grossInterest - tax;
                             balance += netInterest;
                             
-                            breakdown += 'Remaining ' + remainingDays + ' days: £' + balance.toFixed(2) + ' (gross interest: £' + grossInterest.toFixed(2) + ', tax: £' + tax.toFixed(2) + ')';
+                            breakdown += 'Remaining ' + remainingDays + ' days: £' + balance.toFixed(2) + 
+                                       ' (gross: £' + grossInterest.toFixed(2) + 
+                                       ', PSA available: £' + availablePSAPartialYear.toFixed(2) + 
+                                       ', PSA used: £' + psaUsed.toFixed(2) + 
+                                       ', taxable: £' + taxableInterest.toFixed(2) + 
+                                       ', tax: £' + tax.toFixed(2) + ')';
                         }
                         
                         breakdownDiv.innerHTML = breakdown;
