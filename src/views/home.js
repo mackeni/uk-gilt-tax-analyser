@@ -2509,8 +2509,16 @@ export async function renderHomePage(request, env) {
                                                 '<p style="margin: 1px 0;">- Account Charges: £' + totalMonthlyCharges.toFixed(6) + '</p>' : 
                                                 '<p style="margin: 1px 0;">- Account Charges: £0.000000</p>'
                                             }
-                                            <p style="margin: 1px 0; border-top: 1px solid #ddd; padding-top: 2px; font-weight: bold;">= Total Cash: £\${giltTotalCash.toFixed(6)}</p>
+                                            \${(() => {
+                                                const manualCalc = totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0);
+                                                return '<p style="margin: 1px 0; border-top: 1px solid #ddd; padding-top: 2px; font-weight: bold;">= Manual Check: £' + manualCalc.toFixed(6) + '</p>';
+                                            })()}
+                                            <p style="margin: 1px 0; font-weight: bold; color: \${Math.abs(giltTotalCash - (totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0))) < 0.01 ? '#28a745' : '#dc3545'};">Function Result: £\${giltTotalCash.toFixed(6)}</p>
                                             <p style="margin: 1px 0; color: #666;">Rounded Display: £\${giltTotalCash.toFixed(2)}</p>
+                                            \${(() => {
+                                                const diff = Math.abs(giltTotalCash - (totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0)));
+                                                return diff > 0.01 ? '<p style="margin: 1px 0; color: #dc3545; font-weight: bold;">DIFFERENCE: £' + diff.toFixed(6) + '</p>' : '<p style="margin: 1px 0; color: #28a745;">✓ Calculations match</p>';
+                                            })()}
                                         </div>
                                     </div>
                                     
