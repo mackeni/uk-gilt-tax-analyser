@@ -133,6 +133,10 @@ async function calculateTax(request, env) {
           const taxAdvantage = afterTaxYield - savingsAfterTaxRate;
           const annualAdvantage = calculator.calculateAnnualAdvantage(taxAdvantage, body.investmentAmount || 10000);
           
+          // Calculate total extra income over the life of the gilt
+          const yearsToMaturity = gilt.yearsToMaturity || ((new Date(gilt.maturityDate) - new Date()) / (365.25 * 24 * 60 * 60 * 1000));
+          const extraIncome = annualAdvantage * yearsToMaturity;
+          
           // Create detailed tooltip with payment schedule
           const scheduleTooltip = createScheduleTooltip(scheduleResult, body.taxpayerType);
           
@@ -142,6 +146,8 @@ async function calculateTax(request, env) {
             equivalentGrossSavingsRate: equivalentSavingsRate,
             taxAdvantage: taxAdvantage,
             annualAdvantage: annualAdvantage,
+            extraIncome: extraIncome,
+            yearsToMaturity: yearsToMaturity,
             scheduleDetails: scheduleResult,
             scheduleTooltip: scheduleTooltip
           };

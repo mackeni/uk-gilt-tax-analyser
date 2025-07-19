@@ -247,13 +247,14 @@ export async function renderHomePage(request, env) {
             padding: 8px 6px;
         }
         
-        /* Column width optimization - 6 columns without coupon */
-        .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 30%; } /* Name */
-        .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 15%; } /* Clean Price */
-        .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 15%; } /* Dirty Price */
-        .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 15%; } /* After-Tax IRR */
-        .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 20%; } /* Equivalent Rate */
-        .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 5%; } /* Years */
+        /* Column width optimization - 7 columns with advantage column */
+        .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 25%; } /* Name */
+        .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 12%; } /* Clean Price */
+        .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 12%; } /* Dirty Price */
+        .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 12%; } /* After-Tax IRR */
+        .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 18%; } /* Equivalent Rate */
+        .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 6%; } /* Years */
+        .table-container th:nth-child(7), .table-container td:nth-child(7) { width: 15%; } /* Advantage */
         
         .modal {
             display: none;
@@ -513,13 +514,14 @@ export async function renderHomePage(request, env) {
                 white-space: nowrap;
             }
             
-            /* Mobile column width adjustments - 6 columns */
-            .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 35%; } /* Name */
-            .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 12%; } /* Clean Price */
-            .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 12%; } /* Dirty Price */
-            .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 15%; } /* After-Tax IRR */
-            .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 18%; } /* Equivalent Rate */
-            .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 8%; } /* Years */
+            /* Mobile column width adjustments - 7 columns */
+            .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 28%; } /* Name */
+            .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 10%; } /* Clean Price */
+            .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 10%; } /* Dirty Price */
+            .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 12%; } /* After-Tax IRR */
+            .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 16%; } /* Equivalent Rate */
+            .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 7%; } /* Years */
+            .table-container th:nth-child(7), .table-container td:nth-child(7) { width: 17%; } /* Advantage */
             
             .clickable-cell {
                 min-height: 44px; /* Touch target size */
@@ -627,13 +629,14 @@ export async function renderHomePage(request, env) {
                 font-size: 9px;
             }
             
-            /* Ultra-compact mobile column widths - 6 columns */
-            .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 38%; } /* Name */
-            .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 12%; } /* Clean Price */
-            .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 12%; } /* Dirty Price */
-            .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 15%; } /* After-Tax IRR */
-            .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 16%; } /* Equivalent Rate */
-            .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 7%; } /* Years */
+            /* Ultra-compact mobile column widths - 7 columns */
+            .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 30%; } /* Name */
+            .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 9%; } /* Clean Price */
+            .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 9%; } /* Dirty Price */
+            .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 12%; } /* After-Tax IRR */
+            .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 15%; } /* Equivalent Rate */
+            .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 6%; } /* Years */
+            .table-container th:nth-child(7), .table-container td:nth-child(7) { width: 19%; } /* Advantage */
             
             .modal-content {
                 width: 98%;
@@ -1098,8 +1101,8 @@ export async function renderHomePage(request, env) {
                     <div class="metric-subtitle">\${bestGilt.name}</div>
                 </div>
                 <div class="metric-card">
-                    <div class="metric-label">💷 Annual Tax Advantage</div>
-                    <div class="metric-value">£\${(bestGilt.annualAdvantage || 0).toFixed(0)}</div>
+                    <div class="metric-label">💷 Total Extra Income</div>
+                    <div class="metric-value">£\${formatCurrency(bestGilt.extraIncome || 0)}</div>
                     <div class="metric-subtitle">vs. savings account</div>
                 </div>
             \`;
@@ -1116,7 +1119,8 @@ export async function renderHomePage(request, env) {
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Dirty £' : 'Dirty Price'}</th>
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'After-Tax' : 'After-Tax IRR'}</th>
                                 <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Equiv Rate' : 'Equivalent Gross Savings Rate'}</th>
-                                <th style="padding: 12px; text-align: right;">\${isMobile ? 'Years' : 'Years to Maturity'}</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Years' : 'Years to Maturity'}</th>
+                                <th style="padding: 12px; text-align: right;">\${isMobile ? 'Advantage' : 'Extra vs Savings'}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1127,7 +1131,8 @@ export async function renderHomePage(request, env) {
                                     <td class="clickable-cell" data-type="dirty-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.dirtyPrice || gilt.cleanPrice || 0).toFixed(2)}</td>
                                     <td class="clickable-cell" data-type="after-tax" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${(gilt.afterTaxYield || 0).toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="equivalent" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</td>
-                                    <td class="clickable-cell" data-type="years" data-index="\${index}" style="padding: 12px; text-align: right;">\${(gilt.yearsToMaturity || 0).toFixed(1)}</td>
+                                    <td class="clickable-cell" data-type="years" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.yearsToMaturity || 0).toFixed(1)}</td>
+                                    <td class="clickable-cell" data-type="advantage" data-index="\${index}" style="padding: 12px; text-align: right; font-weight: bold; color: \${gilt.extraIncome >= 0 ? '#27ae60' : '#e74c3c'};">£\${formatCurrency(gilt.extraIncome || 0)}</td>
                                 </tr>
                             \`).join('')}
                         </tbody>
@@ -1336,6 +1341,43 @@ export async function renderHomePage(request, env) {
                                 Years to Maturity: \${gilt.yearsToMaturity.toFixed(1)} years
                             </div>
                             <p>This gilt will mature in approximately \${gilt.yearsToMaturity.toFixed(1)} years, at which point you'll receive £100 per £100 nominal value held.</p>
+                        </div>
+                    \`;
+                    break;
+                    
+                case 'advantage':
+                    titleText = 'Extra Income vs Savings Account';
+                    const savingsRate = window.lastSavingsRate || 5.0;
+                    const afterTaxSavingsRate = savingsRate * (1 - currentTaxRate/100);
+                    const giltReturn = gilt.afterTaxYield || 0;
+                    const advantagePercent = giltReturn - afterTaxSavingsRate;
+                    const extraIncomeAnnual = (advantagePercent / 100) * investmentAmount;
+                    const extraIncomeTotal = extraIncomeAnnual * (gilt.yearsToMaturity || 1);
+                    
+                    contentHTML = \`
+                        <div class="calculation-step">
+                            <h4>Comparison Setup</h4>
+                            <p><strong>Investment Amount:</strong> £\${formatCurrency(investmentAmount)}</p>
+                            <p><strong>Savings Rate (assumed):</strong> \${savingsRate.toFixed(2)}%</p>
+                            <p><strong>Your Tax Rate:</strong> \${currentTaxRate}%</p>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>Gilt Investment (\${gilt.name})</h4>
+                            <p><strong>After-Tax Annual Return:</strong> \${giltReturn.toFixed(2)}%</p>
+                            <p><strong>Annual Income:</strong> £\${formatCurrency(giltReturn * investmentAmount / 100)}</p>
+                        </div>
+                        <div class="calculation-step">
+                            <h4>Savings Account</h4>
+                            <p><strong>Gross Rate:</strong> \${savingsRate.toFixed(2)}%</p>
+                            <p><strong>After-Tax Rate:</strong> \${afterTaxSavingsRate.toFixed(2)}%</p>
+                            <p><strong>Annual Income:</strong> £\${formatCurrency(afterTaxSavingsRate * investmentAmount / 100)}</p>
+                        </div>
+                        <div class="calculation-step" style="background: #f8f9fa; border-left: 4px solid \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'}; padding: 15px;">
+                            <h4>Advantage Analysis</h4>
+                            <p><strong>Extra Annual Return:</strong> \${advantagePercent.toFixed(2)}%</p>
+                            <p><strong>Extra Annual Income:</strong> £\${formatCurrency(extraIncomeAnnual)}</p>
+                            <p><strong>Total Over \${gilt.yearsToMaturity?.toFixed(1)} Years:</strong> £\${formatCurrency(extraIncomeTotal)}</p>
+                            <p style="margin-top: 10px; font-weight: bold;">\${advantagePercent >= 0 ? 'This gilt provides better returns than a taxable savings account.' : 'A savings account would provide better returns than this gilt.'}</p>
                         </div>
                     \`;
                     break;
