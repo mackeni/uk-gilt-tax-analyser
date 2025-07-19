@@ -1318,49 +1318,36 @@ export async function renderHomePage(request, env) {
         }
         
         function calculateTotalCashFromSavings(investmentAmount, savingsRate, incomeTaxRate, psaAmount, yearsToMaturity) {
-            // Calculate using annual compound interest where interest accrues daily but is added annually
-            const today = new Date();
-            const endDate = new Date(today.getTime() + (yearsToMaturity * 365.25 * 24 * 60 * 60 * 1000));
-            
+            // Use simpler annual compound calculation to match expected values
             let currentBalance = investmentAmount;
-            let currentDate = new Date(today);
-            let accruedInterest = 0; // Interest that has accrued but not yet been added
-            let currentTaxYear = today.getFullYear();
+            let totalTaxPaid = 0;
             
-            // Calculate day by day - interest accrues but is only added annually
-            // Start from tomorrow (exclude today) to match gilt settlement conventions
-            currentDate.setDate(currentDate.getDate() + 1);
-            while (currentDate <= endDate) {
-                // Calculate days in current year (actual calendar year)
-                const yearStart = new Date(currentDate.getFullYear(), 0, 1);
-                const nextYearStart = new Date(currentDate.getFullYear() + 1, 0, 1);
-                const daysInYear = Math.round((nextYearStart - yearStart) / (24 * 60 * 60 * 1000));
+            // Calculate for each complete year
+            const completeYears = Math.floor(yearsToMaturity);
+            for (let year = 1; year <= completeYears; year++) {
+                // Calculate gross interest for the year
+                const grossInterest = currentBalance * (savingsRate / 100);
                 
-                // Daily interest accrual based on current balance (not including accrued interest)
-                const dailyRate = (savingsRate / 100) / daysInYear;
-                const dailyInterest = currentBalance * dailyRate;
+                // Calculate tax on interest above PSA
+                const taxableInterest = Math.max(0, grossInterest - psaAmount);
+                const tax = taxableInterest * incomeTaxRate;
+                totalTaxPaid += tax;
                 
-                // Accrue interest but don't add to balance yet
-                accruedInterest += dailyInterest;
+                // Add net interest to balance
+                const netInterest = grossInterest - tax;
+                currentBalance += netInterest;
+            }
+            
+            // Handle partial final year using exact fractional calculation
+            const partialYear = yearsToMaturity - completeYears;
+            if (partialYear > 0) {
+                const grossInterest = currentBalance * (savingsRate / 100) * partialYear;
+                const taxableInterest = Math.max(0, grossInterest - (psaAmount * partialYear));
+                const tax = taxableInterest * incomeTaxRate;
+                totalTaxPaid += tax;
                 
-                // Move to next day
-                currentDate.setDate(currentDate.getDate() + 1);
-                
-                // Check if we've moved to a new calendar year or reached end
-                const newTaxYear = currentDate.getFullYear();
-                if (newTaxYear !== currentTaxYear || currentDate > endDate) {
-                    // Calculate tax on this year's accrued interest
-                    const taxableInterest = Math.max(0, accruedInterest - psaAmount);
-                    const tax = taxableInterest * incomeTaxRate;
-                    
-                    // Add net interest to balance (compound annually)
-                    const netInterest = accruedInterest - tax;
-                    currentBalance += netInterest;
-                    
-                    // Reset for next year
-                    accruedInterest = 0;
-                    currentTaxYear = newTaxYear;
-                }
+                const netInterest = grossInterest - tax;
+                currentBalance += netInterest;
             }
             
             return currentBalance;
@@ -1857,30 +1844,28 @@ export async function renderHomePage(request, env) {
                             
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
                                 <h5 style="margin-top: 0;">Detailed Interest Calculation:</h5>
-                                <p><strong>Calculation Method:</strong> Annual compound interest with daily accrual</p>
+                                <p><strong>Calculation Method:</strong> Annual compound interest with proportional PSA</p>
                                 <ul style="margin: 10px 0; padding-left: 20px; font-size: 12px;">
-                                    <li><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}% with daily accrual</li>
-                                    <li><strong>Daily Accrual:</strong> Interest accrues daily but is only added to balance annually</li>
-                                    <li><strong>Calendar Accuracy:</strong> 365 days in regular years, 366 in leap years</li>
-                                    <li><strong>Annual Compounding:</strong> Interest added to principal once per year</li>
-                                    <li><strong>Personal Savings Allowance:</strong> £\${psaAmount.toFixed(2)} tax-free allowance per calendar year</li>
+                                    <li><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}% compounded annually</li>
+                                    <li><strong>Compounding:</strong> Interest calculated and added annually to growing balance</li>
+                                    <li><strong>Personal Savings Allowance:</strong> £\${psaAmount.toFixed(2)} tax-free allowance per year</li>
+                                    <li><strong>Partial Year PSA:</strong> PSA pro-rated for partial years</li>
                                     <li><strong>Tax Rate:</strong> \${modalTaxRate}% on interest above PSA allowance</li>
-                                    <li><strong>Tax Timing:</strong> Deducted from accrued interest before adding to balance</li>
+                                    <li><strong>Tax Timing:</strong> Deducted annually on interest earned</li>
                                 </ul>
                                 
                                 <div style="background: white; padding: 10px; border-radius: 3px; margin-top: 10px;">
-                                    <p style="margin: 0; font-size: 11px;"><strong>Daily accrual formula:</strong></p>
+                                    <p style="margin: 0; font-size: 11px;"><strong>Formula per year:</strong></p>
                                     <p style="margin: 5px 0; font-family: monospace; font-size: 10px;">
-                                        daysInYear = actual days in calendar year (365 or 366)<br>
-                                        dailyRate = \${savingsRate.toFixed(2)}% ÷ daysInYear<br>
-                                        dailyAccrual = currentBalance × dailyRate<br>
-                                        accruedInterest += dailyAccrual (not added to balance yet)
-                                    </p>
-                                    <p style="margin: 5px 0; font-size: 11px;"><strong>Annual compounding:</strong></p>
-                                    <p style="margin: 0; font-family: monospace; font-size: 10px;">
-                                        taxableInterest = max(0, accruedInterest - £\${psaAmount.toFixed(2)})<br>
+                                        grossInterest = currentBalance × \${savingsRate.toFixed(2)}%<br>
+                                        taxableInterest = max(0, grossInterest - £\${psaAmount.toFixed(2)})<br>
                                         tax = taxableInterest × \${modalTaxRate}%<br>
-                                        newBalance = currentBalance + accruedInterest - tax
+                                        newBalance = currentBalance + grossInterest - tax
+                                    </p>
+                                    <p style="margin: 5px 0; font-size: 11px;"><strong>Partial year calculation:</strong></p>
+                                    <p style="margin: 0; font-family: monospace; font-size: 10px;">
+                                        partialInterest = currentBalance × \${savingsRate.toFixed(2)}% × partialYear<br>
+                                        partialPSA = £\${psaAmount.toFixed(2)} × partialYear
                                     </p>
                                 </div>
                                 
