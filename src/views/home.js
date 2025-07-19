@@ -1102,7 +1102,7 @@ export async function renderHomePage(request, env) {
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">💷 Total Extra Income</div>
-                    <div class="metric-value">£\${formatCurrency(bestGilt.extraIncome || 0)}</div>
+                    <div class="metric-value">\${formatCurrency(bestGilt.extraIncome || 0)}</div>
                     <div class="metric-subtitle">vs. savings account</div>
                 </div>
             \`;
@@ -1132,7 +1132,7 @@ export async function renderHomePage(request, env) {
                                     <td class="clickable-cell" data-type="after-tax" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${(gilt.afterTaxYield || 0).toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="equivalent" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="years" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.yearsToMaturity || 0).toFixed(1)}</td>
-                                    <td class="clickable-cell" data-type="advantage" data-index="\${index}" style="padding: 12px; text-align: right; font-weight: bold; color: \${gilt.extraIncome >= 0 ? '#27ae60' : '#e74c3c'};">£\${formatCurrency(gilt.extraIncome || 0)}</td>
+                                    <td class="clickable-cell" data-type="advantage" data-index="\${index}" style="padding: 12px; text-align: right; font-weight: bold; color: \${gilt.extraIncome >= 0 ? '#27ae60' : '#e74c3c'};">\${formatCurrency(gilt.extraIncome || 0)}</td>
                                 </tr>
                             \`).join('')}
                         </tbody>
@@ -1375,8 +1375,8 @@ export async function renderHomePage(request, env) {
                         <div class="calculation-step" style="background: #f8f9fa; border-left: 4px solid \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'}; padding: 15px;">
                             <h4>Advantage Analysis</h4>
                             <p><strong>Extra Annual Return:</strong> \${advantagePercent.toFixed(2)}%</p>
-                            <p><strong>Extra Annual Income:</strong> £\${formatCurrency(extraIncomeAnnual)}</p>
-                            <p><strong>Total Over \${gilt.yearsToMaturity?.toFixed(1)} Years:</strong> £\${formatCurrency(extraIncomeTotal)}</p>
+                            <p><strong>Extra Annual Income:</strong> \${formatCurrency(extraIncomeAnnual)}</p>
+                            <p><strong>Total Over \${gilt.yearsToMaturity?.toFixed(1)} Years:</strong> \${formatCurrency(extraIncomeTotal)}</p>
                             <p style="margin-top: 10px; font-weight: bold;">\${advantagePercent >= 0 ? 'This gilt provides better returns than a taxable savings account.' : 'A savings account would provide better returns than this gilt.'}</p>
                         </div>
                     \`;
