@@ -1684,12 +1684,14 @@ export async function renderHomePage(request, env) {
             
             let totalCash = 0;
             
-            // Sum all after-tax coupon payments
+            // Sum all after-tax coupon payments using SAME rounding as IRR tooltip
             gilt.couponSchedule.forEach(payment => {
-                totalCash += payment.afterTaxAmount;
+                const roundedTaxAmount = Math.round(payment.taxAmount * 100) / 100;
+                const roundedAfterTaxAmount = payment.grossAmount - roundedTaxAmount;
+                totalCash += roundedAfterTaxAmount;
             });
             
-            // Subtract account charges if enabled
+            // Subtract account charges if enabled (these are already rounded)
             if (currentSettings.accountChargeEnabled && gilt.accountCharges) {
                 gilt.accountCharges.forEach(charge => {
                     totalCash -= charge.amount;
