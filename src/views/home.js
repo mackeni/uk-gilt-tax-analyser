@@ -804,22 +804,22 @@ export async function renderHomePage(request, env) {
             }
             
             const bestGilt = sortedResults.reduce((best, gilt) => 
-                gilt.afterTaxYield > best.afterTaxYield ? gilt : best, sortedResults[0]);
+                (gilt.afterTaxYield || 0) > (best.afterTaxYield || 0) ? gilt : best, sortedResults[0]);
             
             metricsDiv.innerHTML = \`
                 <div class="metric-card">
                     <div class="metric-label">💷 Best After-Tax Yield</div>
-                    <div class="metric-value">\${bestGilt.afterTaxYield.toFixed(2)}%</div>
+                    <div class="metric-value">\${(bestGilt.afterTaxYield || 0).toFixed(2)}%</div>
                     <div class="metric-subtitle">\${bestGilt.name}</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">💷 Best Equivalent Savings Rate</div>
-                    <div class="metric-value">\${bestGilt.equivalentSavingsRate.toFixed(2)}%</div>
+                    <div class="metric-value">\${(bestGilt.equivalentSavingsRate || 0).toFixed(2)}%</div>
                     <div class="metric-subtitle">\${bestGilt.name}</div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-label">💷 Annual Tax Advantage</div>
-                    <div class="metric-value">£\${bestGilt.annualAdvantage.toFixed(0)}</div>
+                    <div class="metric-value">£\${(bestGilt.annualAdvantage || 0).toFixed(0)}</div>
                     <div class="metric-subtitle">vs. savings account</div>
                 </div>
             \`;
@@ -844,10 +844,10 @@ export async function renderHomePage(request, env) {
                             \${sortedResults.map((gilt, index) => \`
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
                                     <td style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500;">\${gilt.name}</td>
-                                    <td class="clickable-cell" data-type="coupon" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${formatCouponRate(gilt.couponRate)}</td>
-                                    <td class="clickable-cell" data-type="clean-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${gilt.cleanPrice.toFixed(2)}</td>
+                                    <td class="clickable-cell" data-type="coupon" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${formatCouponRate(gilt.couponRate || 0)}</td>
+                                    <td class="clickable-cell" data-type="clean-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.cleanPrice || 0).toFixed(2)}</td>
                                     <td class="clickable-cell" data-type="dirty-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.dirtyPrice || gilt.cleanPrice || 0).toFixed(2)}</td>
-                                    <td class="clickable-cell" data-type="current-yield" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${gilt.currentYield.toFixed(2)}%</td>
+                                    <td class="clickable-cell" data-type="current-yield" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.currentYield || 0).toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="after-tax" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${(gilt.afterTaxYield || 0).toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="equivalent" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.equivalentSavingsRate || 0).toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="years" data-index="\${index}" style="padding: 12px; text-align: right;">\${(gilt.yearsToMaturity || 0).toFixed(1)}</td>
