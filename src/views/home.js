@@ -927,28 +927,59 @@ export async function renderHomePage(request, env) {
                    currentSettings.taxBracket === 'higher_rate' ? 40 : 45;
         }
         
-        // Import consolidated utility functions
-        function importUtils() {
-            return import('../lib/utils.js');
+        // Import consolidated utility functions synchronously at runtime
+        let utilsLoaded = false;
+        let utils = {};
+        
+        async function ensureUtilsLoaded() {
+            if (!utilsLoaded) {
+                utils = await import('../lib/utils.js');
+                utilsLoaded = true;
+                console.log('Consolidated utility functions loaded');
+            }
+            return utils;
         }
         
-        // Make utility functions available globally
-        let calculateYearsToMaturity, calculateAccruedInterest, calculateDirtyPrice, 
-            findLastCouponDate, findNextCouponDate, getTaxRateInfo, 
-            calculateUnitsOwned, calculateEquivalentGrossSavingsRate;
+        // Make utility functions available with error checking
+        function calculateYearsToMaturity(maturityDate, referenceDate) {
+            if (!utilsLoaded) throw new Error('Utils not loaded yet');
+            return utils.calculateYearsToMaturity(maturityDate, referenceDate);
+        }
         
-        importUtils().then(utils => {
-            calculateYearsToMaturity = utils.calculateYearsToMaturity;
-            calculateAccruedInterest = utils.calculateAccruedInterest;
-            calculateDirtyPrice = utils.calculateDirtyPrice;
-            findLastCouponDate = utils.findLastCouponDate;
-            findNextCouponDate = utils.findNextCouponDate;
-            getTaxRateInfo = utils.getTaxRateInfo;
-            calculateUnitsOwned = utils.calculateUnitsOwned;
-            calculateEquivalentGrossSavingsRate = utils.calculateEquivalentGrossSavingsRate;
-            
-            console.log('Consolidated utility functions loaded');
-        });
+        function calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate) {
+            if (!utilsLoaded) throw new Error('Utils not loaded yet');
+            return utils.calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate);
+        }
+        
+        function calculateDirtyPrice(cleanPrice, accruedInterest) {
+            if (!utilsLoaded) throw new Error('Utils not loaded yet');
+            return utils.calculateDirtyPrice(cleanPrice, accruedInterest);
+        }
+        
+        function findLastCouponDate(maturityDate, referenceDate) {
+            if (!utilsLoaded) throw new Error('Utils not loaded yet');
+            return utils.findLastCouponDate(maturityDate, referenceDate);
+        }
+        
+        function findNextCouponDate(maturityDate, referenceDate) {
+            if (!utilsLoaded) throw new Error('Utils not loaded yet');
+            return utils.findNextCouponDate(maturityDate, referenceDate);
+        }
+        
+        function getTaxRateInfo(taxBracket) {
+            if (!utilsLoaded) throw new Error('Utils not loaded yet');
+            return utils.getTaxRateInfo(taxBracket);
+        }
+        
+        function calculateUnitsOwned(investmentAmount, dirtyPrice) {
+            if (!utilsLoaded) throw new Error('Utils not loaded yet');
+            return utils.calculateUnitsOwned(investmentAmount, dirtyPrice);
+        }
+        
+        function calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate) {
+            if (!utilsLoaded) throw new Error('Utils not loaded yet');
+            return utils.calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate);
+        }
         
         // IMMEDIATE DEBUG - Check if JavaScript is loading
         console.log('=== JAVASCRIPT FILE STARTED LOADING ===');
@@ -1216,6 +1247,9 @@ export async function renderHomePage(request, env) {
             dataDiv.style.display = 'none';
             metricsDiv.style.display = 'none';
             
+            // Ensure utils are loaded first
+            await ensureUtilsLoaded();
+            
             try {
                 console.log('Fetching gilt data from /api/gilt-data...');
                 const controller = new AbortController();
@@ -1341,7 +1375,7 @@ export async function renderHomePage(request, env) {
             
             try {
                 // Calculate tax efficiency locally without API calls
-                const results = calculateTaxEfficiencyLocal(
+                const results = await calculateTaxEfficiencyLocal(
                     currentGiltData,
                     currentSettings.taxBracket,
                     currentSettings.investmentAmount,
@@ -1367,8 +1401,11 @@ export async function renderHomePage(request, env) {
             }
         }
         
-        function calculateTaxEfficiencyLocal(giltData, taxBracket, investmentAmount, savingsRate) {
+        async function calculateTaxEfficiencyLocal(giltData, taxBracket, investmentAmount, savingsRate) {
             console.log('Starting local tax calculations...');
+            
+            // Ensure utils are loaded
+            await ensureUtilsLoaded();
             
             // Use consolidated tax rate function
             const taxInfo = getTaxRateInfo(taxBracket);
