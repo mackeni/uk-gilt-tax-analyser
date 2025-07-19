@@ -31,15 +31,20 @@ export class TaxCalculator {
   }
 
   calculateAfterTaxYield(currentYield, yearsToMaturity, couponRate, taxpayerType = 'additional_rate', dirtyPrice = null, cleanPrice = null) {
-    // Get applicable tax rates
-    const incomeTaxRate = this.taxRates[taxpayerType];
+    // Ensure we have valid input values
+    if (!couponRate || couponRate === 0) {
+      return 0;
+    }
     
-    // Calculate after-tax coupon yield
+    // Get applicable tax rates
+    const incomeTaxRate = this.taxRates[taxpayerType] || this.taxRates['additional_rate'];
+    
+    // Calculate after-tax coupon yield (coupons are taxed as income)
     const afterTaxCouponYield = couponRate * (1 - incomeTaxRate);
     
     // Calculate capital gains component (if any)
     let capitalGainsYield = 0;
-    if (cleanPrice !== null && cleanPrice !== 100) {
+    if (cleanPrice && cleanPrice !== 100 && yearsToMaturity > 0) {
       const capitalGainPerYear = (100 - cleanPrice) / yearsToMaturity;
       // Capital gains on gilts are tax-free in the UK
       capitalGainsYield = capitalGainPerYear;
@@ -48,7 +53,7 @@ export class TaxCalculator {
     // Total after-tax yield
     const totalAfterTaxYield = afterTaxCouponYield + capitalGainsYield;
     
-    return totalAfterTaxYield;
+    return Math.max(0, totalAfterTaxYield);
   }
 
   calculateEquivalentSavingsRate(afterTaxYield, taxpayerType = 'additional_rate') {
@@ -117,13 +122,26 @@ export class TaxCalculator {
     const results = [];
     
     for (const gilt of giltData) {
+      // Calculate years to maturity if not present
+      let yearsToMaturity = gilt.yearsToMaturity;
+      if (!yearsToMaturity && gilt.maturityDate) {
+        const now = new Date();
+        const maturity = new Date(gilt.maturityDate);
+        yearsToMaturity = Math.max(0, (maturity - now) / (1000 * 60 * 60 * 24 * 365.25));
+      }
+      
+      // Ensure we have valid values
+      const validYears = yearsToMaturity || 1;
+      const validDirtyPrice = gilt.dirtyPrice || gilt.cleanPrice || 100;
+      const validCleanPrice = gilt.cleanPrice || 100;
+      
       const afterTaxYield = this.calculateAfterTaxYield(
-        gilt.currentYield,
-        gilt.yearsToMaturity,
-        gilt.couponRate,
+        gilt.currentYield || 0,
+        validYears,
+        gilt.couponRate || 0,
         taxpayerType,
-        gilt.dirtyPrice,
-        gilt.cleanPrice
+        validDirtyPrice,
+        validCleanPrice
       );
       
       const equivalentSavingsRate = this.calculateEquivalentSavingsRate(afterTaxYield, taxpayerType);
@@ -133,10 +151,11 @@ export class TaxCalculator {
       
       results.push({
         ...gilt,
-        afterTaxYield: afterTaxYield,
-        equivalentSavingsRate: equivalentSavingsRate,
-        taxAdvantage: taxAdvantage,
-        annualAdvantage: annualAdvantage
+        yearsToMaturity: validYears,
+        afterTaxYield: afterTaxYield || 0,
+        equivalentSavingsRate: equivalentSavingsRate || 0,
+        taxAdvantage: taxAdvantage || 0,
+        annualAdvantage: annualAdvantage || 0
       });
     }
     
