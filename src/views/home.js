@@ -2588,7 +2588,7 @@ export async function renderHomePage(request, env) {
     </script>
 </body>
 </html>
-  `;
+`;
   
   return new Response(html, {
     headers: { 'Content-Type': 'text/html' }
