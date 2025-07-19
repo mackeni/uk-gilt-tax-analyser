@@ -78,10 +78,9 @@ export class TaxCalculator {
     const totalPrincipal = afterTaxSchedule.reduce((sum, p) => sum + p.principalAmount, 0);
     const totalAfterTaxReturn = totalAfterTaxCoupons + totalPrincipal;
     
-    // Calculate annualized after-tax yield
-    const totalReturn = (totalAfterTaxReturn - investmentAmount) / investmentAmount;
-    const annualizedAfterTaxYield = gilt.yearsToMaturity > 0 ? 
-      (totalReturn / gilt.yearsToMaturity) * 100 : 0;
+    // Calculate IRR (Internal Rate of Return) for accurate yield
+    const irrYield = this.calculateIRR(investmentAmount, afterTaxSchedule);
+    const annualizedAfterTaxYield = irrYield * 100;
     
     return {
       afterTaxYield: Math.max(0, annualizedAfterTaxYield),
@@ -161,6 +160,66 @@ export class TaxCalculator {
 
   calculateAnnualAdvantage(taxAdvantage, investmentAmount) {
     return investmentAmount * (taxAdvantage / 100);
+  }
+
+  calculateIRR(initialInvestment, cashFlowSchedule, maxIterations = 100, tolerance = 1e-7) {
+    // IRR calculation using Newton-Raphson method
+    // Finds the discount rate where NPV = 0
+    
+    if (!cashFlowSchedule || cashFlowSchedule.length === 0) {
+      return 0;
+    }
+    
+    // Convert cash flows to time-based array
+    const cashFlows = [-initialInvestment]; // Initial investment as negative cash flow
+    const timePoints = [0]; // Time 0 for initial investment
+    
+    // Add all payment cash flows with their timing
+    cashFlowSchedule.forEach(payment => {
+      const timeInYears = payment.daysToPayment / 365.25; // Convert days to years
+      cashFlows.push(payment.totalAfterTaxPayment);
+      timePoints.push(timeInYears);
+    });
+    
+    // Initial guess for IRR (10%)
+    let rate = 0.10;
+    
+    for (let i = 0; i < maxIterations; i++) {
+      let npv = 0;
+      let dnpv = 0; // Derivative of NPV
+      
+      // Calculate NPV and its derivative
+      for (let j = 0; j < cashFlows.length; j++) {
+        const timePoint = timePoints[j];
+        const discountFactor = Math.pow(1 + rate, timePoint);
+        
+        npv += cashFlows[j] / discountFactor;
+        dnpv -= (cashFlows[j] * timePoint) / Math.pow(1 + rate, timePoint + 1);
+      }
+      
+      // Check for convergence
+      if (Math.abs(npv) < tolerance) {
+        return rate;
+      }
+      
+      // Newton-Raphson iteration
+      if (Math.abs(dnpv) < tolerance) {
+        break; // Avoid division by zero
+      }
+      
+      rate = rate - npv / dnpv;
+      
+      // Keep rate within reasonable bounds
+      if (rate < -0.99) rate = -0.99;
+      if (rate > 10) rate = 10;
+    }
+    
+    // If IRR calculation fails, fallback to simple method
+    const totalCashFlow = cashFlows.slice(1).reduce((sum, cf) => sum + cf, 0);
+    const totalReturn = (totalCashFlow - initialInvestment) / initialInvestment;
+    const avgTimeToPayment = timePoints.slice(1).reduce((sum, time) => sum + time, 0) / (timePoints.length - 1);
+    
+    return avgTimeToPayment > 0 ? totalReturn / avgTimeToPayment : 0;
   }
 
   getTaxBracketInfo(taxpayerType) {

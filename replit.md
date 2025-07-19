@@ -346,13 +346,20 @@ This migration maintains all original functionality while dramatically improving
 - **Verified Calculations**: Treasury 2% 2025 shows £0.728261 accrued interest (134/184 days elapsed)
 - **Market Convention Compliance**: All accrued interest calculations now follow authentic UK gilt market standards
 
-### July 19, 2025 - Schedule-Based After-Tax Calculations with Detailed Tooltips Complete
+### July 19, 2025 - Schedule-Based IRR Calculations with Detailed Tooltips Complete
 
 **Enhanced Calculation Accuracy:**
-- **Schedule-Based Calculations**: Both Cloudflare Worker and Streamlit apps now use actual coupon payment schedules for precise after-tax calculations
+- **IRR-Based Calculations**: Both Cloudflare Worker and Streamlit apps now use Internal Rate of Return (IRR) methodology for precise after-tax yield calculations
+- **Newton-Raphson Method**: Implemented sophisticated IRR calculation using iterative Newton-Raphson method for mathematical accuracy
 - **Real Payment Dates**: Calculations use authentic UK gilt coupon payment dates with proper semi-annual conventions
-- **Detailed Tax Analysis**: Each coupon payment individually calculated with income tax, showing exact amounts and dates
+- **Time Value of Money**: Properly accounts for timing of cash flows using exact days to payment conversion
 - **Investment Amount Scaling**: All calculations accurately scaled to user's actual investment amount using dirty price
+
+**IRR Implementation Details:**
+- **NPV Convergence**: Finds discount rate where Net Present Value equals zero with 1e-7 tolerance
+- **Cash Flow Timing**: Uses actual days to payment converted to fractional years (days/365.25)
+- **Robust Fallback**: Graceful degradation to time-weighted average method if IRR calculation fails
+- **Bounded Convergence**: Rate bounds (-99% to 1000%) prevent mathematical overflow
 
 **Interactive Schedule Tooltips:**
 - **Cloudflare Worker**: Click after-tax yield cells to see complete payment schedule with tax breakdown
@@ -360,11 +367,12 @@ This migration maintains all original functionality while dramatically improving
 - **Complete Transparency**: Every coupon payment, tax amount, and principal repayment clearly displayed
 - **Professional Styling**: Mobile-responsive tables with proper formatting and clear visual hierarchy
 
-**Calculation Methodology:**
+**Mathematical Methodology:**
+- **IRR Formula**: NPV = -Initial_Investment + Σ(Cash_Flow_t / (1 + IRR)^t) = 0
 - **Dirty Price Calculations**: Uses actual purchase cost including accrued interest for accurate yield calculations
 - **Precise Unit Calculations**: Accurate units owned per £100 nominal for proper scaling
 - **Tax-Free Principal**: Principal repayment at maturity correctly shown as tax-free
-- **Annualized Returns**: Proper compound annual growth rate calculations using actual time periods
+- **True Compound Returns**: IRR methodology provides mathematically accurate compound annual returns
 
 ### July 19, 2025 - API-Based Real-Time Data Integration Complete
 

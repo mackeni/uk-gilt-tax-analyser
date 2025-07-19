@@ -131,10 +131,9 @@ class TaxCalculator:
         total_principal = sum(p['principalAmount'] for p in after_tax_schedule)
         total_after_tax_return = total_after_tax_coupons + total_principal
         
-        # Calculate annualized after-tax yield
-        total_return = (total_after_tax_return - investment_amount) / investment_amount
-        years_to_maturity = gilt_data.get('yearsToMaturity', 0)
-        annualized_after_tax_yield = (total_return / years_to_maturity * 100) if years_to_maturity > 0 else 0
+        # Calculate IRR (Internal Rate of Return) for accurate yield
+        irr_yield = self._calculate_irr(investment_amount, after_tax_schedule)
+        annualized_after_tax_yield = irr_yield * 100
         
         return {
             'afterTaxYield': max(0, annualized_after_tax_yield),
@@ -209,6 +208,66 @@ class TaxCalculator:
         
         return after_tax_yield
     
+    def _calculate_irr(self, initial_investment: float, cash_flow_schedule: List[Dict], 
+                      max_iterations: int = 100, tolerance: float = 1e-7) -> float:
+        """
+        Calculate Internal Rate of Return (IRR) using Newton-Raphson method
+        
+        Args:
+            initial_investment: Initial investment amount
+            cash_flow_schedule: List of cash flow payments with timing
+            max_iterations: Maximum iterations for convergence
+            tolerance: Convergence tolerance
+            
+        Returns:
+            IRR as decimal (e.g., 0.05 for 5%)
+        """
+        if not cash_flow_schedule:
+            return 0.0
+            
+        # Convert to cash flows with time points
+        cash_flows = [-initial_investment]  # Initial investment as negative
+        time_points = [0]  # Time 0 for initial investment
+        
+        # Add all payment cash flows with their timing
+        for payment in cash_flow_schedule:
+            time_in_years = payment['daysToPayment'] / 365.25  # Convert days to years
+            cash_flows.append(payment['totalAfterTaxPayment'])
+            time_points.append(time_in_years)
+        
+        # Initial guess for IRR (10%)
+        rate = 0.10
+        
+        for i in range(max_iterations):
+            npv = 0
+            dnpv = 0  # Derivative of NPV
+            
+            # Calculate NPV and its derivative
+            for j, (cf, time_point) in enumerate(zip(cash_flows, time_points)):
+                discount_factor = (1 + rate) ** time_point
+                npv += cf / discount_factor
+                dnpv -= (cf * time_point) / ((1 + rate) ** (time_point + 1))
+            
+            # Check for convergence
+            if abs(npv) < tolerance:
+                return rate
+                
+            # Newton-Raphson iteration
+            if abs(dnpv) < tolerance:
+                break  # Avoid division by zero
+                
+            rate = rate - npv / dnpv
+            
+            # Keep rate within reasonable bounds
+            rate = max(-0.99, min(10, rate))
+        
+        # If IRR calculation fails, fallback to simple method
+        total_cash_flow = sum(cash_flows[1:])  # Exclude initial investment
+        total_return = (total_cash_flow - initial_investment) / initial_investment
+        avg_time = sum(time_points[1:]) / len(time_points[1:]) if len(time_points) > 1 else 1
+        
+        return total_return / avg_time if avg_time > 0 else 0
+
     def _calculate_schedule_based_yield(self, coupon_schedule: List[Dict], 
                                        purchase_price: float, tax_rate: float, 
                                        taxpayer_type: str = 'additional_rate') -> float:
