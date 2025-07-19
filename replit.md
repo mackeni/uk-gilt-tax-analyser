@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a Streamlit web application designed to help UK additional rate taxpayers (45% tax band) analyse the tax efficiency of UK gilt investments compared to savings accounts. The application provides tools to calculate after-tax yields, compare investment options, and visualise tax implications for high-rate taxpayers.
+This is a Cloudflare Worker application designed to help UK additional rate taxpayers (45% tax band) analyse the tax efficiency of UK gilt investments compared to savings accounts. The application provides tools to calculate after-tax yields, compare investment options, and visualise tax implications for high-rate taxpayers using a fully client-side JavaScript architecture.
 
 ## User Preferences
 
@@ -11,16 +11,16 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: Streamlit - Python-based web framework for data applications
-- **UI Components**: Interactive widgets including sidebars, charts, and data tables
-- **Visualization**: Plotly Express and Plotly Graph Objects for interactive charts
-- **State Management**: Streamlit session state for maintaining user selections and cached data
+- **Framework**: Pure HTML/CSS/JavaScript with Cloudflare Workers
+- **UI Components**: Interactive web components with responsive design
+- **Visualization**: Native JavaScript with interactive modals and tables
+- **State Management**: Client-side state management with local storage persistence
 
 ### Backend Architecture
-- **Language**: Python
-- **Structure**: Modular design with separate components for data fetching, tax calculations, and utilities
-- **Caching**: Streamlit's `@st.cache_resource` decorator for performance optimisation
-- **Data Processing**: Pandas for data manipulation and NumPy for numerical computations
+- **Runtime**: Cloudflare Workers (JavaScript V8 engine)
+- **Structure**: Serverless edge computing with modular JavaScript libraries
+- **Caching**: Edge caching and local browser storage
+- **Data Processing**: Native JavaScript with client-side financial calculations
 
 ## Key Components
 
@@ -71,16 +71,15 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### Data Sources
-- **UK Debt Management Office (DMO)**: Primary source for gilt data
-- **Tradeweb**: Secondary market data source
-- **DividendData**: Backup gilt price and yield information
+- **Finnhub API**: Primary source for real-time gilt data
+- **Alpha Vantage API**: Secondary financial data source
+- **Financial Modeling Prep API**: Tertiary data source with fallback
 
-### Python Libraries
-- **Streamlit**: Web application framework
-- **Pandas**: Data manipulation and analysis
-- **Plotly**: Interactive visualization
-- **NumPy**: Numerical computations
-- **Requests**: HTTP requests for data fetching
+### JavaScript Libraries
+- **Native JavaScript**: All calculations and UI interactions
+- **Cloudflare Workers Runtime**: Edge computing platform
+- **Date-fns**: Date manipulation and formatting
+- **Fetch API**: HTTP requests for data fetching
 
 ## Deployment Strategy
 
@@ -332,13 +331,13 @@ This migration maintains all original functionality while dramatically improving
 - Tablet: Single-column layout with compact spacing
 - Mobile: Optimized for thumb navigation with scrollable tables
 
-### July 19, 2025 - Complete Backup Database Removal and Accrued Interest Accuracy Fix
+### July 19, 2025 - Streamlit Version Removal and Pure Cloudflare Worker Architecture
 
-**Backup Database Completely Removed:**
-- **Worker ID Updated**: a9e6db66-f33f-4d7f-80b5-f76102066d9f (All backup/fallback data eliminated)
-- **Authentic Data Only**: System now exclusively uses real-time financial API data sources
-- **No Estimates**: Removed all backup gilt databases, estimated prices, and fallback calculations
-- **Error-First Approach**: Application shows clear errors when authentic data unavailable instead of using estimates
+**Streamlit Application Completely Removed:**
+- **All Python Files Deleted**: Removed app.py, tax_calculator.py, gilt_data.py, database.py, utils.py, coupon_scheduler.py
+- **Configuration Cleanup**: Deleted pyproject.toml, uv.lock, .streamlit/, __pycache__/
+- **Pure JavaScript Architecture**: Now exclusively using Cloudflare Worker with client-side calculations
+- **No Server Dependencies**: Complete transition to serverless edge computing
 
 **Accrued Interest Calculation Accuracy:**
 - **Precise Coupon Date Logic**: Fixed coupon payment date calculation using proper UK gilt semi-annual conventions
