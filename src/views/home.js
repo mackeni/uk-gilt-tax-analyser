@@ -1318,14 +1318,19 @@ export async function renderHomePage(request, env) {
         }
         
         function calculateTotalCashFromSavings(investmentAmount, savingsRate, incomeTaxRate, psaAmount, yearsToMaturity) {
-            // Use simpler annual compound calculation to match expected values
+            // Calculate using actual calendar days
             let currentBalance = investmentAmount;
             let totalTaxPaid = 0;
             
-            // Calculate for each complete year
-            const completeYears = Math.floor(yearsToMaturity);
+            // Calculate the total number of actual calendar days
+            const today = new Date();
+            const endDate = new Date(today.getTime() + (yearsToMaturity * 365.25 * 24 * 60 * 60 * 1000));
+            const totalDays = Math.round((endDate - today) / (24 * 60 * 60 * 1000));
+            
+            // Calculate for each complete year (365 days)
+            const completeYears = Math.floor(totalDays / 365);
             for (let year = 1; year <= completeYears; year++) {
-                // Calculate gross interest for the year
+                // Calculate gross interest for the year (365 days)
                 const grossInterest = currentBalance * (savingsRate / 100);
                 
                 // Calculate tax on interest above PSA
@@ -1338,11 +1343,17 @@ export async function renderHomePage(request, env) {
                 currentBalance += netInterest;
             }
             
-            // Handle partial final year using exact fractional calculation
-            const partialYear = yearsToMaturity - completeYears;
-            if (partialYear > 0) {
-                const grossInterest = currentBalance * (savingsRate / 100) * partialYear;
-                const taxableInterest = Math.max(0, grossInterest - (psaAmount * partialYear));
+            // Handle remaining days using actual day count
+            const remainingDays = totalDays - (completeYears * 365);
+            if (remainingDays > 0) {
+                // Calculate interest for the remaining actual days
+                const dailyRate = savingsRate / 100 / 365;
+                const grossInterest = currentBalance * dailyRate * remainingDays;
+                
+                // Pro-rate PSA allowance for partial year
+                const partialYearFraction = remainingDays / 365;
+                const availablePSA = psaAmount * partialYearFraction;
+                const taxableInterest = Math.max(0, grossInterest - availablePSA);
                 const tax = taxableInterest * incomeTaxRate;
                 totalTaxPaid += tax;
                 
@@ -1845,8 +1856,11 @@ export async function renderHomePage(request, env) {
                             <p><strong>Investment Period:</strong> \${(() => {
                                 const today = new Date();
                                 const endDate = new Date(today.getTime() + ((gilt.yearsToMaturity || 0) * 365.25 * 24 * 60 * 60 * 1000));
-                                return Math.round((endDate - today) / (24 * 60 * 60 * 1000));
-                            })()} days</p>
+                                const totalDays = Math.round((endDate - today) / (24 * 60 * 60 * 1000));
+                                const years = Math.floor(totalDays / 365);
+                                const remainingDays = totalDays % 365;
+                                return years + ' years + ' + remainingDays + ' days (' + totalDays + ' total days)';
+                            })()} </p>
                             <p><strong>Total Cash Received:</strong> £\${savingsTotalCash.toFixed(2)}</p>
                             
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
@@ -1855,8 +1869,9 @@ export async function renderHomePage(request, env) {
                                 <ul style="margin: 10px 0; padding-left: 20px; font-size: 12px;">
                                     <li><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}% compounded annually</li>
                                     <li><strong>Compounding:</strong> Interest calculated and added annually to growing balance</li>
+                                    <li><strong>Day Calculation:</strong> Uses actual calendar days (365 days = 1 year)</li>
                                     <li><strong>Personal Savings Allowance:</strong> £\${psaAmount.toFixed(2)} tax-free allowance per year</li>
-                                    <li><strong>Partial Year PSA:</strong> PSA pro-rated for partial years</li>
+                                    <li><strong>Partial Year PSA:</strong> PSA pro-rated based on actual days</li>
                                     <li><strong>Tax Rate:</strong> \${modalTaxRate}% on interest above PSA allowance</li>
                                     <li><strong>Tax Timing:</strong> Deducted annually on interest earned</li>
                                 </ul>
@@ -1924,25 +1939,34 @@ export async function renderHomePage(request, env) {
                         let balance = investmentAmountLocal;
                         const completeYears = Math.floor(gilt.yearsToMaturity);
                         
-                        for (let year = 1; year <= completeYears; year++) {
+                        // Calculate using actual calendar days
+                        const today = new Date();
+                        const endDate = new Date(today.getTime() + (gilt.yearsToMaturity * 365.25 * 24 * 60 * 60 * 1000));
+                        const totalDays = Math.round((endDate - today) / (24 * 60 * 60 * 1000));
+                        const actualCompleteYears = Math.floor(totalDays / 365);
+                        
+                        for (let year = 1; year <= actualCompleteYears; year++) {
                             const grossInterest = balance * (savingsRateLocal / 100);
                             const taxableInterest = Math.max(0, grossInterest - psaAmountLocal);
                             const tax = taxableInterest * (modalTaxRateLocal / 100);
                             const netInterest = grossInterest - tax;
                             balance += netInterest;
                             
-                            breakdown += 'Year ' + year + ': £' + balance.toFixed(2) + ' (gross interest: £' + grossInterest.toFixed(2) + ', tax: £' + tax.toFixed(2) + ')<br>';
+                            breakdown += 'Year ' + year + ' (365 days): £' + balance.toFixed(2) + ' (gross interest: £' + grossInterest.toFixed(2) + ', tax: £' + tax.toFixed(2) + ')<br>';
                         }
                         
-                        const partialYear = gilt.yearsToMaturity - completeYears;
-                        if (partialYear > 0) {
-                            const grossInterest = balance * (savingsRateLocal / 100) * partialYear;
-                            const taxableInterest = Math.max(0, grossInterest - (psaAmountLocal * partialYear));
+                        const remainingDays = totalDays - (actualCompleteYears * 365);
+                        if (remainingDays > 0) {
+                            const dailyRate = savingsRateLocal / 100 / 365;
+                            const grossInterest = balance * dailyRate * remainingDays;
+                            const partialYearFraction = remainingDays / 365;
+                            const availablePSA = psaAmountLocal * partialYearFraction;
+                            const taxableInterest = Math.max(0, grossInterest - availablePSA);
                             const tax = taxableInterest * (modalTaxRateLocal / 100);
                             const netInterest = grossInterest - tax;
                             balance += netInterest;
                             
-                            breakdown += 'Partial Year (' + partialYear.toFixed(6) + '): £' + balance.toFixed(2) + ' (gross interest: £' + grossInterest.toFixed(2) + ', tax: £' + tax.toFixed(2) + ')';
+                            breakdown += 'Remaining ' + remainingDays + ' days: £' + balance.toFixed(2) + ' (gross interest: £' + grossInterest.toFixed(2) + ', tax: £' + tax.toFixed(2) + ')';
                         }
                         
                         breakdownDiv.innerHTML = breakdown;
