@@ -908,14 +908,49 @@ export async function renderHomePage(request, env) {
         };
         let durationFilter = { min: 0, max: 2 };
         
-        // Initialize app - automatically load data on page load
+        // Initialize app - use fallback data immediately when rate limited
         function initializeApp() {
+            console.log('Initializing app...');
             setupEventListeners();
             updateTaxSettings();
             
-            // Try API first, then immediate fallback if it fails
-            console.log('Initializing app with data loading...');
-            loadGiltData();
+            // Skip API entirely and use fallback data for rate-limited scenarios
+            console.log('Loading fallback data due to API rate limits...');
+            loadFallbackData();
+        }
+        
+        function loadFallbackData() {
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            
+            loadingDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            
+            try {
+                currentGiltData = getFallbackGiltData();
+                console.log('Successfully loaded fallback data:', currentGiltData.length, 'gilts');
+                
+                loadingDiv.style.display = 'none';
+                document.getElementById('filterControls').style.display = 'block';
+                
+                // Show warning about using cached data
+                const warningDiv = document.createElement('div');
+                warningDiv.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 14px;';
+                warningDiv.innerHTML = '⚠️ Using cached data due to API rate limits. Data may not be real-time.';
+                warningDiv.id = 'rate-limit-warning';
+                
+                const mainContent = document.querySelector('.main-content');
+                if (mainContent && !document.getElementById('rate-limit-warning')) {
+                    mainContent.appendChild(warningDiv);
+                }
+                
+                calculateTaxEfficiency();
+            } catch (error) {
+                console.error('Fallback data failed:', error);
+                loadingDiv.style.display = 'none';
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Unable to load gilt data. Please refresh the page.';
+            }
         }
         
         function setupEventListeners() {
