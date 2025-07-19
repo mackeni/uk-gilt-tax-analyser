@@ -1597,13 +1597,13 @@ export async function renderHomePage(request, env) {
                     const savingsRate = currentSettings.savingsRate || 4.5;
                     const psaAmount = currentSettings.taxBracket === 'basic_rate' ? 1000 : 
                                     currentSettings.taxBracket === 'higher_rate' ? 500 : 0;
-                    const taxRate = currentSettings.taxBracket === 'basic_rate' ? 20 : 
+                    const modalTaxRate = currentSettings.taxBracket === 'basic_rate' ? 20 : 
                                   currentSettings.taxBracket === 'higher_rate' ? 40 : 45;
                     
                     // Calculate savings account after-tax return considering PSA
                     const annualSavingsInterest = (savingsRate / 100) * investmentAmount;
                     const taxableInterest = Math.max(0, annualSavingsInterest - psaAmount);
-                    const taxOnSavings = taxableInterest * (taxRate / 100);
+                    const taxOnSavings = taxableInterest * (modalTaxRate / 100);
                     const netSavingsIncome = annualSavingsInterest - taxOnSavings;
                     const afterTaxSavingsRate = (netSavingsIncome / investmentAmount) * 100;
                     
@@ -1622,7 +1622,7 @@ export async function renderHomePage(request, env) {
                         <div class="calculation-step">
                             <h4>Your Current Settings</h4>
                             <p><strong>Investment Amount:</strong> \${formatCurrency(investmentAmount)}</p>
-                            <p><strong>Your Tax Bracket:</strong> \${currentSettings.taxBracket.replace('_', ' ').toUpperCase()} (\${taxRate}%)</p>
+                            <p><strong>Your Tax Bracket:</strong> \${currentSettings.taxBracket.replace('_', ' ').toUpperCase()} (\${modalTaxRate}%)</p>
                             <p><strong>Personal Savings Allowance:</strong> \${formatCurrency(psaAmount)}</p>
                             <p><strong>Savings Account Rate:</strong> \${savingsRate.toFixed(2)}%</p>
                             <p><strong>Investment Period:</strong> \${gilt.yearsToMaturity?.toFixed(1)} years</p>
@@ -1633,7 +1633,7 @@ export async function renderHomePage(request, env) {
                             <p><strong>Gilt:</strong> \${gilt.name}</p>
                             <p><strong>After-Tax Annual Return:</strong> \${giltReturn.toFixed(3)}%</p>
                             <p><strong>Annual Income from Gilt:</strong> \${formatCurrency(giltAnnualIncome)}</p>
-                            <p><small>• Coupon payments are taxed at \${taxRate}% as income</small></p>
+                            <p><small>• Coupon payments are taxed at \${modalTaxRate}% as income</small></p>
                             <p><small>• Capital gains/losses on gilts are tax-free</small></p>
                         </div>
                         
@@ -1642,7 +1642,7 @@ export async function renderHomePage(request, env) {
                             <p><strong>Gross Annual Interest:</strong> \${formatCurrency(annualSavingsInterest)} (\${savingsRate.toFixed(2)}%)</p>
                             <p><strong>Less: Personal Savings Allowance:</strong> -\${formatCurrency(Math.min(annualSavingsInterest, psaAmount))}</p>
                             <p><strong>Taxable Interest:</strong> \${formatCurrency(taxableInterest)}</p>
-                            <p><strong>Tax on Interest (\${taxRate}%):</strong> -\${formatCurrency(taxOnSavings)}</p>
+                            <p><strong>Tax on Interest (\${modalTaxRate}%):</strong> -\${formatCurrency(taxOnSavings)}</p>
                             <p><strong>Net Annual Income:</strong> \${formatCurrency(netSavingsIncome)}</p>
                             <p><strong>Effective Rate:</strong> \${afterTaxSavingsRate.toFixed(3)}%</p>
                         </div>
