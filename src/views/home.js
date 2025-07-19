@@ -985,20 +985,33 @@ export async function renderHomePage(request, env) {
         const complexCalculationCache = new Map();
         
         function getCachedComplexCalculation(key, calculationFn, ...args) {
-            const cacheKey = key + '_' + JSON.stringify(args);
+            // Optimize cache key generation for common patterns
+            let cacheKey;
+            if (args.length === 1 && typeof args[0] === 'number') {
+                cacheKey = key + '_' + args[0];
+            } else if (args.length === 2 && typeof args[0] === 'number' && typeof args[1] === 'number') {
+                cacheKey = key + '_' + args[0] + '_' + args[1];
+            } else if (args.length === 1 && args[0] && typeof args[0].name === 'string') {
+                // For gilt objects, use name as key component
+                cacheKey = key + '_' + args[0].name + '_' + (args[0].dirtyPrice || 0);
+            } else {
+                cacheKey = key + '_' + JSON.stringify(args);
+            }
             
             if (complexCalculationCache.has(cacheKey)) {
-                console.log('Complex calculation cache hit for ' + key);
                 return complexCalculationCache.get(cacheKey);
             }
             
             const result = calculationFn(...args);
             complexCalculationCache.set(cacheKey, result);
             
-            // Limit cache size
+            // Efficient cache cleanup
             if (complexCalculationCache.size > 500) {
-                const keysToDelete = Array.from(complexCalculationCache.keys()).slice(0, 100);
-                keysToDelete.forEach(k => complexCalculationCache.delete(k));
+                let deleteCount = 0;
+                for (const [k] of complexCalculationCache) {
+                    complexCalculationCache.delete(k);
+                    if (++deleteCount >= 100) break;
+                }
             }
             
             return result;
@@ -1470,8 +1483,6 @@ export async function renderHomePage(request, env) {
             console.log('Using tax rates:', taxInfo);
             
             return giltData.map(gilt => {
-                console.log('Processing gilt:', gilt.name);
-                
                 // Use cached calculations for expensive operations
                 const unitsOwned = getCachedComplexCalculation('unitsOwned', calculateUnitsOwned, investmentAmount, gilt.dirtyPrice);
                 
@@ -1486,10 +1497,17 @@ export async function renderHomePage(request, env) {
                 const savingsTotalCashReceived = getCachedComplexCalculation('savingsCash', calculateTotalCashFromSavings, investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
                 const extraIncome = giltTotalCashReceived - savingsTotalCashReceived;
                 
-                console.log('Gilt processed:', gilt.name, 'After-tax yield:', afterTaxYield.toFixed(3));
-                
+                // Return optimized object creation (avoid spread operator for performance)
                 return {
-                    ...gilt,
+                    name: gilt.name,
+                    couponRate: gilt.couponRate,
+                    cleanPrice: gilt.cleanPrice,
+                    currentYield: gilt.currentYield,
+                    maturityDate: gilt.maturityDate,
+                    yearsToMaturity: gilt.yearsToMaturity,
+                    dirtyPrice: gilt.dirtyPrice,
+                    accruedInterest: gilt.accruedInterest,
+                    couponSchedule: gilt.couponSchedule,
                     afterTaxYield: afterTaxYield,
                     equivalentGrossSavingsRate: equivalentGrossSavingsRate,
                     extraIncome: extraIncome,
@@ -1542,87 +1560,74 @@ export async function renderHomePage(request, env) {
         }
         
         function calculateTotalCashFromSavings(investmentAmount, savingsRate, incomeTaxRate, psaAmount, yearsToMaturity) {
-            // Calculate using actual calendar days
-            let currentBalance = investmentAmount;
-            let totalTaxPaid = 0;
-            let remainingPSA = psaAmount; // Track remaining PSA across years
-            
-            // Calculate the total number of actual calendar days
-            const today = new Date();
-            const endDate = new Date(today.getTime() + (yearsToMaturity * 365.25 * 24 * 60 * 60 * 1000));
-            const totalDays = Math.round((endDate - today) / (24 * 60 * 60 * 1000));
-            
-            // Calculate for each complete year (365 days)
+            // Pre-calculate constants to avoid repeated calculations
+            const msPerDay = 24 * 60 * 60 * 1000;
+            const savingsRateDecimal = savingsRate / 100;
+            const totalDays = Math.round(yearsToMaturity * 365.25);
             const completeYears = Math.floor(totalDays / 365);
-            for (let year = 1; year <= completeYears; year++) {
-                // Calculate gross interest for the year (365 days)
-                const grossInterest = currentBalance * (savingsRate / 100);
-                
-                // Check if PSA is available for this year (reset annually)
-                const availablePSAThisYear = psaAmount; // PSA resets each tax year
-                
-                // Calculate tax on interest above PSA
-                const taxableInterest = Math.max(0, grossInterest - availablePSAThisYear);
-                const tax = taxableInterest * incomeTaxRate;
-                totalTaxPaid += tax;
-                
-                // Add net interest to balance
-                const netInterest = grossInterest - tax;
-                currentBalance += netInterest;
+            const remainingDays = totalDays - (completeYears * 365);
+            
+            let currentBalance = investmentAmount;
+            
+            // Process complete years in batch
+            if (completeYears > 0) {
+                for (let year = 1; year <= completeYears; year++) {
+                    const grossInterest = currentBalance * savingsRateDecimal;
+                    const taxableInterest = Math.max(0, grossInterest - psaAmount);
+                    const tax = taxableInterest * incomeTaxRate;
+                    currentBalance += (grossInterest - tax);
+                }
             }
             
-            // Handle remaining days using actual day count
-            const remainingDays = totalDays - (completeYears * 365);
+            // Handle remaining days if any
             if (remainingDays > 0) {
-                // Calculate interest for the remaining actual days
-                const dailyRate = savingsRate / 100 / 365;
+                const dailyRate = savingsRateDecimal / 365;
                 const grossInterest = currentBalance * dailyRate * remainingDays;
-                
-                // Pro-rate PSA allowance for partial year
                 const partialYearFraction = remainingDays / 365;
                 const availablePSAPartialYear = psaAmount * partialYearFraction;
-                
-                // Only apply PSA if it's available (check if we're in a new tax year)
-                const effectivePSA = availablePSAPartialYear;
-                const taxableInterest = Math.max(0, grossInterest - effectivePSA);
+                const taxableInterest = Math.max(0, grossInterest - availablePSAPartialYear);
                 const tax = taxableInterest * incomeTaxRate;
-                totalTaxPaid += tax;
-                
-                const netInterest = grossInterest - tax;
-                currentBalance += netInterest;
+                currentBalance += (grossInterest - tax);
             }
             
             return currentBalance;
         }
         
         function generateCouponSchedule(gilt, unitsOwned, incomeTaxRate) {
-            const schedule = [];
-            const maturityDate = new Date(gilt.maturityDate);
-            const today = new Date();
+            const maturityTime = new Date(gilt.maturityDate).getTime();
+            const todayTime = new Date().getTime();
             const semiAnnualCoupon = (gilt.couponRate / 2 / 100) * unitsOwned;
+            const schedule = [];
             
-            // Calculate coupon dates (semi-annual)
-            let currentDate = new Date(maturityDate);
+            // Pre-calculate values to avoid repeated calculations
+            const sixMonthsMs = 6 * 30.44 * 24 * 60 * 60 * 1000; // Average 6 months
+            let currentTime = maturityTime;
             
-            // Go back to find all coupon dates from maturity to today
-            while (currentDate > today) {
-                const paymentDate = new Date(currentDate);
+            // Build schedule forward to avoid unshift operations
+            const tempSchedule = [];
+            while (currentTime > todayTime) {
                 const grossAmount = semiAnnualCoupon;
                 const taxAmount = grossAmount * incomeTaxRate;
-                const afterTaxAmount = grossAmount - taxAmount;
                 
-                schedule.unshift({
-                    date: paymentDate.toISOString().split('T')[0],
+                tempSchedule.push({
+                    date: new Date(currentTime).toISOString().split('T')[0],
                     grossAmount: grossAmount,
                     taxAmount: taxAmount,
-                    afterTaxAmount: afterTaxAmount
+                    afterTaxAmount: grossAmount - taxAmount
                 });
                 
-                // Move back 6 months
-                currentDate.setMonth(currentDate.getMonth() - 6);
+                currentTime -= sixMonthsMs;
             }
             
-            return schedule.filter(payment => new Date(payment.date) > today);
+            // Reverse once and filter in single pass
+            for (let i = tempSchedule.length - 1; i >= 0; i--) {
+                const payment = tempSchedule[i];
+                if (new Date(payment.date).getTime() > todayTime) {
+                    schedule.push(payment);
+                }
+            }
+            
+            return schedule;
         }
         
         function calculateIRR(initialInvestment, cashFlows) {

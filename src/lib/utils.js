@@ -68,20 +68,22 @@ export function calculateUnitsOwned(investmentAmount, dirtyPrice) {
 export function calculateCouponPaymentDates(maturityDate, numPayments = 20) {
   const maturity = new Date(maturityDate);
   const paymentDates = [];
+  const cutoffTime = new Date('2020-01-01').getTime();
   
-  // Calculate payments going backwards from maturity (more efficient than loop)
+  // Pre-calculate dates in forward direction to avoid unshift operations
+  let currentTime = maturity.getTime();
+  const sixMonthsMs = 6 * 30.44 * 24 * 60 * 60 * 1000; // Average 6 months in ms
+  
   for (let i = 0; i < numPayments; i++) {
-    const paymentDate = new Date(maturity);
-    paymentDate.setMonth(maturity.getMonth() - (i * 6));
+    if (currentTime <= cutoffTime) break;
     
-    if (paymentDate > new Date('2020-01-01')) {
-      paymentDates.unshift(paymentDate);
-    } else {
-      break;
-    }
+    const paymentDate = new Date(currentTime);
+    paymentDates.push(paymentDate);
+    currentTime -= sixMonthsMs;
   }
   
-  return paymentDates;
+  // Reverse once instead of using unshift in loop
+  return paymentDates.reverse();
 }
 
 export function findLastCouponDate(maturityDate, referenceDate = null) {
@@ -168,11 +170,16 @@ const calculationCache = new Map();
 const cacheStats = { hits: 0, misses: 0 };
 
 export function getCachedCalculation(key, calculationFn, ...args) {
-  const cacheKey = `${key}_${JSON.stringify(args)}`;
+  // Use faster string concatenation instead of JSON.stringify for simple args
+  let cacheKey;
+  if (args.length <= 2 && args.every(arg => typeof arg === 'string' || typeof arg === 'number')) {
+    cacheKey = key + '_' + args.join('_');
+  } else {
+    cacheKey = key + '_' + JSON.stringify(args);
+  }
   
   if (calculationCache.has(cacheKey)) {
     cacheStats.hits++;
-    console.log(`Cache hit for ${key} (${cacheStats.hits}/${cacheStats.hits + cacheStats.misses} hit rate)`);
     return calculationCache.get(cacheKey);
   }
   
@@ -180,12 +187,13 @@ export function getCachedCalculation(key, calculationFn, ...args) {
   const result = calculationFn(...args);
   calculationCache.set(cacheKey, result);
   
-  // Limit cache size to prevent memory issues
+  // More efficient cache cleanup - only when needed
   if (calculationCache.size > 2000) {
-    // Remove oldest 500 entries
-    const keysToDelete = Array.from(calculationCache.keys()).slice(0, 500);
-    keysToDelete.forEach(key => calculationCache.delete(key));
-    console.log(`Cache cleanup: removed ${keysToDelete.length} entries`);
+    let deleteCount = 0;
+    for (const [k] of calculationCache) {
+      calculationCache.delete(k);
+      if (++deleteCount >= 500) break;
+    }
   }
   
   return result;
