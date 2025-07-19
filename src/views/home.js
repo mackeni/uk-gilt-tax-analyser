@@ -1665,6 +1665,7 @@ export async function renderHomePage(request, env) {
                     break;
                     
                 case 'equivalent':
+                    const currentTaxRate = getCurrentTaxRate();
                     titleText = 'Equivalent Gross Savings Rate';
                     contentHTML = \`
                         <div class="calculation-step">
@@ -1680,14 +1681,14 @@ export async function renderHomePage(request, env) {
                                 <p><strong>Example Calculation:</strong></p>
                                 <ul style="margin: 10px 0; padding-left: 20px;">
                                     <li>Gilt After-Tax IRR: \${gilt.afterTaxYield.toFixed(2)}%</li>
-                                    <li>Your Income Tax Rate: \${(taxRate * 100).toFixed(0)}%</li>
-                                    <li>Required Gross Rate: \${gilt.afterTaxYield.toFixed(2)}% ÷ (1 - \${taxRate.toFixed(2)}) = <strong>\${gilt.equivalentGrossSavingsRate.toFixed(2)}%</strong></li>
+                                    <li>Your Income Tax Rate: \${currentTaxRate}%</li>
+                                    <li>Required Gross Rate: \${gilt.afterTaxYield.toFixed(2)}% ÷ (1 - \${(currentTaxRate/100).toFixed(2)}) = <strong>\${gilt.equivalentGrossSavingsRate.toFixed(2)}%</strong></li>
                                 </ul>
                             </div>
                         </div>
                         <div class="calculation-step">
                             <h4>Why This Matters:</h4>
-                            <p>• Savings accounts are taxed as income at your marginal rate (\${(taxRate * 100).toFixed(0)}%)</p>
+                            <p>• Savings accounts are taxed as income at your marginal rate (\${currentTaxRate}%)</p>
                             <p>• Gilt coupons are also taxed as income, but capital gains are tax-free</p>
                             <p>• This calculation shows what savings rate you'd need to match the gilt's performance</p>
                             <p>• If current savings rates are below \${gilt.equivalentGrossSavingsRate.toFixed(2)}%, this gilt offers better value</p>
