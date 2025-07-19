@@ -2148,15 +2148,18 @@ export async function renderHomePage(request, env) {
                                         <tbody>
                         \`;
                         
-                        // Add coupon payments
+                        // Add coupon payments with rounded tax calculations
                         gilt.couponSchedule.forEach(payment => {
                             const paymentDate = new Date(payment.date).toLocaleDateString('en-GB');
+                            // Apply 2-decimal rounding to each coupon tax calculation
+                            const roundedTaxAmount = Math.round(payment.taxAmount * 100) / 100;
+                            const roundedAfterTaxAmount = payment.grossAmount - roundedTaxAmount;
                             scheduleHTML += \`
                                 <tr>
                                     <td style="border: 1px solid #ddd; padding: 8px;">\${paymentDate}</td>
                                     <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${payment.grossAmount.toFixed(2)}</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${payment.taxAmount.toFixed(2)}</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${payment.afterTaxAmount.toFixed(2)}</strong></td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${roundedTaxAmount.toFixed(2)}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${roundedAfterTaxAmount.toFixed(2)}</strong></td>
                                 </tr>
                             \`;
                         });
@@ -2175,10 +2178,10 @@ export async function renderHomePage(request, env) {
                             </tr>
                         \`;
                         
-                        // Calculate grand totals including monthly charges
+                        // Calculate grand totals including monthly charges with rounded tax
                         const totalGrossCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0);
-                        const totalCouponTax = gilt.couponSchedule.reduce((sum, payment) => sum + payment.taxAmount, 0);
-                        const totalNetCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + payment.afterTaxAmount, 0);
+                        const totalCouponTax = gilt.couponSchedule.reduce((sum, payment) => sum + Math.round(payment.taxAmount * 100) / 100, 0);
+                        const totalNetCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + (payment.grossAmount - Math.round(payment.taxAmount * 100) / 100), 0);
                         const totalAccountCharges = monthlyChargeSchedule.reduce((sum, charge) => sum + charge.charge, 0);
                         const grandTotalGross = totalGrossCoupons + principalAmount;
                         // Total costs = Income Tax + Account Charges (both reduce net returns)
