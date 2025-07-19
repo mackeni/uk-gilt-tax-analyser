@@ -534,7 +534,25 @@ This migration maintains all original functionality while dramatically improving
 - **Realistic Returns**: All calculations reflect true cost of gilt investments including broker fees
 - **Transparent Pricing**: Users see both gross investment amount and net amount available for gilt purchase
 
-### July 19, 2025 - Dealing Charge Update Bug Fix Complete
+### July 19, 2025 - Dealing Charge Disable Option Implementation
+
+**Version ID**: c2e54e49-3269-4e18-973f-e01bd4f7fa4d
+
+**Enhanced Dealing Charge Functionality:**
+- **£0 Default**: Changed default dealing charge from £5 to £0 (no dealing charge by default)
+- **Disable Option**: Users can set dealing charge to £0 to completely exclude transaction costs
+- **Smart Display**: Shows "None (£0.00)" when dealing charge is £0 instead of "£0.00"
+- **Improved Documentation**: Updated help text to explain that £0 excludes dealing charges from calculations
+- **Enhanced Parsing**: Better handling of empty inputs defaulting to £0 instead of £5
+- **Clean Tooltips**: Interactive tooltips show "None" when no dealing charge applies
+
+**Technical Improvements:**
+- **Default Value Change**: All default dealing charge references changed from 5 to 0
+- **Conditional Display**: Smart formatting shows "None" vs. actual amounts in all tooltips
+- **Input Handling**: Empty or invalid inputs now default to £0 (no charge) instead of £5
+- **Calculation Logic**: All calculations properly handle £0 dealing charge without affecting yields
+
+### July 19, 2025 - Previous: Dealing Charge Update Bug Fix
 
 **Version ID**: 96dc83b6-2236-4cca-8ce5-62a41a07252e
 

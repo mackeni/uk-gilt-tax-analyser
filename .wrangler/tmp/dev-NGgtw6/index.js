@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-ayWkLy/checked-fetch.js
+// .wrangler/tmp/bundle-5zl6wv/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-ayWkLy/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-5zl6wv/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-ayWkLy/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-5zl6wv/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-ayWkLy/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-5zl6wv/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4096,9 +4096,9 @@ async function renderHomePage(request, env) {
                     
                     <div class="form-group">
                         <label for="dealingCharge">Dealing Charge (\xA3)</label>
-                        <input type="number" id="dealingCharge" value="5" min="0" max="1000" step="1">
+                        <input type="number" id="dealingCharge" value="0" min="0" max="1000" step="1">
                         <div class="tax-info" style="margin-top: 10px; padding: 10px; font-size: 14px;">
-                            <p>\u{1F4B7} Transaction cost charged by your broker for purchasing gilts. This reduces your effective yield.</p>
+                            <p>\u{1F4B7} Transaction cost charged by your broker for purchasing gilts. Set to \xA30 to exclude dealing charges from calculations.</p>
                         </div>
                     </div>
                     
@@ -4328,7 +4328,7 @@ async function renderHomePage(request, env) {
             taxBracket: 'additional_rate',
             investmentAmount: 10000,
             savingsRate: 4.5,
-            dealingCharge: 5,
+            dealingCharge: 0, // Default to \xA30 (no dealing charge)
             accountChargeEnabled: false,
             accountChargeRate: 0.25,
             accountChargeMax: 3.50
@@ -4431,8 +4431,9 @@ async function renderHomePage(request, env) {
         }
         
         function updateDealingCharge() {
-            const dealingCharge = parseFloat(document.getElementById('dealingCharge').value) || 5;
-            currentSettings.dealingCharge = dealingCharge;
+            const value = document.getElementById('dealingCharge').value;
+            const dealingCharge = value === '' ? 0 : (parseFloat(value) || 0);
+            currentSettings.dealingCharge = Math.max(0, dealingCharge); // Ensure non-negative
             
             // Clear cache since dealing charge affects calculations
             clearAllCaches();
@@ -4841,8 +4842,8 @@ async function renderHomePage(request, env) {
             console.log('Using tax rates:', taxInfo);
             
             return giltData.map(gilt => {
-                // Include dealing charge in units calculation
-                const dealingCharge = currentSettings.dealingCharge || 5;
+                // Include dealing charge in units calculation (if any)
+                const dealingCharge = currentSettings.dealingCharge || 0;
                 const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge
                 const unitsOwned = getCachedComplexCalculation('unitsOwned_' + dealingCharge + '_' + investmentAmount, calculateUnitsOwned, effectiveInvestmentAmount, gilt.dirtyPrice);
                 
@@ -4881,8 +4882,8 @@ async function renderHomePage(request, env) {
             const couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
             gilt.couponSchedule = couponSchedule; // Store for tooltips
             
-            // Calculate initial investment INCLUDING dealing charge
-            const dealingCharge = currentSettings.dealingCharge || 5;
+            // Calculate initial investment INCLUDING dealing charge (if any)
+            const dealingCharge = currentSettings.dealingCharge || 0;
             const giltPurchaseCost = (gilt.cleanPrice + gilt.accruedInterest) * unitsOwned / 100;
             const initialInvestment = giltPurchaseCost + dealingCharge;
             
@@ -5368,8 +5369,8 @@ async function renderHomePage(request, env) {
                         
                         // Add principal repayment row
                         const maturityDate = new Date(gilt.maturityDate).toLocaleDateString('en-GB');
-                        // Use effective investment amount after dealing charge for units calculation
-                        const dealingCharge = currentSettings.dealingCharge || 5;
+                        // Use effective investment amount after dealing charge for units calculation (if any)
+                        const dealingCharge = currentSettings.dealingCharge || 0;
                         const effectiveInvestmentAmount = (currentSettings.investmentAmount || 10000) - dealingCharge;
                         const principalAmount = effectiveInvestmentAmount / gilt.dirtyPrice * 100;
                         scheduleHTML += \`
@@ -5415,8 +5416,8 @@ async function renderHomePage(request, env) {
                             <h4>Calculation Method:</h4>
                             <p><strong>Method:</strong> IRR calculation using Newton-Raphson method</p>
                             <p><strong>Your Investment:</strong> \${formatCurrency(currentSettings.investmentAmount || 10000)}</p>
-                            <p><strong>Dealing Charge:</strong> \xA3\${(currentSettings.dealingCharge || 5).toFixed(2)}</p>
-                            <p><strong>Available for Gilts:</strong> \${formatCurrency((currentSettings.investmentAmount || 10000) - (currentSettings.dealingCharge || 5))}</p>
+                            <p><strong>Dealing Charge:</strong> \${currentSettings.dealingCharge > 0 ? '\xA3' + currentSettings.dealingCharge.toFixed(2) : 'None (\xA30.00)'}</p>
+                            <p><strong>Available for Gilts:</strong> \${formatCurrency((currentSettings.investmentAmount || 10000) - (currentSettings.dealingCharge || 0))}</p>
                             <p><strong>Purchase Price:</strong> \xA3\${gilt.dirtyPrice.toFixed(6)} per \xA3100 (including accrued interest)</p>
                             <p><strong>Your Tax Rate:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ')} (\${getCurrentTaxRate()}%)</p>
                         </div>
@@ -5425,7 +5426,7 @@ async function renderHomePage(request, env) {
                             <p><strong>\${gilt.afterTaxYield.toFixed(3)}%</strong> per year</p>
                             <p>This accounts for:</p>
                             <ul>
-                                <li>Dealing charge: \xA3\${(currentSettings.dealingCharge || 5).toFixed(2)}</li>
+                                <li>Dealing charge: \${currentSettings.dealingCharge > 0 ? '\xA3' + currentSettings.dealingCharge.toFixed(2) : 'None (\xA30.00)'}</li>
                                 <li>Income tax on all coupon payments</li>
                                 <li>Tax-free principal repayment at maturity</li>
                                 <li>Exact timing of all cash flows</li>
@@ -5760,14 +5761,14 @@ async function renderHomePage(request, env) {
         // Robust event delegation for dealing charge
         document.addEventListener('input', function(e) {
             if (e.target && e.target.id === 'dealingCharge') {
-                // Handle empty string and convert properly
+                // Handle empty string and convert properly, allow \xA30 to disable dealing charges
                 let dealingCharge;
                 if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
-                    dealingCharge = 5; // Default when empty
+                    dealingCharge = 0; // Default to \xA30 when empty (no dealing charge)
                 } else {
                     dealingCharge = parseFloat(e.target.value);
-                    if (isNaN(dealingCharge)) {
-                        dealingCharge = 5; // Default when invalid
+                    if (isNaN(dealingCharge) || dealingCharge < 0) {
+                        dealingCharge = 0; // Default to \xA30 when invalid or negative
                     }
                 }
                 
@@ -6562,7 +6563,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-ayWkLy/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-5zl6wv/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6596,7 +6597,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-ayWkLy/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-5zl6wv/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

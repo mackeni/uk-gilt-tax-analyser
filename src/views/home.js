@@ -846,9 +846,9 @@ export async function renderHomePage(request, env) {
                     
                     <div class="form-group">
                         <label for="dealingCharge">Dealing Charge (£)</label>
-                        <input type="number" id="dealingCharge" value="5" min="0" max="1000" step="1">
+                        <input type="number" id="dealingCharge" value="0" min="0" max="1000" step="1">
                         <div class="tax-info" style="margin-top: 10px; padding: 10px; font-size: 14px;">
-                            <p>💷 Transaction cost charged by your broker for purchasing gilts. This reduces your effective yield.</p>
+                            <p>💷 Transaction cost charged by your broker for purchasing gilts. Set to £0 to exclude dealing charges from calculations.</p>
                         </div>
                     </div>
                     
@@ -1078,7 +1078,7 @@ export async function renderHomePage(request, env) {
             taxBracket: 'additional_rate',
             investmentAmount: 10000,
             savingsRate: 4.5,
-            dealingCharge: 5,
+            dealingCharge: 0, // Default to £0 (no dealing charge)
             accountChargeEnabled: false,
             accountChargeRate: 0.25,
             accountChargeMax: 3.50
@@ -1181,8 +1181,9 @@ export async function renderHomePage(request, env) {
         }
         
         function updateDealingCharge() {
-            const dealingCharge = parseFloat(document.getElementById('dealingCharge').value) || 5;
-            currentSettings.dealingCharge = dealingCharge;
+            const value = document.getElementById('dealingCharge').value;
+            const dealingCharge = value === '' ? 0 : (parseFloat(value) || 0);
+            currentSettings.dealingCharge = Math.max(0, dealingCharge); // Ensure non-negative
             
             // Clear cache since dealing charge affects calculations
             clearAllCaches();
@@ -1591,8 +1592,8 @@ export async function renderHomePage(request, env) {
             console.log('Using tax rates:', taxInfo);
             
             return giltData.map(gilt => {
-                // Include dealing charge in units calculation
-                const dealingCharge = currentSettings.dealingCharge || 5;
+                // Include dealing charge in units calculation (if any)
+                const dealingCharge = currentSettings.dealingCharge || 0;
                 const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge
                 const unitsOwned = getCachedComplexCalculation('unitsOwned_' + dealingCharge + '_' + investmentAmount, calculateUnitsOwned, effectiveInvestmentAmount, gilt.dirtyPrice);
                 
@@ -1631,8 +1632,8 @@ export async function renderHomePage(request, env) {
             const couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
             gilt.couponSchedule = couponSchedule; // Store for tooltips
             
-            // Calculate initial investment INCLUDING dealing charge
-            const dealingCharge = currentSettings.dealingCharge || 5;
+            // Calculate initial investment INCLUDING dealing charge (if any)
+            const dealingCharge = currentSettings.dealingCharge || 0;
             const giltPurchaseCost = (gilt.cleanPrice + gilt.accruedInterest) * unitsOwned / 100;
             const initialInvestment = giltPurchaseCost + dealingCharge;
             
@@ -2118,8 +2119,8 @@ export async function renderHomePage(request, env) {
                         
                         // Add principal repayment row
                         const maturityDate = new Date(gilt.maturityDate).toLocaleDateString('en-GB');
-                        // Use effective investment amount after dealing charge for units calculation
-                        const dealingCharge = currentSettings.dealingCharge || 5;
+                        // Use effective investment amount after dealing charge for units calculation (if any)
+                        const dealingCharge = currentSettings.dealingCharge || 0;
                         const effectiveInvestmentAmount = (currentSettings.investmentAmount || 10000) - dealingCharge;
                         const principalAmount = effectiveInvestmentAmount / gilt.dirtyPrice * 100;
                         scheduleHTML += \`
@@ -2165,8 +2166,8 @@ export async function renderHomePage(request, env) {
                             <h4>Calculation Method:</h4>
                             <p><strong>Method:</strong> IRR calculation using Newton-Raphson method</p>
                             <p><strong>Your Investment:</strong> \${formatCurrency(currentSettings.investmentAmount || 10000)}</p>
-                            <p><strong>Dealing Charge:</strong> £\${(currentSettings.dealingCharge || 5).toFixed(2)}</p>
-                            <p><strong>Available for Gilts:</strong> \${formatCurrency((currentSettings.investmentAmount || 10000) - (currentSettings.dealingCharge || 5))}</p>
+                            <p><strong>Dealing Charge:</strong> \${currentSettings.dealingCharge > 0 ? '£' + currentSettings.dealingCharge.toFixed(2) : 'None (£0.00)'}</p>
+                            <p><strong>Available for Gilts:</strong> \${formatCurrency((currentSettings.investmentAmount || 10000) - (currentSettings.dealingCharge || 0))}</p>
                             <p><strong>Purchase Price:</strong> £\${gilt.dirtyPrice.toFixed(6)} per £100 (including accrued interest)</p>
                             <p><strong>Your Tax Rate:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ')} (\${getCurrentTaxRate()}%)</p>
                         </div>
@@ -2175,7 +2176,7 @@ export async function renderHomePage(request, env) {
                             <p><strong>\${gilt.afterTaxYield.toFixed(3)}%</strong> per year</p>
                             <p>This accounts for:</p>
                             <ul>
-                                <li>Dealing charge: £\${(currentSettings.dealingCharge || 5).toFixed(2)}</li>
+                                <li>Dealing charge: \${currentSettings.dealingCharge > 0 ? '£' + currentSettings.dealingCharge.toFixed(2) : 'None (£0.00)'}</li>
                                 <li>Income tax on all coupon payments</li>
                                 <li>Tax-free principal repayment at maturity</li>
                                 <li>Exact timing of all cash flows</li>
@@ -2510,14 +2511,14 @@ export async function renderHomePage(request, env) {
         // Robust event delegation for dealing charge
         document.addEventListener('input', function(e) {
             if (e.target && e.target.id === 'dealingCharge') {
-                // Handle empty string and convert properly
+                // Handle empty string and convert properly, allow £0 to disable dealing charges
                 let dealingCharge;
                 if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
-                    dealingCharge = 5; // Default when empty
+                    dealingCharge = 0; // Default to £0 when empty (no dealing charge)
                 } else {
                     dealingCharge = parseFloat(e.target.value);
-                    if (isNaN(dealingCharge)) {
-                        dealingCharge = 5; // Default when invalid
+                    if (isNaN(dealingCharge) || dealingCharge < 0) {
+                        dealingCharge = 0; // Default to £0 when invalid or negative
                     }
                 }
                 
