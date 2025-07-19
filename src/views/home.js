@@ -1024,7 +1024,7 @@ export async function renderHomePage(request, env) {
                     \`\${info.description}\n\n\` +
                     \`Do you have your full Personal Savings Allowance available?\n\n\` +
                     \`Click OK for standard amount (£\${suggestedPSA.toLocaleString()})\n\` +
-                    \`Click Cancel if you have no PSA remaining (£0)\`
+                    \`Click Cancel for nil available (£0)\`
                 );
                 
                 confirmedPSA = psaChoice ? suggestedPSA : 0;
