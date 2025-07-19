@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-sXNiuX/checked-fetch.js
+// .wrangler/tmp/bundle-xa7sOw/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-sXNiuX/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-xa7sOw/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-sXNiuX/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-xa7sOw/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-sXNiuX/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-xa7sOw/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5431,7 +5431,8 @@ async function renderHomePage(request, env) {
                         const totalNetCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + payment.afterTaxAmount, 0);
                         const totalAccountCharges = monthlyChargeSchedule.reduce((sum, charge) => sum + charge.charge, 0);
                         const grandTotalGross = totalGrossCoupons + principalAmount;
-                        const grandTotalCharges = totalCouponTax + totalAccountCharges;
+                        // Total costs = Income Tax + Account Charges (both reduce net returns)
+                        const grandTotalCosts = totalCouponTax + totalAccountCharges;
                         const grandTotalNet = totalNetCoupons + principalAmount - totalAccountCharges;
                         
                         // Add coupon totals row
@@ -5467,7 +5468,7 @@ async function renderHomePage(request, env) {
                                     <div>
                                         <h5 style="margin-bottom: 8px;">Net Returns:</h5>
                                         <p style="margin: 3px 0;"><strong>Total Cash Received:</strong> \xA3\${grandTotalGross.toFixed(2)}</p>
-                                        <p style="margin: 3px 0;"><strong>Total Costs:</strong> \xA3\${grandTotalCharges.toFixed(2)}</p>
+                                        <p style="margin: 3px 0;"><strong>Total Costs:</strong> \xA3\${grandTotalCosts.toFixed(2)} (Tax: \xA3\${totalCouponTax.toFixed(2)} + Charges: \xA3\${totalAccountCharges.toFixed(2)})</p>
                                         <p style="margin: 3px 0; font-size: 16px;"><strong style="color: #007bff;">Net After-Tax Return:</strong> \xA3\${grandTotalNet.toFixed(2)}</p>
                                     </div>
                                 </div>
@@ -6750,7 +6751,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-sXNiuX/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-xa7sOw/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6784,7 +6785,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-sXNiuX/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-xa7sOw/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

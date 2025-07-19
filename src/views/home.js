@@ -2181,7 +2181,8 @@ export async function renderHomePage(request, env) {
                         const totalNetCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + payment.afterTaxAmount, 0);
                         const totalAccountCharges = monthlyChargeSchedule.reduce((sum, charge) => sum + charge.charge, 0);
                         const grandTotalGross = totalGrossCoupons + principalAmount;
-                        const grandTotalCharges = totalCouponTax + totalAccountCharges;
+                        // Total costs = Income Tax + Account Charges (both reduce net returns)
+                        const grandTotalCosts = totalCouponTax + totalAccountCharges;
                         const grandTotalNet = totalNetCoupons + principalAmount - totalAccountCharges;
                         
                         // Add coupon totals row
@@ -2217,7 +2218,7 @@ export async function renderHomePage(request, env) {
                                     <div>
                                         <h5 style="margin-bottom: 8px;">Net Returns:</h5>
                                         <p style="margin: 3px 0;"><strong>Total Cash Received:</strong> £\${grandTotalGross.toFixed(2)}</p>
-                                        <p style="margin: 3px 0;"><strong>Total Costs:</strong> £\${grandTotalCharges.toFixed(2)}</p>
+                                        <p style="margin: 3px 0;"><strong>Total Costs:</strong> £\${grandTotalCosts.toFixed(2)} (Tax: £\${totalCouponTax.toFixed(2)} + Charges: £\${totalAccountCharges.toFixed(2)})</p>
                                         <p style="margin: 3px 0; font-size: 16px;"><strong style="color: #007bff;">Net After-Tax Return:</strong> £\${grandTotalNet.toFixed(2)}</p>
                                     </div>
                                 </div>
