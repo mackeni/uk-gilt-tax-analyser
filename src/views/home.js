@@ -1318,14 +1318,35 @@ export async function renderHomePage(request, env) {
         }
         
         function calculateTotalCashFromSavings(investmentAmount, savingsRate, incomeTaxRate, psaAmount, yearsToMaturity) {
-            const annualGrossInterest = (savingsRate / 100) * investmentAmount;
-            const taxableInterest = Math.max(0, annualGrossInterest - psaAmount);
-            const annualTax = taxableInterest * incomeTaxRate;
-            const annualNetInterest = annualGrossInterest - annualTax;
+            // Calculate compound interest with annual tax deductions
+            let totalCash = investmentAmount;
+            let cumulativeTaxableInterest = 0;
             
-            // Calculate total over the investment period
-            const totalNetInterest = annualNetInterest * yearsToMaturity;
-            const totalCash = investmentAmount + totalNetInterest; // Principal + interest
+            for (let year = 1; year <= Math.floor(yearsToMaturity); year++) {
+                const grossInterest = totalCash * (savingsRate / 100);
+                cumulativeTaxableInterest += grossInterest;
+                
+                // Calculate tax on cumulative interest above PSA
+                const taxableAmount = Math.max(0, cumulativeTaxableInterest - psaAmount);
+                const totalTax = taxableAmount * incomeTaxRate;
+                const netInterest = cumulativeTaxableInterest - totalTax;
+                
+                totalCash = investmentAmount + netInterest;
+                cumulativeTaxableInterest = grossInterest; // Reset for next year
+            }
+            
+            // Handle partial final year
+            const partialYear = yearsToMaturity - Math.floor(yearsToMaturity);
+            if (partialYear > 0) {
+                const grossInterest = totalCash * (savingsRate / 100) * partialYear;
+                cumulativeTaxableInterest += grossInterest;
+                
+                const taxableAmount = Math.max(0, cumulativeTaxableInterest - psaAmount);
+                const totalTax = taxableAmount * incomeTaxRate;
+                const netInterest = cumulativeTaxableInterest - totalTax;
+                
+                totalCash = investmentAmount + netInterest;
+            }
             
             return totalCash;
         }
@@ -1785,10 +1806,10 @@ export async function renderHomePage(request, env) {
                             <h4>Step 1: Total Cash from Gilt Investment</h4>
                             <p><strong>Gilt:</strong> \${gilt.name}</p>
                             <p><strong>Initial Investment:</strong> \${formatCurrency(investmentAmount)}</p>
-                            <p><strong>Total Cash Received:</strong> \${formatCurrency(giltTotalCash)}</p>
+                            <p><strong>Total Cash Received:</strong> £\${giltTotalCash.toFixed(2)}</p>
                             <div style="margin-left: 20px; color: #666;">
                                 <p><small>• All coupon payments (after \${modalTaxRate}% income tax)</small></p>
-                                <p><small>• Principal repayment: \${formatCurrency(gilt.unitsOwned || 0)} (tax-free)</small></p>
+                                <p><small>• Principal repayment: £\${(gilt.unitsOwned || 0).toFixed(2)} (tax-free)</small></p>
                                 <p><small>• Based on actual payment schedule with exact dates</small></p>
                             </div>
                         </div>
@@ -1798,12 +1819,12 @@ export async function renderHomePage(request, env) {
                             <p><strong>Initial Investment:</strong> \${formatCurrency(investmentAmount)}</p>
                             <p><strong>Savings Rate:</strong> \${savingsRate.toFixed(2)}%</p>
                             <p><strong>Investment Period:</strong> \${(gilt.yearsToMaturity || 0).toFixed(1)} years</p>
-                            <p><strong>Total Cash Received:</strong> \${formatCurrency(savingsTotalCash)}</p>
+                            <p><strong>Total Cash Received:</strong> £\${savingsTotalCash.toFixed(2)}</p>
                             <div style="margin-left: 20px; color: #666;">
-                                <p><small>• Annual gross interest: \${formatCurrency(annualSavingsInterest)}</small></p>
-                                <p><small>• Personal Savings Allowance: \${formatCurrency(psaAmount)}</small></p>
-                                <p><small>• Tax on excess interest (\${modalTaxRate}%): \${formatCurrency(taxOnSavings)}</small></p>
-                                <p><small>• Net annual interest: \${formatCurrency(netSavingsIncome)}</small></p>
+                                <p><small>• Annual gross interest: £\${annualSavingsInterest.toFixed(2)}</small></p>
+                                <p><small>• Personal Savings Allowance: £\${psaAmount.toFixed(2)}</small></p>
+                                <p><small>• Tax on excess interest (\${modalTaxRate}%): £\${taxOnSavings.toFixed(2)}</small></p>
+                                <p><small>• Net annual interest: £\${netSavingsIncome.toFixed(2)}</small></p>
                             </div>
                         </div>
                         
@@ -1813,16 +1834,16 @@ export async function renderHomePage(request, env) {
                                 <strong>Formula:</strong><br>
                                 Extra Income = Total Cash from Gilt - Total Cash from Savings<br><br>
                                 <strong>Calculation:</strong><br>
-                                \${formatCurrency(giltTotalCash)} - \${formatCurrency(savingsTotalCash)}<br>
-                                = <strong>\${formatCurrency(extraIncomeTotal)}</strong>
+                                £\${giltTotalCash.toFixed(2)} - £\${savingsTotalCash.toFixed(2)}<br>
+                                = <strong>£\${extraIncomeTotal.toFixed(2)}</strong>
                             </div>
-                            <p><strong>Gilt Total Return:</strong> \${formatCurrency(giltTotalCash - investmentAmount)} profit</p>
-                            <p><strong>Savings Total Return:</strong> \${formatCurrency(savingsTotalCash - investmentAmount)} profit</p>
-                            <p><strong>Total Advantage:</strong> \${formatCurrency(extraIncomeTotal)} over \${(gilt.yearsToMaturity || 0).toFixed(1)} years</p>
+                            <p><strong>Gilt Total Return:</strong> £\${(giltTotalCash - investmentAmount).toFixed(2)} profit</p>
+                            <p><strong>Savings Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit</p>
+                            <p><strong>Total Advantage:</strong> £\${extraIncomeTotal.toFixed(2)} over \${(gilt.yearsToMaturity || 0).toFixed(1)} years</p>
                             <p style="margin-top: 15px; font-weight: bold; color: \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'};">
                                 \${advantagePercent >= 0 ? 
-                                    \`This gilt will earn you \${formatCurrency(Math.abs(extraIncomeTotal))} MORE than a savings account.\` : 
-                                    \`A savings account would earn you \${formatCurrency(Math.abs(extraIncomeTotal))} MORE than this gilt.\`
+                                    \`This gilt will earn you £\${Math.abs(extraIncomeTotal).toFixed(2)} MORE than a savings account.\` : 
+                                    \`A savings account would earn you £\${Math.abs(extraIncomeTotal).toFixed(2)} MORE than this gilt.\`
                                 }
                             </p>
                         </div>
