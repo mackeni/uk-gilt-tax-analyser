@@ -239,12 +239,22 @@ export async function renderHomePage(request, env) {
         .table-container table {
             width: 100%;
             border-collapse: collapse;
-            table-layout: auto;
+            table-layout: fixed;
         }
         
         .table-container td, .table-container th {
             vertical-align: middle;
+            padding: 8px 6px;
         }
+        
+        /* Column width optimization */
+        .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 25%; } /* Name */
+        .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 10%; } /* Coupon */
+        .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 12%; } /* Clean Price */
+        .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 12%; } /* Dirty Price */
+        .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 12%; } /* After-Tax IRR */
+        .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 19%; } /* Equivalent Rate */
+        .table-container th:nth-child(7), .table-container td:nth-child(7) { width: 10%; } /* Years */
         
         .modal {
             display: none;
@@ -482,28 +492,36 @@ export async function renderHomePage(request, env) {
             }
             
             .table-container table {
-                min-width: 800px;
+                min-width: 750px;
                 font-size: 12px;
             }
             
             .table-container th {
                 font-size: 11px;
-                padding: 8px 6px;
+                padding: 6px 4px;
                 white-space: nowrap;
             }
             
             .table-container td {
-                padding: 8px 6px;
+                padding: 6px 4px;
                 font-size: 12px;
             }
             
             .table-container td:first-child {
                 font-size: 11px;
-                max-width: 120px;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
+            
+            /* Mobile column width adjustments */
+            .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 30%; } /* Name - more space on mobile */
+            .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 12%; } /* Coupon */
+            .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 10%; } /* Clean Price - less space */
+            .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 10%; } /* Dirty Price - less space */
+            .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 12%; } /* After-Tax IRR */
+            .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 16%; } /* Equivalent Rate - shorter */
+            .table-container th:nth-child(7), .table-container td:nth-child(7) { width: 10%; } /* Years */
             
             .clickable-cell {
                 min-height: 44px; /* Touch target size */
@@ -593,24 +611,32 @@ export async function renderHomePage(request, env) {
             }
             
             .table-container table {
-                min-width: 700px;
+                min-width: 650px;
                 font-size: 11px;
             }
             
             .table-container th {
-                font-size: 10px;
-                padding: 6px 4px;
+                font-size: 9px;
+                padding: 4px 3px;
             }
             
             .table-container td {
-                padding: 6px 4px;
-                font-size: 11px;
+                padding: 4px 3px;
+                font-size: 10px;
             }
             
             .table-container td:first-child {
-                max-width: 100px;
-                font-size: 10px;
+                font-size: 9px;
             }
+            
+            /* Ultra-compact mobile column widths */
+            .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 32%; } /* Name */
+            .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 11%; } /* Coupon */
+            .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 9%; } /* Clean Price */
+            .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 9%; } /* Dirty Price */
+            .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 11%; } /* After-Tax IRR */
+            .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 18%; } /* Equivalent Rate */
+            .table-container th:nth-child(7), .table-container td:nth-child(7) { width: 10%; } /* Years */
             
             .modal-content {
                 width: 98%;
