@@ -20,8 +20,7 @@ class GiltDataFetcher:
         }
         self.max_years_default = 3  # Default maximum maturity filter
         
-        # Complete UK gilt database with 68 bonds
-        self.gilt_database = self._get_complete_gilt_database()
+        # No backup database - authentic data sources only
     
     @st.cache_data(ttl=300, hash_funcs={type(None): lambda _: None})  # Cache for 5 minutes
     def get_gilt_data(_self) -> pd.DataFrame:
@@ -48,8 +47,8 @@ class GiltDataFetcher:
             if df is not None and not df.empty:
                 return df
             
-            # If all sources fail, show error - no fallback to estimates
-            st.error("Unable to fetch authentic gilt data from any source. Please check your internet connection.")
+            # If all sources fail, show error - no backup database
+            st.error("Unable to fetch authentic gilt data. Please check your internet connection.")
             return pd.DataFrame()
             
         except Exception as e:
@@ -236,7 +235,7 @@ class GiltDataFetcher:
         except Exception:
             return datetime.now() + timedelta(days=365)
     
-    def _get_complete_gilt_database(self) -> Dict:
+    # Complete gilt database method removed - authentic data sources only
         """
         Complete UK gilt database with all 68 government bonds
         """
@@ -418,79 +417,7 @@ class GiltDataFetcher:
             print(f"Error fetching authentic DividendData pricing: {e}")
             return pd.DataFrame()
 
-    def _get_gilt_database_with_estimates(self) -> pd.DataFrame:
-        """
-        Return complete gilt database with current market price estimates
-        """
-        gilt_data = []
-        
-        for isin, info in self.gilt_database.items():
-            # Calculate estimated price based on current market conditions
-            years_to_maturity = (info['maturity_date'] - datetime.now()).days / 365.25
-            
-            # Market yield estimates based on maturity (yield curve as of July 2025)
-            if years_to_maturity <= 2:
-                market_yield = 4.2
-            elif years_to_maturity <= 5:
-                market_yield = 4.4
-            elif years_to_maturity <= 10:
-                market_yield = 4.6
-            elif years_to_maturity <= 20:
-                market_yield = 4.8
-            else:
-                market_yield = 5.0
-            
-            # Adjust for index-linked and green gilts
-            if info['index_linked']:
-                market_yield -= 1.0  # Index-linked typically trade at lower real yields
-            if info['green_gilt']:
-                market_yield -= 0.1  # Green gilts may have slight premium
-            
-            # Estimate price using present value calculation
-            coupon_rate = info['coupon_rate']
-            estimated_price = self._estimate_bond_price(coupon_rate, market_yield, years_to_maturity)
-            
-            gilt_data.append({
-                'Name': info['name'],
-                'Coupon Rate': coupon_rate,
-                'Maturity Date': info['maturity_date'],
-                'Price': estimated_price,
-                'Current Yield': (coupon_rate / estimated_price) * 100,
-                'Years to Maturity': years_to_maturity,
-                'Index Linked': info['index_linked'],
-                'Green Gilt': info['green_gilt']
-            })
-        
-        df = pd.DataFrame(gilt_data)
-        df = self._process_gilt_dataframe(df)
-        return df.sort_values('Years to Maturity')
-    
-    def _estimate_bond_price(self, coupon_rate: float, market_yield: float, years_to_maturity: float) -> float:
-        """
-        Estimate bond price using present value calculation
-        """
-        try:
-            if years_to_maturity <= 0:
-                return 100.0
-            
-            # Semi-annual payments for UK gilts
-            periods = int(years_to_maturity * 2)
-            coupon_payment = coupon_rate / 2
-            discount_rate = market_yield / 200  # Semi-annual rate as decimal
-            
-            # Present value of coupon payments
-            if discount_rate > 0:
-                pv_coupons = coupon_payment * (1 - (1 + discount_rate) ** -periods) / discount_rate
-            else:
-                pv_coupons = coupon_payment * periods
-            
-            # Present value of principal repayment
-            pv_principal = 100 / (1 + discount_rate) ** periods
-            
-            return pv_coupons + pv_principal
-            
-        except Exception:
-            return 100.0  # Par value fallback
+    # All backup database methods removed - authentic data sources only
     
 
     
