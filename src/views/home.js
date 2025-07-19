@@ -2499,6 +2499,31 @@ export async function renderHomePage(request, env) {
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">(Precision: £\${giltTotalCash.toFixed(6)})</p>
                                         </div>
                                     </div>
+                                    
+                                    <div style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 8px; margin-top: 8px;">
+                                        <h6 style="margin: 0 0 5px 0; color: #333;">Total Cash Calculation Detail:</h6>
+                                        <div style="font-family: monospace; font-size: 10px; line-height: 1.3;">
+                                            <p style="margin: 1px 0;">Net Coupon Income: £\${totalNetCoupons.toFixed(6)}</p>
+                                            <p style="margin: 1px 0;">+ Principal Repayment: £\${principalAmount.toFixed(6)}</p>
+                                            \${currentSettings.accountChargeEnabled && totalMonthlyCharges > 0 ? 
+                                                '<p style="margin: 1px 0;">- Account Charges: £' + totalMonthlyCharges.toFixed(6) + '</p>' : 
+                                                '<p style="margin: 1px 0;">- Account Charges: £0.000000</p>'
+                                            }
+                                            <p style="margin: 1px 0; border-top: 1px solid #ddd; padding-top: 2px; font-weight: bold;">= Total Cash: £\${giltTotalCash.toFixed(6)}</p>
+                                            <p style="margin: 1px 0; color: #666;">Rounded Display: £\${giltTotalCash.toFixed(2)}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 8px; margin-top: 5px;">
+                                        <h6 style="margin: 0 0 5px 0; color: #333;">Verification Steps:</h6>
+                                        <div style="font-family: monospace; font-size: 10px; line-height: 1.3;">
+                                            <p style="margin: 1px 0;">1. Each coupon: £\${(totalGrossCoupons/numPayments).toFixed(6)} gross</p>
+                                            <p style="margin: 1px 0;">2. Tax per coupon: £\${((totalGrossCoupons/numPayments) * modalTaxRate/100).toFixed(6)} (before rounding)</p>
+                                            <p style="margin: 1px 0;">3. Rounded tax per coupon: £\${(totalCouponTax/numPayments).toFixed(6)}</p>
+                                            <p style="margin: 1px 0;">4. Net per coupon: £\${(totalNetCoupons/numPayments).toFixed(6)}</p>
+                                            <p style="margin: 1px 0;">5. Total net (\${numPayments} payments): £\${totalNetCoupons.toFixed(6)}</p>
+                                        </div>
+                                    </div>
                                 </div>
                                 \`;
                             })()}

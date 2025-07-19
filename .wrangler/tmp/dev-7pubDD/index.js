@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-6Negtm/checked-fetch.js
+// .wrangler/tmp/bundle-hKX6dx/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-6Negtm/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-hKX6dx/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-6Negtm/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-hKX6dx/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-6Negtm/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-hKX6dx/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5749,6 +5749,31 @@ async function renderHomePage(request, env) {
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">(Precision: \xA3\${giltTotalCash.toFixed(6)})</p>
                                         </div>
                                     </div>
+                                    
+                                    <div style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 8px; margin-top: 8px;">
+                                        <h6 style="margin: 0 0 5px 0; color: #333;">Total Cash Calculation Detail:</h6>
+                                        <div style="font-family: monospace; font-size: 10px; line-height: 1.3;">
+                                            <p style="margin: 1px 0;">Net Coupon Income: \xA3\${totalNetCoupons.toFixed(6)}</p>
+                                            <p style="margin: 1px 0;">+ Principal Repayment: \xA3\${principalAmount.toFixed(6)}</p>
+                                            \${currentSettings.accountChargeEnabled && totalMonthlyCharges > 0 ? 
+                                                '<p style="margin: 1px 0;">- Account Charges: \xA3' + totalMonthlyCharges.toFixed(6) + '</p>' : 
+                                                '<p style="margin: 1px 0;">- Account Charges: \xA30.000000</p>'
+                                            }
+                                            <p style="margin: 1px 0; border-top: 1px solid #ddd; padding-top: 2px; font-weight: bold;">= Total Cash: \xA3\${giltTotalCash.toFixed(6)}</p>
+                                            <p style="margin: 1px 0; color: #666;">Rounded Display: \xA3\${giltTotalCash.toFixed(2)}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 8px; margin-top: 5px;">
+                                        <h6 style="margin: 0 0 5px 0; color: #333;">Verification Steps:</h6>
+                                        <div style="font-family: monospace; font-size: 10px; line-height: 1.3;">
+                                            <p style="margin: 1px 0;">1. Each coupon: \xA3\${(totalGrossCoupons/numPayments).toFixed(6)} gross</p>
+                                            <p style="margin: 1px 0;">2. Tax per coupon: \xA3\${((totalGrossCoupons/numPayments) * modalTaxRate/100).toFixed(6)} (before rounding)</p>
+                                            <p style="margin: 1px 0;">3. Rounded tax per coupon: \xA3\${(totalCouponTax/numPayments).toFixed(6)}</p>
+                                            <p style="margin: 1px 0;">4. Net per coupon: \xA3\${(totalNetCoupons/numPayments).toFixed(6)}</p>
+                                            <p style="margin: 1px 0;">5. Total net (\${numPayments} payments): \xA3\${totalNetCoupons.toFixed(6)}</p>
+                                        </div>
+                                    </div>
                                 </div>
                                 \`;
                             })()}
@@ -6788,7 +6813,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-6Negtm/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-hKX6dx/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6822,7 +6847,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-6Negtm/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-hKX6dx/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
