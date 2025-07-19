@@ -1164,36 +1164,11 @@ export async function renderHomePage(request, env) {
         }
         
         function setupEventListeners() {
-            console.log('=== SETTING UP EVENT LISTENERS ===');
-            
-            // Wait for DOM to be ready and retry if elements don't exist
-            const setupListener = () => {
-                const dealingChargeElement = document.getElementById('dealingCharge');
-                console.log('Dealing charge element:', dealingChargeElement);
-                
-                if (dealingChargeElement) {
-                    // Remove any existing listeners first
-                    dealingChargeElement.removeEventListener('input', updateDealingCharge);
-                    dealingChargeElement.addEventListener('input', updateDealingCharge);
-                    console.log('Added dealing charge event listener');
-                    return true;
-                } else {
-                    console.error('Dealing charge element not found!');
-                    return false;
-                }
-            };
-            
-            // Set up other listeners
+            // Set up standard listeners
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
             document.getElementById('investmentAmount').addEventListener('input', updateInvestmentAmount);
             document.getElementById('savingsRate').addEventListener('input', updateSavingsRate);
             document.getElementById('refreshData').addEventListener('click', loadGiltData);
-            
-            // Try to set up dealing charge listener, with retry if needed
-            if (!setupListener()) {
-                console.log('Retrying dealing charge listener setup in 100ms...');
-                setTimeout(setupListener, 100);
-            }
             
             // Duration filter listeners
             document.getElementById('durationMin').addEventListener('input', updateDurationFilter);
@@ -1207,21 +1182,13 @@ export async function renderHomePage(request, env) {
         
         function updateDealingCharge() {
             const dealingCharge = parseFloat(document.getElementById('dealingCharge').value) || 5;
-            console.log('=== DEALING CHARGE UPDATE ===');
-            console.log('New dealing charge:', dealingCharge);
-            console.log('Previous dealing charge:', currentSettings.dealingCharge);
-            
             currentSettings.dealingCharge = dealingCharge;
             
             // Clear cache since dealing charge affects calculations
             clearAllCaches();
-            console.log('Cache cleared for dealing charge update');
             
             if (currentGiltData.length > 0) {
-                console.log('Recalculating with new dealing charge...');
                 calculateTaxEfficiency();
-            } else {
-                console.log('No gilt data available for recalculation');
             }
         }
 
@@ -2540,13 +2507,9 @@ export async function renderHomePage(request, env) {
             document.body.appendChild(buttonContainer);
         }
         
-        // Add direct event delegation for dealing charge to ensure it works
+        // Robust event delegation for dealing charge
         document.addEventListener('input', function(e) {
             if (e.target && e.target.id === 'dealingCharge') {
-                console.log('=== DEALING CHARGE CHANGED (DELEGATION) ===');
-                console.log('Raw input value:', e.target.value);
-                console.log('Input type:', typeof e.target.value);
-                
                 // Handle empty string and convert properly
                 let dealingCharge;
                 if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
@@ -2558,25 +2521,16 @@ export async function renderHomePage(request, env) {
                     }
                 }
                 
-                console.log('Parsed dealing charge:', dealingCharge);
-                console.log('Previous dealing charge:', currentSettings.dealingCharge);
-                
                 // Only update if the value actually changed
                 if (currentSettings.dealingCharge !== dealingCharge) {
                     currentSettings.dealingCharge = dealingCharge;
                     
                     // Clear cache since dealing charge affects calculations
                     clearAllCaches();
-                    console.log('Cache cleared for dealing charge update');
                     
                     if (currentGiltData.length > 0) {
-                        console.log('Recalculating with new dealing charge...');
                         calculateTaxEfficiency();
-                    } else {
-                        console.log('No gilt data available for recalculation');
                     }
-                } else {
-                    console.log('Dealing charge unchanged, skipping recalculation');
                 }
             }
         });

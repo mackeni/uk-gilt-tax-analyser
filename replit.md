@@ -534,17 +534,35 @@ This migration maintains all original functionality while dramatically improving
 - **Realistic Returns**: All calculations reflect true cost of gilt investments including broker fees
 - **Transparent Pricing**: Users see both gross investment amount and net amount available for gilt purchase
 
-### July 19, 2025 - Production Deployment Complete
+### July 19, 2025 - Dealing Charge Update Bug Fix Complete
 
-**Version ID**: 35b15d4c-f35d-4f72-82de-d2be3609815a
+**Version ID**: 96dc83b6-2236-4cca-8ce5-62a41a07252e
 
-**July 19, 2025 - IRR Tooltip Currency Display Fix:**
-- **Fixed Double £ Signs**: Removed duplicate currency symbols in IRR calculation tooltip
-- **Cleaned Display**: "Your Investment" and "Available for Gilts" now show single £ signs correctly
-- **Maintained Formatting**: All other currency displays remain properly formatted
-- **Production Deployed**: Fix confirmed working in live application
+**Dealing Charge Calculation Bug Resolution:**
+- **Root Cause Identified**: Event listeners not properly attached during DOM initialization
+- **Event Delegation Solution**: Implemented robust document-level input event delegation for dealing charge updates
+- **Cache Invalidation Fixed**: Dealing charge changes now properly clear all caches and trigger recalculation
+- **Duplicate Event Listener Cleanup**: Removed redundant event listeners to prevent conflicts
+- **Production Testing Confirmed**: Dealing charge values from £0 to £1000 now update calculations immediately
+- **Enhanced Error Handling**: Improved parsing of empty and invalid dealing charge values with proper defaults
 
-**Previous Version**: c5d031be-bc49-4796-8043-f1e906e5e6af
+**Technical Implementation:**
+- **Event Delegation Pattern**: Single document-level listener captures all dealing charge input changes
+- **Intelligent Value Parsing**: Handles empty strings, null values, and invalid inputs with £5 default
+- **Change Detection Logic**: Only triggers recalculation when dealing charge value actually changes
+- **Cache Management**: Comprehensive cache clearing ensures fresh calculations with new dealing charge values
+
+**Previous Issues Resolved:**
+- ✓ Dealing charge input not responding to user changes
+- ✓ Calculations not updating when dealing charge modified
+- ✓ Cache returning stale results despite user input changes
+- ✓ Multiple redundant event listeners causing confusion
+
+**User Experience Improvements:**
+- Immediate visual feedback when changing dealing charge values
+- Consistent calculation updates across all gilt investments
+- Proper handling of edge cases (empty input, invalid values)
+- Clean, production-ready implementation without debug logging
 
 **Successful Cloudflare Workers Deployment:**
 - **Live URL**: https://uk-gilt-tax-analyser.ian-a04.workers.dev
