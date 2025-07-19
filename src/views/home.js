@@ -1156,10 +1156,23 @@ export async function renderHomePage(request, env) {
         }
         
         function setupEventListeners() {
+            console.log('=== SETTING UP EVENT LISTENERS ===');
+            
+            // Check if elements exist before adding listeners
+            const dealingChargeElement = document.getElementById('dealingCharge');
+            console.log('Dealing charge element:', dealingChargeElement);
+            
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
             document.getElementById('investmentAmount').addEventListener('input', updateInvestmentAmount);
             document.getElementById('savingsRate').addEventListener('input', updateSavingsRate);
-            document.getElementById('dealingCharge').addEventListener('input', updateDealingCharge);
+            
+            if (dealingChargeElement) {
+                dealingChargeElement.addEventListener('input', updateDealingCharge);
+                console.log('Added dealing charge event listener');
+            } else {
+                console.error('Dealing charge element not found!');
+            }
+            
             document.getElementById('refreshData').addEventListener('click', loadGiltData);
             
             // Duration filter listeners
