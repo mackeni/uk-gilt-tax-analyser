@@ -1676,6 +1676,23 @@ export async function renderHomePage(request, env) {
                             </tr>
                         \`;
                         
+                        // Calculate grand totals
+                        const totalGrossCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0);
+                        const totalTax = gilt.couponSchedule.reduce((sum, payment) => sum + payment.taxAmount, 0);
+                        const totalNetCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + payment.afterTaxAmount, 0);
+                        const grandTotalGross = totalGrossCoupons + principalAmount;
+                        const grandTotalNet = totalNetCoupons + principalAmount;
+                        
+                        // Add grand total row
+                        scheduleHTML += \`
+                            <tr style="background: #007bff; color: white; font-weight: bold; border-top: 2px solid #0056b3;">
+                                <td style="border: 1px solid #0056b3; padding: 10px;"><strong>GRAND TOTAL</strong></td>
+                                <td style="border: 1px solid #0056b3; padding: 10px; text-align: right;"><strong>£\${grandTotalGross.toFixed(2)}</strong></td>
+                                <td style="border: 1px solid #0056b3; padding: 10px; text-align: right;"><strong>£\${totalTax.toFixed(2)}</strong></td>
+                                <td style="border: 1px solid #0056b3; padding: 10px; text-align: right;"><strong>£\${grandTotalNet.toFixed(2)}</strong></td>
+                            </tr>
+                        \`;
+                        
                         scheduleHTML += \`
                                         </tbody>
                                     </table>
