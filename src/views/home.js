@@ -2219,6 +2219,7 @@ export async function renderHomePage(request, env) {
                                         <h5 style="margin-bottom: 8px;">Net Returns:</h5>
                                         <p style="margin: 3px 0;"><strong>Total Cash Received:</strong> £\${grandTotalGross.toFixed(2)}</p>
                                         <p style="margin: 3px 0;"><strong>Total Costs:</strong> £\${grandTotalCosts.toFixed(2)} (Tax: £\${totalCouponTax.toFixed(2)} + Charges: £\${totalAccountCharges.toFixed(2)})</p>
+                                        <p style="margin: 3px 0; font-size: 11px; color: #666;"><em>Precision check: £\${grandTotalCosts.toFixed(6)} = £\${totalCouponTax.toFixed(6)} + £\${totalAccountCharges.toFixed(6)}</em></p>
                                         <p style="margin: 3px 0; font-size: 16px;"><strong style="color: #007bff;">Net After-Tax Return:</strong> £\${grandTotalNet.toFixed(2)}</p>
                                     </div>
                                 </div>
@@ -2422,15 +2423,15 @@ export async function renderHomePage(request, env) {
                         }
                     }
                     
-                    // Debug log to verify charges are included
-                    console.log('Gilt total cash calculation:', {
+                    // Debug log to verify charges are included with HIGH PRECISION
+                    console.log('Gilt total cash calculation (PRECISION DEBUG):', {
                         giltName: gilt.name,
                         accountChargesEnabled: currentSettings.accountChargeEnabled,
-                        accountCharges: gilt.accountCharges ? gilt.accountCharges.length : 0,
-                        accountChargesArray: gilt.accountCharges,
                         totalMonthlyCharges: totalMonthlyCharges,
-                        totalCash: giltTotalCash,
-                        currentSettings: currentSettings
+                        totalMonthlyChargesHighPrecision: totalMonthlyCharges.toFixed(6),
+                        giltTotalCash: giltTotalCash,
+                        giltTotalCashHighPrecision: giltTotalCash.toFixed(6),
+                        difference: Math.abs(totalMonthlyCharges - (gilt.accountCharges ? gilt.accountCharges.reduce((sum, c) => sum + c.amount, 0) : 0)).toFixed(6)
                     });
                     
                     // Calculate actual after-tax savings rate based on total returns
@@ -2468,7 +2469,7 @@ export async function renderHomePage(request, env) {
                             <p><strong>Total Cash Received:</strong> £\${giltTotalCash.toFixed(2)}</p>
                             <div style="margin-left: 20px; color: #666;">
                                 <p><small>• All coupon payments (after \${modalTaxRate}% income tax)</small></p>
-                                \${currentSettings.accountChargeEnabled ? '<p><small>• Monthly account charges: ' + (totalMonthlyCharges > 0 ? '£' + totalMonthlyCharges.toFixed(2) + ' total deducted' : 'None calculated') + '</small></p>' : ''}
+                                \${currentSettings.accountChargeEnabled ? '<p><small>• Monthly account charges: ' + (totalMonthlyCharges > 0 ? '£' + totalMonthlyCharges.toFixed(2) + ' total deducted (£' + totalMonthlyCharges.toFixed(6) + ' precise)' : 'None calculated') + '</small></p>' : ''}
                                 <p><small>• Principal repayment: £\${(gilt.unitsOwned || 0).toFixed(2)} (tax-free)</small></p>
                                 <p><small>• Based on actual payment schedule with exact dates</small></p>
                                 \${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: £' + giltTotalCash.toFixed(2) + '</small></p>' : ''}

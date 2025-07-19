@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-Npoyjz/checked-fetch.js
+// .wrangler/tmp/bundle-FgLy3V/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-Npoyjz/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-FgLy3V/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-Npoyjz/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-FgLy3V/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-Npoyjz/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-FgLy3V/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5469,6 +5469,7 @@ async function renderHomePage(request, env) {
                                         <h5 style="margin-bottom: 8px;">Net Returns:</h5>
                                         <p style="margin: 3px 0;"><strong>Total Cash Received:</strong> \xA3\${grandTotalGross.toFixed(2)}</p>
                                         <p style="margin: 3px 0;"><strong>Total Costs:</strong> \xA3\${grandTotalCosts.toFixed(2)} (Tax: \xA3\${totalCouponTax.toFixed(2)} + Charges: \xA3\${totalAccountCharges.toFixed(2)})</p>
+                                        <p style="margin: 3px 0; font-size: 11px; color: #666;"><em>Precision check: \xA3\${grandTotalCosts.toFixed(6)} = \xA3\${totalCouponTax.toFixed(6)} + \xA3\${totalAccountCharges.toFixed(6)}</em></p>
                                         <p style="margin: 3px 0; font-size: 16px;"><strong style="color: #007bff;">Net After-Tax Return:</strong> \xA3\${grandTotalNet.toFixed(2)}</p>
                                     </div>
                                 </div>
@@ -5672,15 +5673,15 @@ async function renderHomePage(request, env) {
                         }
                     }
                     
-                    // Debug log to verify charges are included
-                    console.log('Gilt total cash calculation:', {
+                    // Debug log to verify charges are included with HIGH PRECISION
+                    console.log('Gilt total cash calculation (PRECISION DEBUG):', {
                         giltName: gilt.name,
                         accountChargesEnabled: currentSettings.accountChargeEnabled,
-                        accountCharges: gilt.accountCharges ? gilt.accountCharges.length : 0,
-                        accountChargesArray: gilt.accountCharges,
                         totalMonthlyCharges: totalMonthlyCharges,
-                        totalCash: giltTotalCash,
-                        currentSettings: currentSettings
+                        totalMonthlyChargesHighPrecision: totalMonthlyCharges.toFixed(6),
+                        giltTotalCash: giltTotalCash,
+                        giltTotalCashHighPrecision: giltTotalCash.toFixed(6),
+                        difference: Math.abs(totalMonthlyCharges - (gilt.accountCharges ? gilt.accountCharges.reduce((sum, c) => sum + c.amount, 0) : 0)).toFixed(6)
                     });
                     
                     // Calculate actual after-tax savings rate based on total returns
@@ -5718,7 +5719,7 @@ async function renderHomePage(request, env) {
                             <p><strong>Total Cash Received:</strong> \xA3\${giltTotalCash.toFixed(2)}</p>
                             <div style="margin-left: 20px; color: #666;">
                                 <p><small>\u2022 All coupon payments (after \${modalTaxRate}% income tax)</small></p>
-                                \${currentSettings.accountChargeEnabled ? '<p><small>\u2022 Monthly account charges: ' + (totalMonthlyCharges > 0 ? '\xA3' + totalMonthlyCharges.toFixed(2) + ' total deducted' : 'None calculated') + '</small></p>' : ''}
+                                \${currentSettings.accountChargeEnabled ? '<p><small>\u2022 Monthly account charges: ' + (totalMonthlyCharges > 0 ? '\xA3' + totalMonthlyCharges.toFixed(2) + ' total deducted (\xA3' + totalMonthlyCharges.toFixed(6) + ' precise)' : 'None calculated') + '</small></p>' : ''}
                                 <p><small>\u2022 Principal repayment: \xA3\${(gilt.unitsOwned || 0).toFixed(2)} (tax-free)</small></p>
                                 <p><small>\u2022 Based on actual payment schedule with exact dates</small></p>
                                 \${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: \xA3' + giltTotalCash.toFixed(2) + '</small></p>' : ''}
@@ -6751,7 +6752,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-Npoyjz/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-FgLy3V/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6785,7 +6786,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-Npoyjz/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-FgLy3V/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
