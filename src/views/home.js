@@ -1812,12 +1812,13 @@ export async function renderHomePage(request, env) {
                 const monthlyRate = currentSettings.accountChargeRate / 100 / 12;
                 const monthlyCharge = giltValue * monthlyRate;
                 
-                // Apply monthly cap
+                // Apply monthly cap and 2-decimal rounding (consistent with coupon calculations)
                 const cappedCharge = Math.min(monthlyCharge, currentSettings.accountChargeMax);
+                const roundedCharge = Math.round(cappedCharge * 100) / 100;
                 
                 accountCharges.push({
                     date: chargeDate,
-                    amount: cappedCharge,
+                    amount: roundedCharge,
                     giltValue: giltValue,
                     interpolatedPrice: interpolatedPrice,
                     uncappedCharge: monthlyCharge
