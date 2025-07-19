@@ -1074,7 +1074,7 @@ export async function renderHomePage(request, env) {
             }, 50);
         }
         
-        function loadFallbackData() {
+        async function loadFallbackData() {
             console.log('=== STARTING FALLBACK DATA LOAD ===');
             const loadingDiv = document.getElementById('loading');
             const errorDiv = document.getElementById('error');
@@ -1087,7 +1087,7 @@ export async function renderHomePage(request, env) {
             
             try {
                 console.log('Calling getFallbackGiltData...');
-                currentGiltData = getFallbackGiltData();
+                currentGiltData = await getFallbackGiltData();
                 console.log('=== FALLBACK DATA LOADED ===');
                 console.log('Current gilt data length:', currentGiltData ? currentGiltData.length : 'NULL');
                 console.log('First gilt:', currentGiltData ? currentGiltData[0] : 'NULL');
@@ -1970,7 +1970,10 @@ export async function renderHomePage(request, env) {
                         
                         // Add principal repayment row
                         const maturityDate = new Date(gilt.maturityDate).toLocaleDateString('en-GB');
-                        const principalAmount = (currentSettings.investmentAmount || 10000) / gilt.dirtyPrice * 100;
+                        // Use effective investment amount after dealing charge for units calculation
+                        const dealingCharge = currentSettings.dealingCharge || 5;
+                        const effectiveInvestmentAmount = (currentSettings.investmentAmount || 10000) - dealingCharge;
+                        const principalAmount = effectiveInvestmentAmount / gilt.dirtyPrice * 100;
                         scheduleHTML += \`
                             <tr style="background: #e8f5e8;">
                                 <td style="border: 1px solid #ddd; padding: 8px;"><strong>\${maturityDate}</strong></td>
