@@ -536,21 +536,21 @@ This migration maintains all original functionality while dramatically improving
 
 ### July 19, 2025 - Dealing Charge Disable Option Implementation
 
-**Version ID**: c2e54e49-3269-4e18-973f-e01bd4f7fa4d
+**Version ID**: 87681d4f-759e-4189-8836-e797ca97291d
 
 **Enhanced Dealing Charge Functionality:**
-- **£0 Default**: Changed default dealing charge from £5 to £0 (no dealing charge by default)
+- **£5 Default**: Maintained £5 default dealing charge for realistic broker fee modeling
 - **Disable Option**: Users can set dealing charge to £0 to completely exclude transaction costs
 - **Smart Display**: Shows "None (£0.00)" when dealing charge is £0 instead of "£0.00"
 - **Improved Documentation**: Updated help text to explain that £0 excludes dealing charges from calculations
-- **Enhanced Parsing**: Better handling of empty inputs defaulting to £0 instead of £5
+- **Enhanced Parsing**: Better handling of empty inputs defaulting to £5 (standard broker fee)
 - **Clean Tooltips**: Interactive tooltips show "None" when no dealing charge applies
 
 **Technical Improvements:**
-- **Default Value Change**: All default dealing charge references changed from 5 to 0
+- **Flexible Default**: Default £5 with option to disable by setting to £0
 - **Conditional Display**: Smart formatting shows "None" vs. actual amounts in all tooltips
-- **Input Handling**: Empty or invalid inputs now default to £0 (no charge) instead of £5
-- **Calculation Logic**: All calculations properly handle £0 dealing charge without affecting yields
+- **Input Handling**: Empty or invalid inputs default to £5 (realistic broker charge)
+- **Calculation Logic**: All calculations properly handle both £0 and positive dealing charges
 
 ### July 19, 2025 - Previous: Dealing Charge Update Bug Fix
 

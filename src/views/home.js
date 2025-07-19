@@ -846,7 +846,7 @@ export async function renderHomePage(request, env) {
                     
                     <div class="form-group">
                         <label for="dealingCharge">Dealing Charge (£)</label>
-                        <input type="number" id="dealingCharge" value="0" min="0" max="1000" step="1">
+                        <input type="number" id="dealingCharge" value="5" min="0" max="1000" step="1">
                         <div class="tax-info" style="margin-top: 10px; padding: 10px; font-size: 14px;">
                             <p>💷 Transaction cost charged by your broker for purchasing gilts. Set to £0 to exclude dealing charges from calculations.</p>
                         </div>
@@ -1078,7 +1078,7 @@ export async function renderHomePage(request, env) {
             taxBracket: 'additional_rate',
             investmentAmount: 10000,
             savingsRate: 4.5,
-            dealingCharge: 0, // Default to £0 (no dealing charge)
+            dealingCharge: 5, // Default to £5
             accountChargeEnabled: false,
             accountChargeRate: 0.25,
             accountChargeMax: 3.50
@@ -1182,7 +1182,7 @@ export async function renderHomePage(request, env) {
         
         function updateDealingCharge() {
             const value = document.getElementById('dealingCharge').value;
-            const dealingCharge = value === '' ? 0 : (parseFloat(value) || 0);
+            const dealingCharge = value === '' ? 5 : (parseFloat(value) || 5);
             currentSettings.dealingCharge = Math.max(0, dealingCharge); // Ensure non-negative
             
             // Clear cache since dealing charge affects calculations
@@ -2514,11 +2514,11 @@ export async function renderHomePage(request, env) {
                 // Handle empty string and convert properly, allow £0 to disable dealing charges
                 let dealingCharge;
                 if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
-                    dealingCharge = 0; // Default to £0 when empty (no dealing charge)
+                    dealingCharge = 5; // Default to £5 when empty
                 } else {
                     dealingCharge = parseFloat(e.target.value);
                     if (isNaN(dealingCharge) || dealingCharge < 0) {
-                        dealingCharge = 0; // Default to £0 when invalid or negative
+                        dealingCharge = 5; // Default to £5 when invalid or negative
                     }
                 }
                 
