@@ -82,6 +82,9 @@ export class TaxCalculator {
     const irrYield = this.calculateIRR(investmentAmount, afterTaxSchedule);
     const annualizedAfterTaxYield = irrYield * 100;
     
+    // Calculate total return for summary
+    const totalReturn = (totalAfterTaxReturn - investmentAmount) / investmentAmount;
+    
     return {
       afterTaxYield: Math.max(0, annualizedAfterTaxYield),
       schedule: afterTaxSchedule,
@@ -94,7 +97,7 @@ export class TaxCalculator {
         totalAfterTaxReturn,
         totalReturn: totalReturn * 100,
         annualizedReturn: annualizedAfterTaxYield,
-        effectiveTaxRate: totalCouponTax / totalGrossCoupons * 100
+        effectiveTaxRate: totalGrossCoupons > 0 ? totalCouponTax / totalGrossCoupons * 100 : 0
       }
     };
   }

@@ -101,38 +101,62 @@ async function calculateTax(request, env) {
     if (body.giltData && Array.isArray(body.giltData)) {
       // Calculate for multiple gilts using schedule-based approach
       const results = await Promise.all(body.giltData.map(async gilt => {
-        // Use schedule-based calculation for accurate after-tax yields
-        const scheduleResult = await calculator.calculateAfterTaxYieldWithSchedule(
-          gilt,
-          body.taxpayerType,
-          body.investmentAmount || 10000
-        );
-        
-        const afterTaxYield = scheduleResult.afterTaxYield || calculator.calculateAfterTaxYield(
-          gilt.currentYield,
-          gilt.yearsToMaturity,
-          gilt.couponRate,
-          body.taxpayerType,
-          gilt.dirtyPrice,
-          gilt.cleanPrice
-        );
-        
-        const equivalentSavingsRate = calculator.calculateEquivalentSavingsRate(
-          afterTaxYield,
-          body.taxpayerType
-        );
-        
-        // Create detailed tooltip with payment schedule
-        const scheduleTooltip = createScheduleTooltip(scheduleResult, body.taxpayerType);
-        
-        return {
-          ...gilt,
-          afterTaxYield: afterTaxYield,
-          equivalentSavingsRate: equivalentSavingsRate,
-          taxAdvantage: afterTaxYield - (body.savingsRate * (1 - calculator.taxRates[body.taxpayerType])),
-          scheduleDetails: scheduleResult,
-          scheduleTooltip: scheduleTooltip
-        };
+        try {
+          // Use schedule-based calculation for accurate after-tax yields
+          const scheduleResult = await calculator.calculateAfterTaxYieldWithSchedule(
+            gilt,
+            body.taxpayerType,
+            body.investmentAmount || 10000
+          );
+          
+          const afterTaxYield = scheduleResult.afterTaxYield || calculator.calculateAfterTaxYield(
+            gilt.currentYield || 0,
+            gilt.yearsToMaturity || 0,
+            gilt.couponRate || 0,
+            body.taxpayerType,
+            gilt.dirtyPrice,
+            gilt.cleanPrice
+          );
+          
+          const equivalentSavingsRate = calculator.calculateEquivalentSavingsRate(
+            afterTaxYield,
+            body.taxpayerType
+          );
+          
+          // Calculate savings after tax for comparison
+          const savingsAfterTaxRate = calculator.calculateSavingsAfterTax(
+            body.savingsRate || 0,
+            body.investmentAmount || 10000,
+            body.taxpayerType
+          );
+          
+          const taxAdvantage = afterTaxYield - savingsAfterTaxRate;
+          const annualAdvantage = calculator.calculateAnnualAdvantage(taxAdvantage, body.investmentAmount || 10000);
+          
+          // Create detailed tooltip with payment schedule
+          const scheduleTooltip = createScheduleTooltip(scheduleResult, body.taxpayerType);
+          
+          return {
+            ...gilt,
+            afterTaxYield: afterTaxYield,
+            equivalentSavingsRate: equivalentSavingsRate,
+            taxAdvantage: taxAdvantage,
+            annualAdvantage: annualAdvantage,
+            scheduleDetails: scheduleResult,
+            scheduleTooltip: scheduleTooltip
+          };
+        } catch (giltError) {
+          console.error(`Error calculating for gilt ${gilt.name}:`, giltError);
+          return {
+            ...gilt,
+            afterTaxYield: 0,
+            equivalentSavingsRate: 0,
+            taxAdvantage: 0,
+            annualAdvantage: 0,
+            scheduleDetails: null,
+            scheduleTooltip: "Calculation error"
+          };
+        }
       }));
       
       return new Response(JSON.stringify(results), {
