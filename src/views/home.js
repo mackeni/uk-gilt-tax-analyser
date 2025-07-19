@@ -2396,38 +2396,11 @@ export async function renderHomePage(request, env) {
                     const giltTotalCash = calculateTotalCashFromGilt(gilt, gilt.unitsOwned, modalTaxRate / 100);
                     const savingsTotalCash = calculateTotalCashFromSavings(investmentAmount, savingsRate, modalTaxRate / 100, psaAmount, gilt.yearsToMaturity);
                     
-                    // Calculate total monthly charges for display using the SAME method as IRR tooltip
+                    // Calculate total monthly charges using the SAME function as IRR calculation
                     let totalMonthlyCharges = 0;
-                    if (currentSettings.accountChargeEnabled) {
-                        const dealingCharge = currentSettings.dealingCharge || 0;
-                        const effectiveInvestment = investmentAmount - dealingCharge;
-                        const initialUnits = effectiveInvestment / gilt.dirtyPrice * 100; // Units at £100 nominal
-                        const yearsToMaturity = gilt.yearsToMaturity;
-                        const monthlyRate = currentSettings.accountChargeRate / 12 / 100; // Convert to monthly decimal
-                        const maxMonthlyCharge = currentSettings.accountChargeMax;
-                        
-                        const currentDate = new Date();
-                        const maturityDate = new Date(gilt.maturityDate);
-                        
-                        // Generate monthly charges using EXACT same method as IRR tooltip
-                        for (let month = 1; month <= Math.ceil(yearsToMaturity * 12); month++) {
-                            const chargeDate = new Date(currentDate);
-                            chargeDate.setMonth(chargeDate.getMonth() + month);
-                            
-                            if (chargeDate <= maturityDate) {
-                                // Calculate gilt value at this point (linear convergence to £100)
-                                const monthsRemaining = (maturityDate.getTime() - chargeDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
-                                const totalMonths = yearsToMaturity * 12;
-                                const convergenceFactor = monthsRemaining / totalMonths;
-                                const giltPrice = 100 + (gilt.cleanPrice - 100) * convergenceFactor;
-                                const giltValue = initialUnits * giltPrice / 100;
-                                
-                                // Calculate monthly charge with 2-decimal rounding
-                                const rawCharge = giltValue * monthlyRate;
-                                const actualCharge = Math.round(Math.min(rawCharge, maxMonthlyCharge) * 100) / 100;
-                                totalMonthlyCharges += actualCharge;
-                            }
-                        }
+                    if (currentSettings.accountChargeEnabled && gilt.accountCharges) {
+                        // Use the stored account charges from the unified function
+                        totalMonthlyCharges = gilt.accountCharges.reduce((sum, charge) => sum + charge.amount, 0);
                     }
                     
 
