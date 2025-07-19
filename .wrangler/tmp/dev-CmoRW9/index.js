@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-fwswvu/checked-fetch.js
+// .wrangler/tmp/bundle-lmzEac/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-fwswvu/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-lmzEac/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-fwswvu/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-lmzEac/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-fwswvu/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-lmzEac/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5713,6 +5713,33 @@ async function renderHomePage(request, env) {
                             <p><strong>Monthly Account Charges:</strong> \${currentSettings.accountChargeRate}% annually (max \xA3\${currentSettings.accountChargeMax.toFixed(2)}/month)</p>
                             \` : ''}
                             <p><strong>Total Cash Received:</strong> \xA3\${giltTotalCash.toFixed(2)}</p>
+                            
+                            \${(() => {
+                                // Calculate coupon totals for display using same method as IRR tooltip
+                                const totalGrossCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0) : 0;
+                                const totalCouponTax = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.taxAmount, 0) : 0;
+                                const totalNetCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.afterTaxAmount, 0) : 0;
+                                const principalAmount = gilt.unitsOwned || 0;
+                                
+                                return \`
+                                <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; padding: 12px; margin: 10px 0;">
+                                    <h5 style="margin: 0 0 8px 0; color: #007bff;">Coupon Payment Totals:</h5>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
+                                        <div>
+                                            <p style="margin: 2px 0;"><strong>Total Gross Coupons:</strong> \xA3\${totalGrossCoupons.toFixed(2)}</p>
+                                            <p style="margin: 2px 0;"><strong>Income Tax:</strong> \xA3\${totalCouponTax.toFixed(2)}</p>
+                                            <p style="margin: 2px 0;"><strong>Net Coupon Income:</strong> \xA3\${totalNetCoupons.toFixed(2)}</p>
+                                        </div>
+                                        <div>
+                                            <p style="margin: 2px 0;"><strong>Principal Repayment:</strong> \xA3\${principalAmount.toFixed(2)}</p>
+                                            \${currentSettings.accountChargeEnabled && totalMonthlyCharges > 0 ? '<p style="margin: 2px 0;"><strong>Account Charges:</strong> \xA3' + totalMonthlyCharges.toFixed(2) + '</p>' : ''}
+                                            <p style="margin: 2px 0; font-weight: bold; color: #007bff;"><strong>Total Cash:</strong> \xA3\${giltTotalCash.toFixed(2)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                \`;
+                            })()}
+                            
                             <div style="margin-left: 20px; color: #666;">
                                 <p><small>\u2022 All coupon payments (after \${modalTaxRate}% income tax)</small></p>
                                 \${currentSettings.accountChargeEnabled ? '<p><small>\u2022 Monthly account charges: ' + (totalMonthlyCharges > 0 ? '\xA3' + totalMonthlyCharges.toFixed(2) + ' total deducted' : 'None calculated') + '</small></p>' : ''}
@@ -6748,7 +6775,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-fwswvu/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-lmzEac/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6782,7 +6809,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-fwswvu/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-lmzEac/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

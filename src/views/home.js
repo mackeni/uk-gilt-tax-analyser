@@ -2463,6 +2463,33 @@ export async function renderHomePage(request, env) {
                             <p><strong>Monthly Account Charges:</strong> \${currentSettings.accountChargeRate}% annually (max £\${currentSettings.accountChargeMax.toFixed(2)}/month)</p>
                             \` : ''}
                             <p><strong>Total Cash Received:</strong> £\${giltTotalCash.toFixed(2)}</p>
+                            
+                            \${(() => {
+                                // Calculate coupon totals for display using same method as IRR tooltip
+                                const totalGrossCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0) : 0;
+                                const totalCouponTax = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.taxAmount, 0) : 0;
+                                const totalNetCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.afterTaxAmount, 0) : 0;
+                                const principalAmount = gilt.unitsOwned || 0;
+                                
+                                return \`
+                                <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; padding: 12px; margin: 10px 0;">
+                                    <h5 style="margin: 0 0 8px 0; color: #007bff;">Coupon Payment Totals:</h5>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
+                                        <div>
+                                            <p style="margin: 2px 0;"><strong>Total Gross Coupons:</strong> £\${totalGrossCoupons.toFixed(2)}</p>
+                                            <p style="margin: 2px 0;"><strong>Income Tax:</strong> £\${totalCouponTax.toFixed(2)}</p>
+                                            <p style="margin: 2px 0;"><strong>Net Coupon Income:</strong> £\${totalNetCoupons.toFixed(2)}</p>
+                                        </div>
+                                        <div>
+                                            <p style="margin: 2px 0;"><strong>Principal Repayment:</strong> £\${principalAmount.toFixed(2)}</p>
+                                            \${currentSettings.accountChargeEnabled && totalMonthlyCharges > 0 ? '<p style="margin: 2px 0;"><strong>Account Charges:</strong> £' + totalMonthlyCharges.toFixed(2) + '</p>' : ''}
+                                            <p style="margin: 2px 0; font-weight: bold; color: #007bff;"><strong>Total Cash:</strong> £\${giltTotalCash.toFixed(2)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                \`;
+                            })()}
+                            
                             <div style="margin-left: 20px; color: #666;">
                                 <p><small>• All coupon payments (after \${modalTaxRate}% income tax)</small></p>
                                 \${currentSettings.accountChargeEnabled ? '<p><small>• Monthly account charges: ' + (totalMonthlyCharges > 0 ? '£' + totalMonthlyCharges.toFixed(2) + ' total deducted' : 'None calculated') + '</small></p>' : ''}
