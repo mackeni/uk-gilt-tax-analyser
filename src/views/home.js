@@ -997,7 +997,7 @@ export async function renderHomePage(request, env) {
             document.getElementById('durationMax').addEventListener('input', updateDurationFilter);
         }
         
-        function updateTaxSettings() {
+        async function updateTaxSettings() {
             const taxBracket = document.getElementById('taxBracket').value;
             currentSettings.taxBracket = taxBracket;
             
@@ -1017,17 +1017,7 @@ export async function renderHomePage(request, env) {
             
             // Only ask for confirmation if this is a meaningful change and PSA is relevant
             if (currentPSA !== suggestedPSA && (currentPSA !== undefined || suggestedPSA > 0)) {
-                const psaChoice = confirm(
-                    \`Personal Savings Allowance Confirmation\n\n\` +
-                    \`Tax Bracket: \${taxBracket.replace('_', ' ').toUpperCase()}\n\` +
-                    \`Standard PSA: £\${suggestedPSA.toLocaleString()}\n\n\` +
-                    \`\${info.description}\n\n\` +
-                    \`Do you have your full Personal Savings Allowance available?\n\n\` +
-                    \`Click OK for standard amount (£\${suggestedPSA.toLocaleString()})\n\` +
-                    \`Click Cancel for nil available (£0)\`
-                );
-                
-                confirmedPSA = psaChoice ? suggestedPSA : 0;
+                confirmedPSA = await showPSAChoiceModal(taxBracket, suggestedPSA, info.description);
             }
             
             // Store the confirmed PSA amount
@@ -1046,6 +1036,80 @@ export async function renderHomePage(request, env) {
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
             }
+        }
+        
+        function showPSAChoiceModal(taxBracket, suggestedPSA, description) {
+            return new Promise((resolve) => {
+                // Create modal HTML
+                const modalHTML = \`
+                    <div id="psaModal" style="
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.5);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 10000;
+                    ">
+                        <div style="
+                            background: white;
+                            padding: 30px;
+                            border-radius: 10px;
+                            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                            max-width: 500px;
+                            width: 90%;
+                            text-align: center;
+                        ">
+                            <h3 style="margin: 0 0 20px 0; color: #2c3e50;">Personal Savings Allowance Confirmation</h3>
+                            <div style="margin: 20px 0; text-align: left; line-height: 1.5;">
+                                <p><strong>Tax Bracket:</strong> \${taxBracket.replace('_', ' ').toUpperCase()}</p>
+                                <p><strong>Standard PSA:</strong> £\${suggestedPSA.toLocaleString()}</p>
+                                <p style="margin: 15px 0; color: #555;">\${description}</p>
+                            </div>
+                            <p style="margin: 20px 0; font-weight: bold;">Do you have your full Personal Savings Allowance available?</p>
+                            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
+                                <button id="psaStandard" style="
+                                    background: #27ae60;
+                                    color: white;
+                                    border: none;
+                                    padding: 12px 20px;
+                                    border-radius: 6px;
+                                    cursor: pointer;
+                                    font-size: 16px;
+                                    font-weight: bold;
+                                ">Standard Amount (£\${suggestedPSA.toLocaleString()})</button>
+                                <button id="psaNil" style="
+                                    background: #e74c3c;
+                                    color: white;
+                                    border: none;
+                                    padding: 12px 20px;
+                                    border-radius: 6px;
+                                    cursor: pointer;
+                                    font-size: 16px;
+                                    font-weight: bold;
+                                ">Nil Available (£0)</button>
+                            </div>
+                        </div>
+                    </div>
+                \`;
+                
+                // Add modal to page
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+                
+                // Add event listeners
+                document.getElementById('psaStandard').addEventListener('click', function() {
+                    document.getElementById('psaModal').remove();
+                    resolve(suggestedPSA);
+                });
+                
+                document.getElementById('psaNil').addEventListener('click', function() {
+                    document.getElementById('psaModal').remove();
+                    resolve(0);
+                });
+            });
         }
         
         function updateInvestmentAmount() {
