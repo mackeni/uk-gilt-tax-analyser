@@ -536,7 +536,7 @@ This migration maintains all original functionality while dramatically improving
 
 ### July 19, 2025 - Detailed Monthly Account Charge Schedule Implementation
 
-**Version ID**: b39d7ae2-84c1-456b-89a9-e8da303585f4
+**Version ID**: 34da5228-b91a-40a5-a4d3-7cc87695b556
 
 **Separate Detailed Schedule Implementation:**
 - **Independent Schedule Sections**: Coupon payments and monthly account charges displayed in separate, clearly organized tables
@@ -546,6 +546,7 @@ This migration maintains all original functionality while dramatically improving
 - **Maximum Charge Indicators**: Clear "(max)" labels when monthly charges hit the user-defined ceiling
 - **Professional Visual Design**: Color-coded sections with yellow highlights for account charges, green for coupons
 - **Comprehensive Summary Section**: Complete investment overview with side-by-side income/cost breakdown
+- **Monthly Charge Totals**: Added prominent total row showing number of payments and cumulative charge amount
 
 **Technical Implementation:**
 - **Dynamic Gilt Valuation**: Calculates gilt price at each month based on linear convergence to par value

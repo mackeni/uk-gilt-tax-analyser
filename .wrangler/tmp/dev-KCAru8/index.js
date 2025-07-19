@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-V5W8cA/checked-fetch.js
+// .wrangler/tmp/bundle-V65VKN/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-V5W8cA/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-V65VKN/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-V5W8cA/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-V65VKN/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-V5W8cA/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-V65VKN/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5511,6 +5511,16 @@ async function renderHomePage(request, env) {
                                 \`;
                             });
                             
+                            // Add total row for monthly charges
+                            const totalMonthlyCharges = monthlyChargeSchedule.reduce((sum, charge) => sum + charge.charge, 0);
+                            scheduleHTML += \`
+                                <tr style="background: #ffc107; color: #000; font-weight: bold; border-top: 2px solid #e0a800;">
+                                    <td style="border: 1px solid #e0a800; padding: 10px;"><strong>TOTAL CHARGES</strong></td>
+                                    <td style="border: 1px solid #e0a800; padding: 10px; text-align: right;" colspan="2"><strong>\${monthlyChargeSchedule.length} payments</strong></td>
+                                    <td style="border: 1px solid #e0a800; padding: 10px; text-align: right;"><strong>\xA3\${totalMonthlyCharges.toFixed(2)}</strong></td>
+                                </tr>
+                            \`;
+                            
                             scheduleHTML += \`
                                             </tbody>
                                         </table>
@@ -5651,12 +5661,17 @@ async function renderHomePage(request, env) {
                         </div>
                         
                         <div class="calculation-step">
-                            <h4>Step 1: Total Cash from Gilt Investment</h4>
+                            <h4>Step 1: Total Cash from Gilt Investment (Including All Charges)</h4>
                             <p><strong>Gilt:</strong> \${gilt.name}</p>
                             <p><strong>Initial Investment:</strong> \xA3\${investmentAmount.toFixed(2)}</p>
+                            <p><strong>Dealing Charge:</strong> \${currentSettings.dealingCharge > 0 ? '\xA3' + currentSettings.dealingCharge.toFixed(2) : 'None (\xA30.00)'}</p>
+                            \${currentSettings.accountChargeEnabled ? \`
+                            <p><strong>Monthly Account Charges:</strong> \${currentSettings.accountChargeRate}% annually (max \xA3\${currentSettings.accountChargeMax.toFixed(2)}/month)</p>
+                            \` : ''}
                             <p><strong>Total Cash Received:</strong> \xA3\${giltTotalCash.toFixed(2)}</p>
                             <div style="margin-left: 20px; color: #666;">
                                 <p><small>\u2022 All coupon payments (after \${modalTaxRate}% income tax)</small></p>
+                                \${currentSettings.accountChargeEnabled ? '<p><small>\u2022 Monthly account charges deducted</small></p>' : ''}
                                 <p><small>\u2022 Principal repayment: \xA3\${(gilt.unitsOwned || 0).toFixed(2)} (tax-free)</small></p>
                                 <p><small>\u2022 Based on actual payment schedule with exact dates</small></p>
                             </div>
@@ -6688,7 +6703,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-V5W8cA/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-V65VKN/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6722,7 +6737,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-V5W8cA/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-V65VKN/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

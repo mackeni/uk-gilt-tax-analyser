@@ -2261,6 +2261,16 @@ export async function renderHomePage(request, env) {
                                 \`;
                             });
                             
+                            // Add total row for monthly charges
+                            const totalMonthlyCharges = monthlyChargeSchedule.reduce((sum, charge) => sum + charge.charge, 0);
+                            scheduleHTML += \`
+                                <tr style="background: #ffc107; color: #000; font-weight: bold; border-top: 2px solid #e0a800;">
+                                    <td style="border: 1px solid #e0a800; padding: 10px;"><strong>TOTAL CHARGES</strong></td>
+                                    <td style="border: 1px solid #e0a800; padding: 10px; text-align: right;" colspan="2"><strong>\${monthlyChargeSchedule.length} payments</strong></td>
+                                    <td style="border: 1px solid #e0a800; padding: 10px; text-align: right;"><strong>£\${totalMonthlyCharges.toFixed(2)}</strong></td>
+                                </tr>
+                            \`;
+                            
                             scheduleHTML += \`
                                             </tbody>
                                         </table>
@@ -2401,12 +2411,17 @@ export async function renderHomePage(request, env) {
                         </div>
                         
                         <div class="calculation-step">
-                            <h4>Step 1: Total Cash from Gilt Investment</h4>
+                            <h4>Step 1: Total Cash from Gilt Investment (Including All Charges)</h4>
                             <p><strong>Gilt:</strong> \${gilt.name}</p>
                             <p><strong>Initial Investment:</strong> £\${investmentAmount.toFixed(2)}</p>
+                            <p><strong>Dealing Charge:</strong> \${currentSettings.dealingCharge > 0 ? '£' + currentSettings.dealingCharge.toFixed(2) : 'None (£0.00)'}</p>
+                            \${currentSettings.accountChargeEnabled ? \`
+                            <p><strong>Monthly Account Charges:</strong> \${currentSettings.accountChargeRate}% annually (max £\${currentSettings.accountChargeMax.toFixed(2)}/month)</p>
+                            \` : ''}
                             <p><strong>Total Cash Received:</strong> £\${giltTotalCash.toFixed(2)}</p>
                             <div style="margin-left: 20px; color: #666;">
                                 <p><small>• All coupon payments (after \${modalTaxRate}% income tax)</small></p>
+                                \${currentSettings.accountChargeEnabled ? '<p><small>• Monthly account charges deducted</small></p>' : ''}
                                 <p><small>• Principal repayment: £\${(gilt.unitsOwned || 0).toFixed(2)} (tax-free)</small></p>
                                 <p><small>• Based on actual payment schedule with exact dates</small></p>
                             </div>
