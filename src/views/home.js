@@ -1902,7 +1902,7 @@ export async function renderHomePage(request, env) {
             content.innerHTML = contentHTML;
             
             // If this is the savings breakdown, populate the year-by-year section
-            if (columnName === 'Extra vs Savings' && gilt) {
+            if (type === 'advantage' && gilt) {
                 const breakdownDiv = document.getElementById('savingsBreakdown');
                 if (breakdownDiv) {
                     let breakdown = '';
