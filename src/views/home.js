@@ -1254,21 +1254,27 @@ export async function renderHomePage(request, env) {
                 // Calculate after-tax yield using simplified method
                 const afterTaxYield = calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate);
                 
-                // Calculate equivalent savings rate
-                const equivalentSavingsRate = calculateEquivalentSavingsRate(afterTaxYield, savingsRate, psaAmount, incomeTaxRate, investmentAmount);
+                // Calculate equivalent gross savings rate (what savings account would need to match gilt)
+                const equivalentGrossSavingsRate = afterTaxYield / (1 - incomeTaxRate);
                 
-                // Calculate extra income vs savings
-                const giltAnnualReturn = (afterTaxYield / 100) * investmentAmount;
-                const savingsAnnualReturn = (equivalentSavingsRate / 100) * investmentAmount;
-                const extraIncomeTotal = (giltAnnualReturn - savingsAnnualReturn) * gilt.yearsToMaturity;
+                // Calculate advantage over current savings account
+                const savingsRateDecimal = savingsRate / 100;
+                const annualSavingsInterest = savingsRateDecimal * investmentAmount;
+                const taxableInterest = Math.max(0, annualSavingsInterest - psaAmount);
+                const taxOnSavings = taxableInterest * incomeTaxRate;
+                const netSavingsIncome = annualSavingsInterest - taxOnSavings;
+                
+                const giltAnnualIncome = (afterTaxYield / 100) * investmentAmount;
+                const extraIncomeAnnual = giltAnnualIncome - netSavingsIncome;
+                const extraIncome = extraIncomeAnnual * (gilt.yearsToMaturity || 1);
                 
                 console.log('Gilt processed:', gilt.name, 'After-tax yield:', afterTaxYield.toFixed(3));
                 
                 return {
                     ...gilt,
                     afterTaxYield: afterTaxYield,
-                    equivalentSavingsRate: equivalentSavingsRate,
-                    extraIncomeTotal: extraIncomeTotal,
+                    equivalentGrossSavingsRate: equivalentGrossSavingsRate,
+                    extraIncome: extraIncome,
                     unitsOwned: unitsOwned
                 };
             });
