@@ -8,13 +8,8 @@ export function formatCurrency(amount, currency = '£') {
     return 'N/A';
   }
   
-  if (Math.abs(amount) >= 1000000) {
-    return `${currency}${(amount / 1000000).toFixed(2)}M`;
-  } else if (Math.abs(amount) >= 1000) {
-    return `${currency}${(amount / 1000).toFixed(1)}K`;
-  } else {
-    return `${currency}${amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  }
+  // Always show full amount with exactly 2 decimal places
+  return `${currency}${amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export function formatPercentage(percentage, decimalPlaces = 2) {
