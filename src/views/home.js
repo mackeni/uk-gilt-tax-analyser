@@ -1656,17 +1656,6 @@ export async function renderHomePage(request, env) {
                             </ul>
                         </div>
                     \`;
-                                    <div class="calculation-formula">
-                                        Capital Gains = (\${((100 - gilt.cleanPrice) / gilt.yearsToMaturity).toFixed(2)}% per year, tax-free)
-                                    </div>
-                                \` : ''}
-                                <div class="calculation-formula">
-                                    <strong>Total After-Tax Yield = \${gilt.afterTaxYield.toFixed(2)}%</strong>
-                                </div>
-                                <p><em>Note: Detailed coupon schedule calculation unavailable. Please refresh data for complete schedule details.</em></p>
-                            </div>
-                        \`;
-                    }
                     break;
                     
                 case 'equivalent':
