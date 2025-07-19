@@ -107,9 +107,15 @@ export async function renderHomePage(request, env) {
         }
         
         .main-content {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
+            display: flex;
+            flex-direction: column;
             gap: 30px;
+        }
+        
+        .controls-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
         }
         
         .gilt-table {
@@ -393,18 +399,31 @@ export async function renderHomePage(request, env) {
                 padding: 10px;
             }
             
-            .main-content {
+            .controls-section {
                 grid-template-columns: 1fr;
                 gap: 15px;
             }
             
             .sidebar {
-                order: 2;
                 padding: 15px;
             }
             
             .gilt-table {
-                order: 1;
+                padding: 15px;
+            }
+            
+            /* Mobile summary layout */
+            .metric-card div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+            
+            .metric-card {
+                padding: 20px 15px !important;
+            }
+            
+            .metric-card div[style*="font-size: 1.3em"] {
+                font-size: 1.1em !important;
             }
             
             .form-group {
@@ -802,62 +821,70 @@ export async function renderHomePage(request, env) {
         </header>
         
         <div class="main-content">
-            <aside class="sidebar">
-                <h3>💷 Tax Settings</h3>
-                <div class="form-group">
-                    <label for="taxBracket">Select Your Tax Bracket</label>
-                    <select id="taxBracket">
-                        <option value="basic_rate">Basic Rate (20%)</option>
-                        <option value="higher_rate">Higher Rate (40%)</option>
-                        <option value="additional_rate" selected>Additional Rate (45%)</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="investmentAmount">Investment Amount (£)</label>
-                    <input type="number" id="investmentAmount" value="10000" min="100" max="10000000" step="1000">
-                </div>
-                
-                <div class="form-group">
-                    <label for="savingsRate">Current Savings Rate (%)</label>
-                    <input type="number" id="savingsRate" value="4.5" min="0" max="20" step="0.1">
-                </div>
-                
-                <div class="tax-info" id="taxInfo">
-                    <h4>Your Tax Settings:</h4>
-                    <div id="taxDetails">
-                        <p><strong>Income Tax Rate:</strong> 45%</p>
-                        <p><strong>Personal Savings Allowance:</strong> £0</p>
-                        <p><strong>Capital Gains Tax on Gilts:</strong> 0% (exempt)</p>
+            <!-- Controls Section - Top -->
+            <div class="controls-section">
+                <div class="sidebar">
+                    <h3>💷 Tax Settings</h3>
+                    <div class="form-group">
+                        <label for="taxBracket">Select Your Tax Bracket</label>
+                        <select id="taxBracket">
+                            <option value="basic_rate">Basic Rate (20%)</option>
+                            <option value="higher_rate">Higher Rate (40%)</option>
+                            <option value="additional_rate" selected>Additional Rate (45%)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="investmentAmount">Investment Amount (£)</label>
+                        <input type="number" id="investmentAmount" value="10000" min="100" max="10000000" step="1000">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="savingsRate">Current Savings Rate (%)</label>
+                        <input type="number" id="savingsRate" value="4.5" min="0" max="20" step="0.1">
+                    </div>
+                    
+                    <div class="tax-info" id="taxInfo">
+                        <h4>Your Tax Settings:</h4>
+                        <div id="taxDetails">
+                            <p><strong>Income Tax Rate:</strong> 45%</p>
+                            <p><strong>Personal Savings Allowance:</strong> £0</p>
+                            <p><strong>Capital Gains Tax on Gilts:</strong> 0% (exempt)</p>
+                        </div>
                     </div>
                 </div>
                 
-                <button class="btn" id="refreshData">🔄 Refresh Data</button>
-            </aside>
+                <div class="sidebar">
+                    <h3>🔧 Controls</h3>
+                    <button class="btn" id="refreshData" style="width: 100%; margin-bottom: 20px;">🔄 Refresh Data</button>
+                    
+                    <div id="filterControls" class="filter-controls" style="display: none;">
+                        <div class="form-group">
+                            <label for="durationRange">Filter by Duration (Years):</label>
+                            <div class="range-container">
+                                <div>
+                                    <label for="durationMin">Min:</label>
+                                    <input type="number" id="durationMin" min="0" max="45" value="0" step="0.5">
+                                </div>
+                                <div>
+                                    <label for="durationMax">Max:</label>
+                                    <input type="number" id="durationMax" min="0" max="45" value="2" step="0.5">
+                                </div>
+                            </div>
+                            <div class="range-info">
+                                <small>Showing <span id="filteredCount">0</span> of <span id="totalCount">0</span> gilts</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
+            <!-- Summary Section - Middle -->
+            <div class="metrics" id="metrics" style="display: none;"></div>
+            
+            <!-- Table Section - Bottom -->
             <main class="gilt-table">
                 <h3>📊 Available Gilts</h3>
-                
-                <div id="filterControls" class="filter-controls" style="display: none;">
-                    <div class="form-group">
-                        <label for="durationRange">Filter by Duration (Years to Maturity):</label>
-                        <div class="range-container">
-                            <div>
-                                <label for="durationMin">Min:</label>
-                                <input type="number" id="durationMin" min="0" max="45" value="0" step="0.5">
-                                <span>years</span>
-                            </div>
-                            <div>
-                                <label for="durationMax">Max:</label>
-                                <input type="number" id="durationMax" min="0" max="45" value="2" step="0.5">
-                                <span>years</span>
-                            </div>
-                        </div>
-                        <div class="range-info">
-                            <small>Showing <span id="filteredCount">0</span> of <span id="totalCount">0</span> gilts</small>
-                        </div>
-                    </div>
-                </div>
                 
                 <div id="loading" class="loading">Loading gilt data...</div>
                 <div id="error" class="error" style="display: none;"></div>
