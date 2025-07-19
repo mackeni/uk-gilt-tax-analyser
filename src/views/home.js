@@ -1349,15 +1349,8 @@ export async function renderHomePage(request, env) {
                 // Check if we've moved to a new calendar year or reached end
                 const newTaxYear = currentDate.getFullYear();
                 if (newTaxYear !== currentTaxYear || currentDate >= endDate) {
-                    // Calculate pro-rated PSA for partial year periods
-                    let effectivePSA = psaAmount;
-                    if (currentDate >= endDate && yearsToMaturity < 1) {
-                        // For investments less than a year, pro-rate the PSA
-                        effectivePSA = psaAmount * yearsToMaturity;
-                    }
-                    
                     // Calculate tax on this year's accrued interest
-                    const taxableInterest = Math.max(0, accruedInterest - effectivePSA);
+                    const taxableInterest = Math.max(0, accruedInterest - psaAmount);
                     const tax = taxableInterest * incomeTaxRate;
                     
                     // Add net interest to balance (compound annually)
