@@ -1318,46 +1318,36 @@ export async function renderHomePage(request, env) {
         }
         
         function calculateTotalCashFromSavings(investmentAmount, savingsRate, incomeTaxRate, psaAmount, yearsToMaturity) {
-            // Calculate exact compound interest with daily compounding and annual tax deductions
-            const today = new Date();
-            const endDate = new Date(today.getTime() + (yearsToMaturity * 365.25 * 24 * 60 * 60 * 1000));
-            
+            // Calculate annual compound interest with annual tax deductions
             let currentBalance = investmentAmount;
-            let annualGrossInterest = 0;
-            let currentYear = today.getFullYear();
+            let totalTaxPaid = 0;
             
-            // Daily interest rate (annual rate / days in year)
-            const dailyRate = savingsRate / 100 / 365.25;
+            // Calculate for each complete year
+            const completeYears = Math.floor(yearsToMaturity);
+            for (let year = 1; year <= completeYears; year++) {
+                // Calculate gross interest for the year
+                const grossInterest = currentBalance * (savingsRate / 100);
+                
+                // Calculate tax on interest above PSA
+                const taxableInterest = Math.max(0, grossInterest - psaAmount);
+                const tax = taxableInterest * incomeTaxRate;
+                totalTaxPaid += tax;
+                
+                // Add net interest to balance
+                const netInterest = grossInterest - tax;
+                currentBalance += netInterest;
+            }
             
-            // Calculate day by day with compound interest
-            let currentDate = new Date(today);
-            
-            while (currentDate < endDate) {
-                // Add daily compound interest
-                const dailyInterest = currentBalance * dailyRate;
-                currentBalance += dailyInterest;
-                annualGrossInterest += dailyInterest;
+            // Handle partial final year
+            const partialYear = yearsToMaturity - completeYears;
+            if (partialYear > 0) {
+                const grossInterest = currentBalance * (savingsRate / 100) * partialYear;
+                const taxableInterest = Math.max(0, grossInterest - psaAmount);
+                const tax = taxableInterest * incomeTaxRate;
+                totalTaxPaid += tax;
                 
-                // Move to next day
-                currentDate.setDate(currentDate.getDate() + 1);
-                
-                // Check if we've moved to a new tax year (April 6th in UK)
-                const newYear = currentDate.getFullYear();
-                const isNewTaxYear = (currentDate.getMonth() === 3 && currentDate.getDate() >= 6) && 
-                                   (currentYear !== newYear || (currentDate.getMonth() === 3 && currentDate.getDate() === 6));
-                
-                if (isNewTaxYear || currentDate >= endDate) {
-                    // Calculate tax on this tax year's interest
-                    const taxableInterest = Math.max(0, annualGrossInterest - psaAmount);
-                    const tax = taxableInterest * incomeTaxRate;
-                    
-                    // Deduct tax from balance
-                    currentBalance -= tax;
-                    
-                    // Reset for next tax year
-                    annualGrossInterest = 0;
-                    currentYear = newYear;
-                }
+                const netInterest = grossInterest - tax;
+                currentBalance += netInterest;
             }
             
             return currentBalance;
@@ -1852,25 +1842,26 @@ export async function renderHomePage(request, env) {
                             
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
                                 <h5 style="margin-top: 0;">Detailed Interest Calculation:</h5>
-                                <p><strong>Calculation Method:</strong> Daily compound interest with UK tax year compliance</p>
+                                <p><strong>Calculation Method:</strong> Annual compound interest with annual tax deductions</p>
                                 <ul style="margin: 10px 0; padding-left: 20px; font-size: 12px;">
-                                    <li><strong>Daily Interest Rate:</strong> \${savingsRate.toFixed(2)}% ÷ 365.25 = \${(savingsRate / 365.25).toFixed(6)}% per day</li>
-                                    <li><strong>Compounding:</strong> Interest calculated and added daily to growing balance</li>
-                                    <li><strong>Tax Year:</strong> UK tax years (April 6 - April 5) with annual PSA of £\${psaAmount.toFixed(2)}</li>
+                                    <li><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}% compounded annually</li>
+                                    <li><strong>Compounding:</strong> Interest calculated and added annually to growing balance</li>
+                                    <li><strong>Personal Savings Allowance:</strong> £\${psaAmount.toFixed(2)} tax-free allowance per year</li>
                                     <li><strong>Tax Rate:</strong> \${modalTaxRate}% on interest above PSA allowance</li>
-                                    <li><strong>Tax Timing:</strong> Deducted at end of each tax year</li>
+                                    <li><strong>Tax Timing:</strong> Deducted annually on interest earned</li>
                                 </ul>
                                 
                                 <div style="background: white; padding: 10px; border-radius: 3px; margin-top: 10px;">
-                                    <p style="margin: 0; font-size: 11px;"><strong>Formula per day:</strong></p>
+                                    <p style="margin: 0; font-size: 11px;"><strong>Formula per year:</strong></p>
                                     <p style="margin: 5px 0; font-family: monospace; font-size: 10px;">
-                                        dailyInterest = currentBalance × (\${savingsRate.toFixed(2)}% ÷ 365.25)<br>
-                                        newBalance = currentBalance + dailyInterest
+                                        grossInterest = currentBalance × \${savingsRate.toFixed(2)}%<br>
+                                        taxableInterest = max(0, grossInterest - £\${psaAmount.toFixed(2)})<br>
+                                        tax = taxableInterest × \${modalTaxRate}%<br>
+                                        newBalance = currentBalance + grossInterest - tax
                                     </p>
-                                    <p style="margin: 5px 0; font-size: 11px;"><strong>Annual tax calculation:</strong></p>
+                                    <p style="margin: 5px 0; font-size: 11px;"><strong>Partial year calculation:</strong></p>
                                     <p style="margin: 0; font-family: monospace; font-size: 10px;">
-                                        taxableInterest = max(0, yearlyInterest - £\${psaAmount.toFixed(2)})<br>
-                                        tax = taxableInterest × \${modalTaxRate}%
+                                        partialInterest = currentBalance × \${savingsRate.toFixed(2)}% × partialYear
                                     </p>
                                 </div>
                                 
