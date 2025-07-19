@@ -6,6 +6,10 @@ account_id = "a04d937ed3a449227c48f7edb1b750fe"
 [vars]
 ENVIRONMENT = "production"
 
+routes = [
+  { pattern = "gilts.monsters.org.uk", custom_domain = true }
+]
+
 # Database configuration will be added after initial deployment
 # [[d1_databases]]
 # binding = "DB"
