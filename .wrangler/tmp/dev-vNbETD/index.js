@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-UEpnu8/checked-fetch.js
+// .wrangler/tmp/bundle-Hq3ZoY/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-UEpnu8/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-Hq3ZoY/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-UEpnu8/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-Hq3ZoY/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-UEpnu8/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-Hq3ZoY/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5417,6 +5417,7 @@ async function renderHomePage(request, env) {
                             <p><strong>Method:</strong> IRR calculation using Newton-Raphson method</p>
                             <p><strong>Your Investment:</strong> \${formatCurrency(currentSettings.investmentAmount || 10000)}</p>
                             <p><strong>Dealing Charge:</strong> \${currentSettings.dealingCharge > 0 ? '\xA3' + currentSettings.dealingCharge.toFixed(2) : 'None (\xA30.00)'}</p>
+                            <p><strong>Monthly Account Charge:</strong> \${currentSettings.accountChargeEnabled ? currentSettings.accountChargeRate + '% annually (\xA3' + (currentSettings.accountChargeRate / 12).toFixed(3) + '% monthly, max \xA3' + currentSettings.accountChargeMax.toFixed(2) + '/month)' : 'None'}</p>
                             <p><strong>Available for Gilts:</strong> \${formatCurrency((currentSettings.investmentAmount || 10000) - (currentSettings.dealingCharge || 0))}</p>
                             <p><strong>Purchase Price:</strong> \xA3\${gilt.dirtyPrice.toFixed(6)} per \xA3100 (including accrued interest)</p>
                             <p><strong>Your Tax Rate:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ')} (\${getCurrentTaxRate()}%)</p>
@@ -5427,6 +5428,7 @@ async function renderHomePage(request, env) {
                             <p>This accounts for:</p>
                             <ul>
                                 <li>Dealing charge: \${currentSettings.dealingCharge > 0 ? '\xA3' + currentSettings.dealingCharge.toFixed(2) : 'None (\xA30.00)'}</li>
+                                <li>Monthly account charge: \${currentSettings.accountChargeEnabled ? currentSettings.accountChargeRate + '% annually (max \xA3' + currentSettings.accountChargeMax.toFixed(2) + '/month)' : 'None'}</li>
                                 <li>Income tax on all coupon payments</li>
                                 <li>Tax-free principal repayment at maturity</li>
                                 <li>Exact timing of all cash flows</li>
@@ -6563,7 +6565,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-UEpnu8/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-Hq3ZoY/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6597,7 +6599,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-UEpnu8/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-Hq3ZoY/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
