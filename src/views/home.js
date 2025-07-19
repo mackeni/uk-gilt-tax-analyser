@@ -1835,7 +1835,7 @@ export async function renderHomePage(request, env) {
                         <div class="calculation-step">
                             <h4>Step 1: Total Cash from Gilt Investment</h4>
                             <p><strong>Gilt:</strong> \${gilt.name}</p>
-                            <p><strong>Initial Investment:</strong> \${formatCurrency(investmentAmount)}</p>
+                            <p><strong>Initial Investment:</strong> £\${investmentAmount.toFixed(2)}</p>
                             <p><strong>Total Cash Received:</strong> £\${giltTotalCash.toFixed(2)}</p>
                             <div style="margin-left: 20px; color: #666;">
                                 <p><small>• All coupon payments (after \${modalTaxRate}% income tax)</small></p>
