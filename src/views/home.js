@@ -1346,38 +1346,87 @@ export async function renderHomePage(request, env) {
                     break;
                     
                 case 'advantage':
-                    titleText = 'Extra Income vs Savings Account';
-                    const savingsRate = window.lastSavingsRate || 5.0;
-                    const afterTaxSavingsRate = savingsRate * (1 - currentTaxRate/100);
+                    titleText = 'Extra Income vs Savings Account - Detailed Calculation';
+                    const savingsRate = currentSettings.savingsRate || 4.5;
+                    const psaAmount = currentSettings.taxBracket === 'basic_rate' ? 1000 : 
+                                    currentSettings.taxBracket === 'higher_rate' ? 500 : 0;
+                    const taxRate = currentSettings.taxBracket === 'basic_rate' ? 20 : 
+                                  currentSettings.taxBracket === 'higher_rate' ? 40 : 45;
+                    
+                    // Calculate savings account after-tax return considering PSA
+                    const annualSavingsInterest = (savingsRate / 100) * investmentAmount;
+                    const taxableInterest = Math.max(0, annualSavingsInterest - psaAmount);
+                    const taxOnSavings = taxableInterest * (taxRate / 100);
+                    const netSavingsIncome = annualSavingsInterest - taxOnSavings;
+                    const afterTaxSavingsRate = (netSavingsIncome / investmentAmount) * 100;
+                    
                     const giltReturn = gilt.afterTaxYield || 0;
+                    const giltAnnualIncome = (giltReturn / 100) * investmentAmount;
                     const advantagePercent = giltReturn - afterTaxSavingsRate;
-                    const extraIncomeAnnual = (advantagePercent / 100) * investmentAmount;
+                    const extraIncomeAnnual = giltAnnualIncome - netSavingsIncome;
                     const extraIncomeTotal = extraIncomeAnnual * (gilt.yearsToMaturity || 1);
                     
                     contentHTML = \`
                         <div class="calculation-step">
-                            <h4>Comparison Setup</h4>
-                            <p><strong>Investment Amount:</strong> £\${formatCurrency(investmentAmount)}</p>
-                            <p><strong>Savings Rate (assumed):</strong> \${savingsRate.toFixed(2)}%</p>
-                            <p><strong>Your Tax Rate:</strong> \${currentTaxRate}%</p>
+                            <h4>What This Column Shows</h4>
+                            <p>This column displays the <strong>total extra money</strong> you would receive from investing in this gilt compared to putting the same amount in a taxable savings account over the gilt's entire lifespan.</p>
                         </div>
+                        
                         <div class="calculation-step">
-                            <h4>Gilt Investment (\${gilt.name})</h4>
-                            <p><strong>After-Tax Annual Return:</strong> \${giltReturn.toFixed(2)}%</p>
-                            <p><strong>Annual Income:</strong> £\${formatCurrency(giltReturn * investmentAmount / 100)}</p>
+                            <h4>Your Current Settings</h4>
+                            <p><strong>Investment Amount:</strong> \${formatCurrency(investmentAmount)}</p>
+                            <p><strong>Your Tax Bracket:</strong> \${currentSettings.taxBracket.replace('_', ' ').toUpperCase()} (\${taxRate}%)</p>
+                            <p><strong>Personal Savings Allowance:</strong> \${formatCurrency(psaAmount)}</p>
+                            <p><strong>Savings Account Rate:</strong> \${savingsRate.toFixed(2)}%</p>
+                            <p><strong>Investment Period:</strong> \${gilt.yearsToMaturity?.toFixed(1)} years</p>
                         </div>
+                        
                         <div class="calculation-step">
-                            <h4>Savings Account</h4>
-                            <p><strong>Gross Rate:</strong> \${savingsRate.toFixed(2)}%</p>
-                            <p><strong>After-Tax Rate:</strong> \${afterTaxSavingsRate.toFixed(2)}%</p>
-                            <p><strong>Annual Income:</strong> £\${formatCurrency(afterTaxSavingsRate * investmentAmount / 100)}</p>
+                            <h4>Step 1: Gilt Investment Returns</h4>
+                            <p><strong>Gilt:</strong> \${gilt.name}</p>
+                            <p><strong>After-Tax Annual Return:</strong> \${giltReturn.toFixed(3)}%</p>
+                            <p><strong>Annual Income from Gilt:</strong> \${formatCurrency(giltAnnualIncome)}</p>
+                            <p><small>• Coupon payments are taxed at \${taxRate}% as income</small></p>
+                            <p><small>• Capital gains/losses on gilts are tax-free</small></p>
                         </div>
+                        
+                        <div class="calculation-step">
+                            <h4>Step 2: Savings Account Returns</h4>
+                            <p><strong>Gross Annual Interest:</strong> \${formatCurrency(annualSavingsInterest)} (\${savingsRate.toFixed(2)}%)</p>
+                            <p><strong>Less: Personal Savings Allowance:</strong> -\${formatCurrency(Math.min(annualSavingsInterest, psaAmount))}</p>
+                            <p><strong>Taxable Interest:</strong> \${formatCurrency(taxableInterest)}</p>
+                            <p><strong>Tax on Interest (\${taxRate}%):</strong> -\${formatCurrency(taxOnSavings)}</p>
+                            <p><strong>Net Annual Income:</strong> \${formatCurrency(netSavingsIncome)}</p>
+                            <p><strong>Effective Rate:</strong> \${afterTaxSavingsRate.toFixed(3)}%</p>
+                        </div>
+                        
                         <div class="calculation-step" style="background: #f8f9fa; border-left: 4px solid \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'}; padding: 15px;">
-                            <h4>Advantage Analysis</h4>
-                            <p><strong>Extra Annual Return:</strong> \${advantagePercent.toFixed(2)}%</p>
-                            <p><strong>Extra Annual Income:</strong> \${formatCurrency(extraIncomeAnnual)}</p>
-                            <p><strong>Total Over \${gilt.yearsToMaturity?.toFixed(1)} Years:</strong> \${formatCurrency(extraIncomeTotal)}</p>
-                            <p style="margin-top: 10px; font-weight: bold;">\${advantagePercent >= 0 ? 'This gilt provides better returns than a taxable savings account.' : 'A savings account would provide better returns than this gilt.'}</p>
+                            <h4>Step 3: Final Calculation</h4>
+                            <div class="calculation-formula" style="background: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                                <strong>Formula:</strong><br>
+                                Extra Income = (Gilt Annual Income - Savings Annual Income) × Years to Maturity<br><br>
+                                <strong>Calculation:</strong><br>
+                                (\${formatCurrency(giltAnnualIncome)} - \${formatCurrency(netSavingsIncome)}) × \${gilt.yearsToMaturity?.toFixed(1)} years<br>
+                                = \${formatCurrency(extraIncomeAnnual)} × \${gilt.yearsToMaturity?.toFixed(1)}<br>
+                                = <strong>\${formatCurrency(extraIncomeTotal)}</strong>
+                            </div>
+                            <p><strong>Annual Advantage:</strong> \${formatCurrency(extraIncomeAnnual)} per year</p>
+                            <p><strong>Total Advantage:</strong> \${formatCurrency(extraIncomeTotal)} over \${gilt.yearsToMaturity?.toFixed(1)} years</p>
+                            <p style="margin-top: 15px; font-weight: bold; color: \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'};">
+                                \${advantagePercent >= 0 ? 
+                                    \`This gilt will earn you \${formatCurrency(Math.abs(extraIncomeTotal))} MORE than a savings account.\` : 
+                                    \`A savings account would earn you \${formatCurrency(Math.abs(extraIncomeTotal))} MORE than this gilt.\`
+                                }
+                            </p>
+                        </div>
+                        
+                        <div class="calculation-step">
+                            <h4>Key Assumptions</h4>
+                            <p><small>• Uses your actual tax settings from the sidebar</small></p>
+                            <p><small>• Includes Personal Savings Allowance for savings account</small></p>
+                            <p><small>• Assumes both investments held for full maturity period</small></p>
+                            <p><small>• Based on current market prices and yields</small></p>
+                            <p><small>• Does not account for reinvestment of income</small></p>
                         </div>
                     \`;
                     break;
