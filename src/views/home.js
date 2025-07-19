@@ -235,6 +235,17 @@ export async function renderHomePage(request, env) {
             background-color: #f8f9fa;
         }
         
+        /* Ensure table structure is preserved */
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+        }
+        
+        .table-container td, .table-container th {
+            vertical-align: middle;
+        }
+        
         .modal {
             display: none;
             position: fixed;
@@ -496,14 +507,12 @@ export async function renderHomePage(request, env) {
             
             .clickable-cell {
                 min-height: 44px; /* Touch target size */
-                display: flex;
-                align-items: center;
-                justify-content: flex-end;
                 cursor: pointer;
+                position: relative;
             }
             
-            .clickable-cell:first-child {
-                justify-content: flex-start;
+            .clickable-cell:hover {
+                background-color: #f8f9fa;
             }
             
             /* Modal improvements for mobile */
@@ -1091,7 +1100,7 @@ export async function renderHomePage(request, env) {
                         <tbody>
                             \${sortedResults.map((gilt, index) => \`
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
-                                    <td class="clickable-cell" data-type="name" data-index="\${index}" style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500;">\${gilt.name}</td>
+                                    <td class="clickable-cell" data-type="name" data-index="\${index}" style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500; text-align: left;">\${gilt.name}</td>
                                     <td class="clickable-cell" data-type="coupon" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${formatCouponRate(gilt.couponRate || 0)}</td>
                                     <td class="clickable-cell" data-type="clean-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.cleanPrice || 0).toFixed(2)}</td>
                                     <td class="clickable-cell" data-type="dirty-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.dirtyPrice || gilt.cleanPrice || 0).toFixed(2)}</td>
