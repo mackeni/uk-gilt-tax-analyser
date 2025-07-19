@@ -1109,7 +1109,9 @@ export async function renderHomePage(request, env) {
         }
         
         function getFallbackGiltData() {
+            console.log('Creating fallback gilt data...');
             const today = new Date();
+            console.log('Today date:', today);
             const fallbackData = [
                 { name: "Treasury 2% 2025", couponRate: 2.0, cleanPrice: 99.72, currentYield: 4.073, maturityDate: "2025-09-07" },
                 { name: "Treasury 3.5% 2025", couponRate: 3.5, cleanPrice: 99.82, currentYield: 4.187, maturityDate: "2025-10-22" },
@@ -1133,7 +1135,7 @@ export async function renderHomePage(request, env) {
                 { name: "Treasury 4.75% 2030", couponRate: 4.75, cleanPrice: 103.37, currentYield: 4.046, maturityDate: "2030-12-07" }
             ];
             
-            return fallbackData.map(gilt => {
+            const processedData = fallbackData.map(gilt => {
                 const maturityDate = new Date(gilt.maturityDate);
                 const yearsToMaturity = (maturityDate - today) / (365.25 * 24 * 60 * 60 * 1000);
                 
@@ -1142,13 +1144,23 @@ export async function renderHomePage(request, env) {
                 const daysInCouponPeriod = 184; // Semi-annual
                 const accruedInterest = (gilt.couponRate / 2) * (daysSinceLastCoupon / daysInCouponPeriod);
                 
-                return {
+                const processedGilt = {
                     ...gilt,
                     yearsToMaturity: Math.max(0, yearsToMaturity),
                     dirtyPrice: gilt.cleanPrice + accruedInterest,
                     accruedInterest: accruedInterest
                 };
-            }).filter(gilt => gilt.yearsToMaturity > 0);
+                
+                console.log('Processed gilt:', processedGilt.name, 'years:', processedGilt.yearsToMaturity);
+                return processedGilt;
+            }).filter(gilt => {
+                const isValid = gilt.yearsToMaturity > 0;
+                console.log('Gilt valid:', gilt.name, isValid);
+                return isValid;
+            });
+            
+            console.log('Final fallback data count:', processedData.length);
+            return processedData;
         }
         }
         
