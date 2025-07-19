@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-5snliF/checked-fetch.js
+// .wrangler/tmp/bundle-P0UiYU/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-5snliF/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-P0UiYU/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-5snliF/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-P0UiYU/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-5snliF/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-P0UiYU/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4138,15 +4138,6 @@ async function renderHomePage(request, env) {
                             <p><strong>Income Tax Rate:</strong> 45%</p>
                             <p><strong>Personal Savings Allowance:</strong> \xA30</p>
                             <p><strong>Capital Gains Tax on Gilts:</strong> 0% (exempt)</p>
-                        </div>
-                    </div>
-                    
-                    <div class="tax-info" id="transactionCostInfo" style="background: #fff3cd; border: 1px solid #ffeaa7; margin-top: 10px;">
-                        <h4>Transaction Cost Summary:</h4>
-                        <div id="transactionCostDetails">
-                            <p><strong>Broker:</strong> <span id="brokerDisplay">Low Cost (\xA35 per trade)</span></p>
-                            <p><strong>Total Costs:</strong> <span id="totalCostDisplay">\xA315.00</span></p>
-                            <p><small>Includes purchase, sale, and holding fees</small></p>
                         </div>
                     </div>
                 </div>
@@ -5711,24 +5702,6 @@ async function renderHomePage(request, env) {
             initializeApp();
         });
         
-        function updateTransactionCostDisplay() {
-            const transactionCosts = getTransactionCosts();
-            const investmentAmount = parseFloat(document.getElementById('investmentAmount').value) || 10000;
-            const baseInvestment = investmentAmount; // Simplified for display
-            const totalCosts = transactionCosts.totalPurchaseCost + transactionCosts.totalSaleCost + 
-                             (baseInvestment * transactionCosts.annualHoldingFeeRate * 2); // Assume 2-year average
-            
-            const brokerLabels = {
-                'low_cost': 'Low Cost (\xA35 per trade)',
-                'percentage': 'Percentage Based (0.1%)',
-                'traditional': 'Traditional (\xA311.95 per trade)',
-                'custom': 'Custom'
-            };
-            
-            document.getElementById('brokerDisplay').textContent = brokerLabels[transactionCosts.brokerType] || 'Custom';
-            document.getElementById('totalCostDisplay').textContent = formatCurrency(totalCosts);
-        }
-        
         function handleBrokerTypeChange() {
             const brokerType = document.getElementById('brokerType').value;
             const customCosts = document.getElementById('customCosts');
@@ -5739,8 +5712,7 @@ async function renderHomePage(request, env) {
                 customCosts.style.display = 'none';
             }
             
-            // Update display and recalculate
-            updateTransactionCostDisplay();
+            // Recalculate with new transaction costs
             calculateTaxEfficiency();
         }
         
@@ -5750,34 +5722,11 @@ async function renderHomePage(request, env) {
             
             // Set up transaction cost event listeners
             document.getElementById('brokerType').addEventListener('change', handleBrokerTypeChange);
-            document.getElementById('bidAskSpread').addEventListener('input', debounce(() => {
-                updateTransactionCostDisplay();
-                calculateTaxEfficiency();
-            }, 500));
-            document.getElementById('annualHoldingFee').addEventListener('input', debounce(() => {
-                updateTransactionCostDisplay();
-                calculateTaxEfficiency();
-            }, 500));
-            document.getElementById('purchaseFee').addEventListener('input', debounce(() => {
-                updateTransactionCostDisplay();
-                calculateTaxEfficiency();
-            }, 500));
-            document.getElementById('saleFee').addEventListener('input', debounce(() => {
-                updateTransactionCostDisplay();
-                calculateTaxEfficiency();
-            }, 500));
-            document.getElementById('percentageFee').addEventListener('input', debounce(() => {
-                updateTransactionCostDisplay();
-                calculateTaxEfficiency();
-            }, 500));
-            
-            // Initialize transaction cost display
-            try {
-                updateTransactionCostDisplay();
-                console.log('Transaction cost display updated successfully');
-            } catch (error) {
-                console.error('Error updating transaction cost display:', error);
-            }
+            document.getElementById('bidAskSpread').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
+            document.getElementById('annualHoldingFee').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
+            document.getElementById('purchaseFee').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
+            document.getElementById('saleFee').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
+            document.getElementById('percentageFee').addEventListener('input', debounce(() => calculateTaxEfficiency(), 500));
             
             // Set up other event listeners (existing ones)
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
@@ -5796,9 +5745,7 @@ async function renderHomePage(request, env) {
             
             // Load initial data
             loadGiltData();
-        }
-        
-
+        });
         
         function addCacheManagementButtons() {
             // Add debug info and cache stats buttons
@@ -5815,11 +5762,7 @@ async function renderHomePage(request, env) {
                 const stats = getCacheStats();
                 console.log('Cache stats:', stats);
                 if (stats) {
-                    alert('Cache Stats:
-Utils Cache: ' + (stats.utilsCache?.cacheSize || 0) + ' items
-Complex Cache: ' + stats.complexCache.size + ' items
-Total Items: ' + stats.total + '
-Hit Rate: ' + (stats.utilsCache?.hitRate * 100 || 0).toFixed(1) + '%');
+                    alert('Cache Stats:\\nUtils Cache: ' + (stats.utilsCache?.cacheSize || 0) + ' items\\nComplex Cache: ' + stats.complexCache.size + ' items\\nTotal Items: ' + stats.total + '\\nHit Rate: ' + (stats.utilsCache?.hitRate * 100 || 0).toFixed(1) + '%');
                 }
                 console.log('==================');
             };
@@ -5842,7 +5785,7 @@ Hit Rate: ' + (stats.utilsCache?.hitRate * 100 || 0).toFixed(1) + '%');
     <\/script>
 </body>
 </html>
-`;
+  `;
   return new Response(html, {
     headers: { "Content-Type": "text/html" }
   });
@@ -6610,7 +6553,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-5snliF/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-P0UiYU/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6644,7 +6587,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-5snliF/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-P0UiYU/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
