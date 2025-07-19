@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-UqQLrc/checked-fetch.js
+// .wrangler/tmp/bundle-sXNiuX/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-UqQLrc/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-sXNiuX/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-UqQLrc/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-sXNiuX/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-UqQLrc/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-sXNiuX/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5637,10 +5637,38 @@ async function renderHomePage(request, env) {
                     const giltTotalCash = calculateTotalCashFromGilt(gilt, gilt.unitsOwned, modalTaxRate / 100);
                     const savingsTotalCash = calculateTotalCashFromSavings(investmentAmount, savingsRate, modalTaxRate / 100, psaAmount, gilt.yearsToMaturity);
                     
-                    // Calculate total monthly charges for display
+                    // Calculate total monthly charges for display using the SAME method as IRR tooltip
                     let totalMonthlyCharges = 0;
-                    if (currentSettings.accountChargeEnabled && gilt.accountCharges && gilt.accountCharges.length > 0) {
-                        totalMonthlyCharges = gilt.accountCharges.reduce((sum, c) => sum + c.amount, 0);
+                    if (currentSettings.accountChargeEnabled) {
+                        const dealingCharge = currentSettings.dealingCharge || 0;
+                        const effectiveInvestment = investmentAmount - dealingCharge;
+                        const initialUnits = effectiveInvestment / gilt.dirtyPrice * 100; // Units at \xA3100 nominal
+                        const yearsToMaturity = gilt.yearsToMaturity;
+                        const monthlyRate = currentSettings.accountChargeRate / 12 / 100; // Convert to monthly decimal
+                        const maxMonthlyCharge = currentSettings.accountChargeMax;
+                        
+                        const currentDate = new Date();
+                        const maturityDate = new Date(gilt.maturityDate);
+                        
+                        // Generate monthly charges using EXACT same method as IRR tooltip
+                        for (let month = 1; month <= Math.ceil(yearsToMaturity * 12); month++) {
+                            const chargeDate = new Date(currentDate);
+                            chargeDate.setMonth(chargeDate.getMonth() + month);
+                            
+                            if (chargeDate <= maturityDate) {
+                                // Calculate gilt value at this point (linear convergence to \xA3100)
+                                const monthsRemaining = (maturityDate.getTime() - chargeDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
+                                const totalMonths = yearsToMaturity * 12;
+                                const convergenceFactor = monthsRemaining / totalMonths;
+                                const giltPrice = 100 + (gilt.cleanPrice - 100) * convergenceFactor;
+                                const giltValue = initialUnits * giltPrice / 100;
+                                
+                                // Calculate monthly charge
+                                const rawCharge = giltValue * monthlyRate;
+                                const actualCharge = Math.min(rawCharge, maxMonthlyCharge);
+                                totalMonthlyCharges += actualCharge;
+                            }
+                        }
                     }
                     
                     // Debug log to verify charges are included
@@ -6722,7 +6750,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-UqQLrc/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-sXNiuX/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6756,7 +6784,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-UqQLrc/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-sXNiuX/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
