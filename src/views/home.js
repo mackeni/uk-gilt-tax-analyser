@@ -1017,22 +1017,17 @@ export async function renderHomePage(request, env) {
             
             // Only ask for confirmation if this is a meaningful change and PSA is relevant
             if (currentPSA !== suggestedPSA && (currentPSA !== undefined || suggestedPSA > 0)) {
-                const userPSA = prompt(
+                const psaChoice = confirm(
                     \`Personal Savings Allowance Confirmation\n\n\` +
                     \`Tax Bracket: \${taxBracket.replace('_', ' ').toUpperCase()}\n\` +
                     \`Standard PSA: £\${suggestedPSA.toLocaleString()}\n\n\` +
                     \`\${info.description}\n\n\` +
-                    \`What is your actual Personal Savings Allowance for this tax year?\n\` +
-                    \`(Enter amount or press Cancel to use standard amount)\`,
-                    suggestedPSA
+                    \`Do you have your full Personal Savings Allowance available?\n\n\` +
+                    \`Click OK for standard amount (£\${suggestedPSA.toLocaleString()})\n\` +
+                    \`Click Cancel if you have no PSA remaining (£0)\`
                 );
                 
-                if (userPSA !== null) {
-                    const parsedPSA = parseFloat(userPSA);
-                    if (!isNaN(parsedPSA) && parsedPSA >= 0) {
-                        confirmedPSA = parsedPSA;
-                    }
-                }
+                confirmedPSA = psaChoice ? suggestedPSA : 0;
             }
             
             // Store the confirmed PSA amount
