@@ -2096,45 +2096,10 @@ export async function renderHomePage(request, env) {
                     // Generate payment schedule table including monthly account charges
                     let scheduleHTML = '';
                     if (gilt.couponSchedule && gilt.couponSchedule.length > 0) {
-                        // Calculate monthly account charges if enabled
+                        // Use stored monthly account charges from unified function
                         let monthlyChargeSchedule = [];
-                        if (currentSettings.accountChargeEnabled) {
-                            const dealingCharge = currentSettings.dealingCharge || 0;
-                            const effectiveInvestment = (currentSettings.investmentAmount || 10000) - dealingCharge;
-                            const initialUnits = effectiveInvestment / gilt.dirtyPrice * 100; // Units at £100 nominal
-                            const yearsToMaturity = gilt.yearsToMaturity;
-                            const monthlyRate = currentSettings.accountChargeRate / 12 / 100; // Convert to monthly decimal
-                            const maxMonthlyCharge = currentSettings.accountChargeMax;
-                            
-                            const currentDate = new Date();
-                            const maturityDate = new Date(gilt.maturityDate);
-                            
-                            // Generate monthly charges from now until maturity
-                            for (let month = 1; month <= Math.ceil(yearsToMaturity * 12); month++) {
-                                const chargeDate = new Date(currentDate);
-                                chargeDate.setMonth(chargeDate.getMonth() + month);
-                                
-                                if (chargeDate <= maturityDate) {
-                                    // Calculate gilt value at this point (linear convergence to £100)
-                                    const monthsRemaining = (maturityDate.getTime() - chargeDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
-                                    const totalMonths = yearsToMaturity * 12;
-                                    const convergenceFactor = monthsRemaining / totalMonths;
-                                    const giltPrice = 100 + (gilt.cleanPrice - 100) * convergenceFactor;
-                                    const giltValue = initialUnits * giltPrice / 100;
-                                    
-                                    // Calculate monthly charge with 2-decimal rounding
-                                    const rawCharge = giltValue * monthlyRate;
-                                    const actualCharge = Math.round(Math.min(rawCharge, maxMonthlyCharge) * 100) / 100;
-                                    
-                                    monthlyChargeSchedule.push({
-                                        date: chargeDate,
-                                        giltPrice: giltPrice,
-                                        giltValue: giltValue,
-                                        charge: actualCharge,
-                                        isMax: actualCharge === maxMonthlyCharge
-                                    });
-                                }
-                            }
+                        if (currentSettings.accountChargeEnabled && gilt.accountCharges) {
+                            monthlyChargeSchedule = gilt.accountCharges;
                         }
 
                         // Create separate schedules for coupons and account charges
@@ -2188,7 +2153,7 @@ export async function renderHomePage(request, env) {
                         const totalGrossCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0);
                         const totalCouponTax = gilt.couponSchedule.reduce((sum, payment) => sum + Math.round(payment.taxAmount * 100) / 100, 0);
                         const totalNetCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + (payment.grossAmount - Math.round(payment.taxAmount * 100) / 100), 0);
-                        const totalAccountCharges = monthlyChargeSchedule.reduce((sum, charge) => sum + charge.charge, 0);
+                        const totalAccountCharges = monthlyChargeSchedule.reduce((sum, charge) => sum + charge.amount, 0);
                         const grandTotalGross = totalGrossCoupons + principalAmount;
                         // Total costs = Income Tax + Account Charges (both reduce net returns)
                         const grandTotalCosts = totalCouponTax + totalAccountCharges;
@@ -2262,18 +2227,19 @@ export async function renderHomePage(request, env) {
                             
                             monthlyChargeSchedule.forEach(charge => {
                                 const chargeDate = charge.date.toLocaleDateString('en-GB');
+                                const isMax = charge.amount === currentSettings.accountChargeMax;
                                 scheduleHTML += \`
                                     <tr style="background: #fffbf0;">
                                         <td style="border: 1px solid #ddd; padding: 8px;">\${chargeDate}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${charge.giltPrice.toFixed(2)}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${charge.interpolatedPrice.toFixed(2)}</td>
                                         <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${charge.giltValue.toFixed(2)}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${charge.charge.toFixed(2)}\${charge.isMax ? ' (max)' : ''}</strong></td>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${charge.amount.toFixed(2)}\${isMax ? ' (max)' : ''}</strong></td>
                                     </tr>
                                 \`;
                             });
                             
                             // Add total row for monthly charges
-                            const totalMonthlyCharges = monthlyChargeSchedule.reduce((sum, charge) => sum + charge.charge, 0);
+                            const totalMonthlyCharges = monthlyChargeSchedule.reduce((sum, charge) => sum + charge.amount, 0);
                             scheduleHTML += \`
                                 <tr style="background: #ffc107; color: #000; font-weight: bold; border-top: 2px solid #e0a800;">
                                     <td style="border: 1px solid #e0a800; padding: 10px;"><strong>TOTAL CHARGES</strong></td>
