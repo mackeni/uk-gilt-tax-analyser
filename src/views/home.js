@@ -1614,7 +1614,7 @@ export async function renderHomePage(request, env) {
                         
                         // Add principal repayment row
                         const maturityDate = new Date(gilt.maturityDate).toLocaleDateString('en-GB');
-                        const principalAmount = currentSettings.investmentAmount / gilt.dirtyPrice * 100;
+                        const principalAmount = (currentSettings.investmentAmount || 10000) / gilt.dirtyPrice * 100;
                         scheduleHTML += \`
                             <tr style="background: #e8f5e8;">
                                 <td style="border: 1px solid #ddd; padding: 8px;"><strong>\${maturityDate}</strong></td>
@@ -1640,9 +1640,9 @@ export async function renderHomePage(request, env) {
                         <div class="calculation-step">
                             <h4>Calculation Method:</h4>
                             <p><strong>Method:</strong> IRR calculation using Newton-Raphson method</p>
-                            <p><strong>Your Investment:</strong> £\${formatCurrency(currentSettings.investmentAmount)}</p>
+                            <p><strong>Your Investment:</strong> £\${formatCurrency(currentSettings.investmentAmount || 10000)}</p>
                             <p><strong>Purchase Price:</strong> £\${gilt.dirtyPrice.toFixed(6)} per £100 (including accrued interest)</p>
-                            <p><strong>Your Tax Rate:</strong> \${currentSettings.taxBracket.replace('_', ' ')} (\${getCurrentTaxRate()}%)</p>
+                            <p><strong>Your Tax Rate:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ')} (\${getCurrentTaxRate()}%)</p>
                         </div>
                         <div class="calculation-step" style="background: #f8f9fa; border-left: 4px solid #007bff; padding: 15px;">
                             <h4>Final After-Tax Yield:</h4>

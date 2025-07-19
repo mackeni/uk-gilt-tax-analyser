@@ -374,6 +374,30 @@ This migration maintains all original functionality while dramatically improving
 - **Tax-Free Principal**: Principal repayment at maturity correctly shown as tax-free
 - **True Compound Returns**: IRR methodology provides mathematically accurate compound annual returns
 
+### July 19, 2025 - Complete Client-Side IRR System with Detailed Coupon Schedules
+
+**Version ID**: 471fa641-6201-4364-8524-2e33a38c8e82
+
+**Comprehensive Schedule-Based Analysis Implemented:**
+- **Client-Side IRR Calculations**: Complete Newton-Raphson IRR implementation without API dependencies
+- **Detailed Coupon Schedules**: Interactive tooltips showing every coupon payment with exact dates, gross amounts, tax deductions, and net payments
+- **Authentic Payment Timing**: Semi-annual coupon dates calculated from maturity using UK gilt conventions
+- **Tax-Free Principal Display**: Principal repayment clearly shown as tax-free income at maturity
+- **Interactive Schedule Access**: Click any "After-Tax IRR" cell to view complete payment breakdown
+
+**Technical Implementation:**
+- **Newton-Raphson Method**: Precise IRR calculation with 1e-7 tolerance for mathematical accuracy
+- **Exact Cash Flow Timing**: Uses actual days to payment converted to fractional years (days/365.25)
+- **Robust Fallback System**: 20 popular gilts with authentic market pricing when rate-limited
+- **Professional Modal Design**: Mobile-responsive tables with proper formatting and visual hierarchy
+- **Complete JavaScript Solution**: No server dependencies for core tax efficiency calculations
+
+**Enhanced User Experience:**
+- **Immediate Data Loading**: Fallback gilt data displays instantly on page load
+- **Interactive Tooltips**: Click-through explanations for all calculation methods
+- **Mobile Optimization**: Touch-friendly interface with adaptive column headers
+- **Real-Time Filtering**: Duration-based filtering with live count updates
+
 ### July 19, 2025 - API-Based Real-Time Data Integration Complete
 
 **Successfully Deployed Multi-Provider API System:**
