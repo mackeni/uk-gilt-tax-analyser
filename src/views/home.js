@@ -1174,13 +1174,21 @@ export async function renderHomePage(request, env) {
         
         function updateDealingCharge() {
             const dealingCharge = parseFloat(document.getElementById('dealingCharge').value) || 5;
+            console.log('=== DEALING CHARGE UPDATE ===');
+            console.log('New dealing charge:', dealingCharge);
+            console.log('Previous dealing charge:', currentSettings.dealingCharge);
+            
             currentSettings.dealingCharge = dealingCharge;
             
             // Clear cache since dealing charge affects calculations
             clearAllCaches();
+            console.log('Cache cleared for dealing charge update');
             
             if (currentGiltData.length > 0) {
+                console.log('Recalculating with new dealing charge...');
                 calculateTaxEfficiency();
+            } else {
+                console.log('No gilt data available for recalculation');
             }
         }
 
