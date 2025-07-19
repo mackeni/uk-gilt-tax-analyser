@@ -505,6 +505,35 @@ This migration maintains all original functionality while dramatically improving
 - **Preserved Presentation**: User interface and data display remain unchanged
 - **Authentic Data Integrity**: All optimizations preserve authentic market data and tax calculation accuracy
 
+### July 19, 2025 - Dealing Charge Implementation
+
+**Version ID**: 04e3a820-65c8-48e0-96b2-80f070a41ded
+
+**Comprehensive Transaction Cost Modeling:**
+- **Dealing Charge Input**: Added configurable dealing charge field with £5 default for realistic investment cost modeling
+- **Effective Investment Calculation**: Reduces available gilt purchase amount by dealing charge (e.g., £10,000 - £5 = £9,995 for gilts)
+- **IRR Integration**: Includes dealing charge in initial investment cost for accurate after-tax yield calculations
+- **Complete Calculation Impact**: All metrics (after-tax yield, equivalent savings rate, extra income) reflect transaction costs
+- **Enhanced Transparency**: Tooltip explanations show dealing charge breakdown and impact on returns
+
+**Transaction Cost Integration:**
+- **Units Owned Calculation**: Based on effective investment amount after deducting dealing charge
+- **After-Tax IRR**: Includes dealing charge as upfront cost in Newton-Raphson IRR calculation
+- **Comparison Accuracy**: Gilt vs. savings comparisons account for transaction costs in gilt investments
+- **Real-World Modeling**: Reflects actual broker charges for purchasing UK government bonds
+
+**User Interface Enhancements:**
+- **Input Field**: Number input with £0-£1,000 range and £1 step increments
+- **Explanatory Text**: Clear description of dealing charge impact on effective yield
+- **Live Updates**: Real-time recalculation when dealing charge is modified
+- **Tooltip Integration**: Detailed breakdown showing dealing charge in calculation explanations
+
+**Financial Impact Analysis:**
+- **Yield Reduction**: £5 dealing charge on £10,000 investment reduces effective yield by 0.05%
+- **Accurate Costing**: Total investment cost includes both gilt purchase price and transaction fees
+- **Realistic Returns**: All calculations reflect true cost of gilt investments including broker fees
+- **Transparent Pricing**: Users see both gross investment amount and net amount available for gilt purchase
+
 ### July 19, 2025 - Code Efficiency Optimization Review
 
 **Version ID**: a4d5bbce-5aec-435b-a184-a6cc1fc1eaef
