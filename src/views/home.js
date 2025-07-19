@@ -1764,7 +1764,6 @@ export async function renderHomePage(request, env) {
                     const extraIncomeTotal = gilt.extraIncome || (giltTotalCash - savingsTotalCash);
                     
                     const giltReturn = gilt.afterTaxYield || 0;
-                    const afterTaxSavingsRate = (netSavingsIncome / investmentAmount) * 100;
                     const advantagePercent = giltReturn - afterTaxSavingsRate;
                     
                     contentHTML = \`
