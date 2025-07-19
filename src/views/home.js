@@ -1684,11 +1684,9 @@ export async function renderHomePage(request, env) {
             
             let totalCash = 0;
             
-            // Sum all after-tax coupon payments using SAME rounding as IRR tooltip
+            // Sum all after-tax coupon payments (already rounded in schedule generation)
             gilt.couponSchedule.forEach(payment => {
-                const roundedTaxAmount = Math.round(payment.taxAmount * 100) / 100;
-                const roundedAfterTaxAmount = payment.grossAmount - roundedTaxAmount;
-                totalCash += roundedAfterTaxAmount;
+                totalCash += payment.afterTaxAmount;
             });
             
             // Subtract account charges if enabled (these are already rounded)
@@ -1753,12 +1751,15 @@ export async function renderHomePage(request, env) {
             while (currentTime > todayTime) {
                 const grossAmount = semiAnnualCoupon;
                 const taxAmount = grossAmount * incomeTaxRate;
+                // Apply 2-decimal rounding to match IRR tooltip calculations
+                const roundedTaxAmount = Math.round(taxAmount * 100) / 100;
+                const roundedAfterTaxAmount = grossAmount - roundedTaxAmount;
                 
                 tempSchedule.push({
                     date: new Date(currentTime).toISOString().split('T')[0],
                     grossAmount: grossAmount,
-                    taxAmount: taxAmount,
-                    afterTaxAmount: grossAmount - taxAmount
+                    taxAmount: roundedTaxAmount,
+                    afterTaxAmount: roundedAfterTaxAmount
                 });
                 
                 currentTime -= sixMonthsMs;

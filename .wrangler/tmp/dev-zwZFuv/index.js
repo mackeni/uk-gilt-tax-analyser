@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-VISBOQ/checked-fetch.js
+// .wrangler/tmp/bundle-U58hid/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-VISBOQ/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-U58hid/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-VISBOQ/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-U58hid/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-VISBOQ/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-U58hid/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4934,11 +4934,9 @@ async function renderHomePage(request, env) {
             
             let totalCash = 0;
             
-            // Sum all after-tax coupon payments using SAME rounding as IRR tooltip
+            // Sum all after-tax coupon payments (already rounded in schedule generation)
             gilt.couponSchedule.forEach(payment => {
-                const roundedTaxAmount = Math.round(payment.taxAmount * 100) / 100;
-                const roundedAfterTaxAmount = payment.grossAmount - roundedTaxAmount;
-                totalCash += roundedAfterTaxAmount;
+                totalCash += payment.afterTaxAmount;
             });
             
             // Subtract account charges if enabled (these are already rounded)
@@ -5003,12 +5001,15 @@ async function renderHomePage(request, env) {
             while (currentTime > todayTime) {
                 const grossAmount = semiAnnualCoupon;
                 const taxAmount = grossAmount * incomeTaxRate;
+                // Apply 2-decimal rounding to match IRR tooltip calculations
+                const roundedTaxAmount = Math.round(taxAmount * 100) / 100;
+                const roundedAfterTaxAmount = grossAmount - roundedTaxAmount;
                 
                 tempSchedule.push({
                     date: new Date(currentTime).toISOString().split('T')[0],
                     grossAmount: grossAmount,
-                    taxAmount: taxAmount,
-                    afterTaxAmount: grossAmount - taxAmount
+                    taxAmount: roundedTaxAmount,
+                    afterTaxAmount: roundedAfterTaxAmount
                 });
                 
                 currentTime -= sixMonthsMs;
@@ -6747,7 +6748,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-VISBOQ/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-U58hid/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6781,7 +6782,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-VISBOQ/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-U58hid/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
