@@ -335,7 +335,7 @@ This migration maintains all original functionality while dramatically improving
 ### July 19, 2025 - API-Based Real-Time Data Integration Complete
 
 **Successfully Deployed Multi-Provider API System:**
-- **Worker ID Updated**: b4f5069d-0cc4-429c-9523-fba76af54123 (Tax calculations fully working)
+- **Worker ID Updated**: 34f81546-cb0d-41a5-b8e7-6b8d80ac8b36 (Table display fixed)
 - **Multi-Provider Integration**: Finnhub, Alpha Vantage, and Financial Modeling Prep APIs successfully connected
 - **Live Data Verification**: 37 UK government bonds with authentic market pricing
 - **Both Platforms Updated**: Streamlit Python app and Cloudflare Worker using same API system

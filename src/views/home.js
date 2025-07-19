@@ -660,8 +660,7 @@ export async function renderHomePage(request, env) {
                 currentGiltData = data;
                 
                 loadingDiv.style.display = 'none';
-                dataDiv.style.display = 'block';
-                metricsDiv.style.display = 'block';
+                // Don't show data div yet - wait for tax calculations
                 document.getElementById('filterControls').style.display = 'block';
                 
                 calculateTaxEfficiency();
@@ -694,10 +693,20 @@ export async function renderHomePage(request, env) {
                 
                 const results = await response.json();
                 currentResults = results;
+                
+                // Now show the data sections since we have complete results
+                const dataDiv = document.getElementById('giltData');
+                const metricsDiv = document.getElementById('metrics');
+                dataDiv.style.display = 'block';
+                metricsDiv.style.display = 'block';
+                
                 displayResults(results);
                 
             } catch (error) {
                 console.error('Error calculating tax efficiency:', error);
+                const errorDiv = document.getElementById('error');
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Error calculating tax efficiency: ' + error.message;
             }
         }
         
