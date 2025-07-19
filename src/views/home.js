@@ -2472,20 +2472,31 @@ export async function renderHomePage(request, env) {
                                 const totalCouponTax = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.taxAmount, 0) : 0;
                                 const totalNetCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.afterTaxAmount, 0) : 0;
                                 const principalAmount = gilt.unitsOwned || 0;
+                                const numPayments = gilt.couponSchedule ? gilt.couponSchedule.length : 0;
+                                const semiAnnualRate = gilt.couponRate / 2;
+                                const effectiveInvestment = investmentAmount - (currentSettings.dealingCharge || 0);
                                 
                                 return \`
                                 <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; padding: 12px; margin: 10px 0;">
-                                    <h5 style="margin: 0 0 8px 0; color: #007bff;">Coupon Payment Totals:</h5>
+                                    <h5 style="margin: 0 0 8px 0; color: #007bff;">Coupon Payment Totals & Precision:</h5>
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
                                         <div>
                                             <p style="margin: 2px 0;"><strong>Total Gross Coupons:</strong> £\${totalGrossCoupons.toFixed(2)}</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(\${numPayments} payments × £\${(totalGrossCoupons/numPayments).toFixed(6)} each)</p>
                                             <p style="margin: 2px 0;"><strong>Income Tax:</strong> £\${totalCouponTax.toFixed(2)}</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(Each payment taxed at \${modalTaxRate}%)</p>
                                             <p style="margin: 2px 0;"><strong>Net Coupon Income:</strong> £\${totalNetCoupons.toFixed(2)}</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(Gross - Tax, rounded per payment)</p>
                                         </div>
                                         <div>
+                                            <p style="margin: 2px 0;"><strong>Calculation Base:</strong></p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Units Owned: \${(principalAmount/100).toFixed(6)}</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Semi-Annual Rate: \${semiAnnualRate.toFixed(3)}%</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Effective Investment: £\${effectiveInvestment.toFixed(2)}</p>
                                             <p style="margin: 2px 0;"><strong>Principal Repayment:</strong> £\${principalAmount.toFixed(2)}</p>
                                             \${currentSettings.accountChargeEnabled && totalMonthlyCharges > 0 ? '<p style="margin: 2px 0;"><strong>Account Charges:</strong> £' + totalMonthlyCharges.toFixed(2) + '</p>' : ''}
                                             <p style="margin: 2px 0; font-weight: bold; color: #007bff;"><strong>Total Cash:</strong> £\${giltTotalCash.toFixed(2)}</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(Precision: £\${giltTotalCash.toFixed(6)})</p>
                                         </div>
                                     </div>
                                 </div>
