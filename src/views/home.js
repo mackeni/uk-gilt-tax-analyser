@@ -1521,20 +1521,27 @@ export async function renderHomePage(request, env) {
             dataDiv.innerHTML = tableHTML;
             
             // Add click event listeners to clickable cells
+            console.log('Adding click listeners to cells...');
             document.querySelectorAll('.clickable-cell').forEach(cell => {
+                console.log('Adding listener to cell:', cell.dataset.type);
                 cell.addEventListener('click', function() {
+                    console.log('Cell clicked:', this.dataset.type, this.dataset.index);
                     const type = this.dataset.type;
                     const index = parseInt(this.dataset.index);
                     const gilt = sortedResults[index];
+                    console.log('Calling showCalculationModal with:', type, gilt);
                     showCalculationModal(type, gilt);
                 });
             });
         }
         
         function showCalculationModal(type, gilt) {
+            console.log('showCalculationModal called with type:', type, 'gilt:', gilt?.name);
             const modal = document.getElementById('calculationModal');
             const title = document.getElementById('modalTitle');
             const content = document.getElementById('modalContent');
+            
+            console.log('Modal elements found:', !!modal, !!title, !!content);
             
             let titleText = '';
             let contentHTML = '';
