@@ -536,7 +536,13 @@ This migration maintains all original functionality while dramatically improving
 
 ### July 19, 2025 - Detailed Monthly Account Charge Schedule Implementation
 
-**Version ID**: 48f7c9e3-b3c2-4c5d-8a92-0f3d1e8e7a93
+**Version ID**: 18f7e91f-1369-48a7-a5a0-1a58d64ab492
+
+**Enhanced Advantage Tooltip with Monthly Charge Transparency:**
+- **Exact Charge Display**: Shows specific £ amount of monthly account charges deducted from total returns
+- **Debug Verification**: Console logging confirms charges are properly included in calculations
+- **Net Amount Highlighting**: Clear "Net after all charges and taxes" summary with final amount
+- **Complete Transparency**: Advantage column tooltip now accurately reflects all deductions including monthly charges
 
 **Separate Detailed Schedule Implementation:**
 - **Independent Schedule Sections**: Coupon payments and monthly account charges displayed in separate, clearly organized tables
