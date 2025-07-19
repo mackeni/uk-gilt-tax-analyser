@@ -1801,20 +1801,18 @@ export async function renderHomePage(request, env) {
                     const modalTaxRate = getCurrentTaxRate();
                     const investmentAmount = currentSettings.investmentAmount || 10000;
                     
-                    // Calculate savings account after-tax return considering PSA
-                    const annualSavingsInterest = (savingsRate / 100) * investmentAmount;
-                    const taxableInterest = Math.max(0, annualSavingsInterest - psaAmount);
-                    const taxOnSavings = taxableInterest * (modalTaxRate / 100);
-                    const netSavingsIncome = annualSavingsInterest - taxOnSavings;
-                    const afterTaxSavingsRate = (netSavingsIncome / investmentAmount) * 100;
-                    
                     // Calculate precise total cash flows
                     const giltTotalCash = calculateTotalCashFromGilt(gilt, gilt.unitsOwned, modalTaxRate / 100);
                     const savingsTotalCash = calculateTotalCashFromSavings(investmentAmount, savingsRate, modalTaxRate / 100, psaAmount, gilt.yearsToMaturity);
+                    
+                    // Calculate actual after-tax savings rate based on total returns
+                    const savingsReturn = savingsTotalCash - investmentAmount;
+                    const afterTaxSavingsRate = Math.pow(savingsTotalCash / investmentAmount, 1 / gilt.yearsToMaturity) - 1;
+                    
                     const extraIncomeTotal = gilt.extraIncome || (giltTotalCash - savingsTotalCash);
                     
                     const giltReturn = gilt.afterTaxYield || 0;
-                    const advantagePercent = giltReturn - afterTaxSavingsRate;
+                    const advantagePercent = giltReturn - (afterTaxSavingsRate * 100);
                     
                     contentHTML = \`
                         <div class="calculation-step">
