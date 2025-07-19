@@ -1176,6 +1176,9 @@ export async function renderHomePage(request, env) {
             const dealingCharge = parseFloat(document.getElementById('dealingCharge').value) || 5;
             currentSettings.dealingCharge = dealingCharge;
             
+            // Clear cache since dealing charge affects calculations
+            clearAllCaches();
+            
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
             }
@@ -1583,17 +1586,17 @@ export async function renderHomePage(request, env) {
                 // Include dealing charge in units calculation
                 const dealingCharge = currentSettings.dealingCharge || 5;
                 const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge
-                const unitsOwned = getCachedComplexCalculation('unitsOwned', calculateUnitsOwned, effectiveInvestmentAmount, gilt.dirtyPrice);
+                const unitsOwned = getCachedComplexCalculation('unitsOwned_' + dealingCharge + '_' + investmentAmount, calculateUnitsOwned, effectiveInvestmentAmount, gilt.dirtyPrice);
                 
                 // Calculate after-tax yield using IRR method with caching (includes dealing charge)
-                const afterTaxYield = getCachedComplexCalculation('afterTaxIRR', calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
+                const afterTaxYield = getCachedComplexCalculation('afterTaxIRR_' + dealingCharge + '_' + gilt.name, calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
                 
                 // Use cached equivalent rate calculation
-                const equivalentGrossSavingsRate = getCachedComplexCalculation('equivalentRate', calculateEquivalentGrossSavingsRate, afterTaxYield, incomeTaxRate);
+                const equivalentGrossSavingsRate = getCachedComplexCalculation('equivalentRate_' + afterTaxYield, calculateEquivalentGrossSavingsRate, afterTaxYield, incomeTaxRate);
                 
                 // Calculate precise advantage using actual coupon schedule with caching
-                const giltTotalCashReceived = getCachedComplexCalculation('giltCash', calculateTotalCashFromGilt, gilt, unitsOwned, incomeTaxRate);
-                const savingsTotalCashReceived = getCachedComplexCalculation('savingsCash', calculateTotalCashFromSavings, investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
+                const giltTotalCashReceived = getCachedComplexCalculation('giltCash_' + dealingCharge + '_' + gilt.name, calculateTotalCashFromGilt, gilt, unitsOwned, incomeTaxRate);
+                const savingsTotalCashReceived = getCachedComplexCalculation('savingsCash_' + investmentAmount + '_' + savingsRate, calculateTotalCashFromSavings, investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
                 const extraIncome = giltTotalCashReceived - savingsTotalCashReceived;
                 
                 // Return optimized object creation (avoid spread operator for performance)
