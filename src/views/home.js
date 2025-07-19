@@ -2130,79 +2130,34 @@ export async function renderHomePage(request, env) {
                             }
                         }
 
+                        // Create separate schedules for coupons and account charges
                         scheduleHTML = \`
                             <div class="calculation-step">
-                                <h4>Detailed Payment Schedule with Monthly Account Charges</h4>
+                                <h4>Coupon Payment Schedule</h4>
                                 <div style="overflow-x: auto;">
                                     <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
                                         <thead>
                                             <tr style="background: #f8f9fa;">
                                                 <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Date</th>
-                                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Type</th>
-                                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Gross Amount</th>
-                                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Tax/Charge</th>
+                                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Gross Coupon</th>
+                                                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Income Tax</th>
                                                 <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Net Amount</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                         \`;
                         
-                        // Combine and sort all payments (coupons + monthly charges)
-                        const allPayments = [];
-                        
                         // Add coupon payments
                         gilt.couponSchedule.forEach(payment => {
-                            allPayments.push({
-                                date: new Date(payment.date),
-                                type: 'Coupon',
-                                grossAmount: payment.grossAmount,
-                                taxAmount: payment.taxAmount,
-                                netAmount: payment.afterTaxAmount,
-                                isCoupon: true
-                            });
-                        });
-                        
-                        // Add monthly charges
-                        monthlyChargeSchedule.forEach(charge => {
-                            allPayments.push({
-                                date: charge.date,
-                                type: 'Account Charge',
-                                grossAmount: 0,
-                                taxAmount: charge.charge,
-                                netAmount: -charge.charge,
-                                isCharge: true,
-                                giltPrice: charge.giltPrice,
-                                giltValue: charge.giltValue,
-                                isMax: charge.isMax
-                            });
-                        });
-                        
-                        // Sort by date
-                        allPayments.sort((a, b) => a.date - b.date);
-                        
-                        allPayments.forEach(payment => {
-                            const paymentDate = payment.date.toLocaleDateString('en-GB');
-                            if (payment.isCoupon) {
-                                scheduleHTML += \`
-                                    <tr>
-                                        <td style="border: 1px solid #ddd; padding: 8px;">\${paymentDate}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold; color: #28a745;">\${payment.type}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${payment.grossAmount.toFixed(2)}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${payment.taxAmount.toFixed(2)}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${payment.netAmount.toFixed(2)}</strong></td>
-                                    </tr>
-                                \`;
-                            } else {
-                                scheduleHTML += \`
-                                    <tr style="background: #fff3cd;">
-                                        <td style="border: 1px solid #ddd; padding: 8px;">\${paymentDate}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold; color: #d63384;">\${payment.type}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-size: 11px;">Gilt: £\${payment.giltPrice.toFixed(2)}<br>Value: £\${payment.giltValue.toFixed(0)}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${payment.taxAmount.toFixed(2)}\${payment.isMax ? ' (max)' : ''}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>-£\${payment.taxAmount.toFixed(2)}</strong></td>
-                                    </tr>
-                                \`;
-                            }
+                            const paymentDate = new Date(payment.date).toLocaleDateString('en-GB');
+                            scheduleHTML += \`
+                                <tr>
+                                    <td style="border: 1px solid #ddd; padding: 8px;">\${paymentDate}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${payment.grossAmount.toFixed(2)}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${payment.taxAmount.toFixed(2)}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${payment.afterTaxAmount.toFixed(2)}</strong></td>
+                                </tr>
+                            \`;
                         });
                         
                         // Add principal repayment row
@@ -2228,34 +2183,100 @@ export async function renderHomePage(request, env) {
                         const grandTotalCharges = totalCouponTax + totalAccountCharges;
                         const grandTotalNet = totalNetCoupons + principalAmount - totalAccountCharges;
                         
-                        // Add summary rows
-                        if (monthlyChargeSchedule.length > 0) {
-                            scheduleHTML += \`
-                                <tr style="background: #f8f9fa; font-weight: bold; border-top: 1px solid #6c757d;">
-                                    <td style="border: 1px solid #6c757d; padding: 8px;" colspan="2"><strong>Account Charges Total</strong></td>
-                                    <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>-</strong></td>
-                                    <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${totalAccountCharges.toFixed(2)}</strong></td>
-                                    <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>-£\${totalAccountCharges.toFixed(2)}</strong></td>
-                                </tr>
-                            \`;
-                        }
-                        
-                        // Add grand total row
+                        // Add coupon totals row
                         scheduleHTML += \`
-                            <tr style="background: #007bff; color: white; font-weight: bold; border-top: 2px solid #0056b3;">
-                                <td style="border: 1px solid #0056b3; padding: 10px;" colspan="2"><strong>GRAND TOTAL</strong></td>
-                                <td style="border: 1px solid #0056b3; padding: 10px; text-align: right;"><strong>£\${grandTotalGross.toFixed(2)}</strong></td>
-                                <td style="border: 1px solid #0056b3; padding: 10px; text-align: right;"><strong>£\${grandTotalCharges.toFixed(2)}</strong></td>
-                                <td style="border: 1px solid #0056b3; padding: 10px; text-align: right;"><strong>£\${grandTotalNet.toFixed(2)}</strong></td>
+                            <tr style="background: #e8f5e8; font-weight: bold; border-top: 1px solid #6c757d;">
+                                <td style="border: 1px solid #6c757d; padding: 8px;"><strong>Coupon Totals</strong></td>
+                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${totalGrossCoupons.toFixed(2)}</strong></td>
+                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${totalCouponTax.toFixed(2)}</strong></td>
+                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${totalNetCoupons.toFixed(2)}</strong></td>
                             </tr>
                         \`;
                         
+                        // Close coupon table and add summary section
                         scheduleHTML += \`
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                         \`;
+                        
+                        // Add comprehensive summary section
+                        scheduleHTML += \`
+                            <div class="calculation-step" style="background: #f8f9fa; border: 2px solid #007bff; border-radius: 8px; padding: 15px;">
+                                <h4 style="color: #007bff;">Complete Investment Summary</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                                    <div>
+                                        <h5 style="margin-bottom: 8px;">Income & Costs:</h5>
+                                        <p style="margin: 3px 0;"><strong>Total Coupon Income:</strong> £\${totalGrossCoupons.toFixed(2)}</p>
+                                        <p style="margin: 3px 0;"><strong>Income Tax:</strong> £\${totalCouponTax.toFixed(2)}</p>
+                                        \${monthlyChargeSchedule.length > 0 ? '<p style="margin: 3px 0;"><strong>Account Charges:</strong> £' + totalAccountCharges.toFixed(2) + '</p>' : ''}
+                                        <p style="margin: 3px 0;"><strong>Principal Repayment:</strong> £\${principalAmount.toFixed(2)} (tax-free)</p>
+                                    </div>
+                                    <div>
+                                        <h5 style="margin-bottom: 8px;">Net Returns:</h5>
+                                        <p style="margin: 3px 0;"><strong>Total Cash Received:</strong> £\${grandTotalGross.toFixed(2)}</p>
+                                        <p style="margin: 3px 0;"><strong>Total Costs:</strong> £\${grandTotalCharges.toFixed(2)}</p>
+                                        <p style="margin: 3px 0; font-size: 16px;"><strong style="color: #007bff;">Net After-Tax Return:</strong> £\${grandTotalNet.toFixed(2)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        \`;
+                        
+                        // Close coupon schedule table
+                        scheduleHTML += \`
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        \`;
+                        
+                        // Add monthly account charges schedule if enabled
+                        if (monthlyChargeSchedule.length > 0) {
+                            scheduleHTML += \`
+                                <div class="calculation-step">
+                                    <h4>Monthly Account Charge Schedule</h4>
+                                    <div style="overflow-x: auto;">
+                                        <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                                            <thead>
+                                                <tr style="background: #fff3cd;">
+                                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Month-End Date</th>
+                                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Gilt Price</th>
+                                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Portfolio Value</th>
+                                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Monthly Charge</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                            \`;
+                            
+                            monthlyChargeSchedule.forEach(charge => {
+                                const chargeDate = charge.date.toLocaleDateString('en-GB');
+                                scheduleHTML += \`
+                                    <tr style="background: #fffbf0;">
+                                        <td style="border: 1px solid #ddd; padding: 8px;">\${chargeDate}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${charge.giltPrice.toFixed(2)}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${charge.giltValue.toFixed(2)}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${charge.charge.toFixed(2)}\${charge.isMax ? ' (max)' : ''}</strong></td>
+                                    </tr>
+                                \`;
+                            });
+                            
+                            scheduleHTML += \`
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                                        <p><strong>Account Charge Details:</strong></p>
+                                        <ul style="margin: 5px 0; padding-left: 20px;">
+                                            <li>Rate: \${currentSettings.accountChargeRate}% annually (\${(currentSettings.accountChargeRate/12).toFixed(3)}% monthly)</li>
+                                            <li>Maximum per month: £\${currentSettings.accountChargeMax.toFixed(2)}</li>
+                                            <li>Gilt price converges linearly from £\${gilt.cleanPrice.toFixed(2)} to £100.00 at maturity</li>
+                                            <li>Total account charges over life: £\${monthlyChargeSchedule.reduce((sum, charge) => sum + charge.charge, 0).toFixed(2)}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            \`;
+                        }
                     }
                     
                     contentHTML = \`

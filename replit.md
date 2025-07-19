@@ -536,16 +536,16 @@ This migration maintains all original functionality while dramatically improving
 
 ### July 19, 2025 - Detailed Monthly Account Charge Schedule Implementation
 
-**Version ID**: f3a09ba3-93d4-4c78-a5a1-6227dffd67c2
+**Version ID**: b39d7ae2-84c1-456b-89a9-e8da303585f4
 
-**Comprehensive Monthly Account Charge Modeling:**
-- **Complete Payment Schedule**: Enhanced IRR tooltips show detailed monthly account charges alongside coupon payments
-- **Linear Price Convergence**: Gilt price converges linearly from current price to £100 at maturity
-- **Accurate Charge Calculation**: Monthly charges based on actual gilt value at each month-end
-- **Maximum Charge Enforcement**: Charges capped at maximum monthly amount with clear indicators
-- **Chronological Display**: All payments (coupons and charges) sorted by date in single timeline
-- **Visual Differentiation**: Coupons in green, account charges in yellow highlighting
-- **Complete Totals**: Separate subtotals for account charges and grand totals including all costs
+**Separate Detailed Schedule Implementation:**
+- **Independent Schedule Sections**: Coupon payments and monthly account charges displayed in separate, clearly organized tables
+- **Coupon Payment Schedule**: Dedicated section showing all coupon payment dates, gross amounts, taxes, and net receipts
+- **Monthly Account Charge Schedule**: Separate table showing month-end dates, gilt prices, portfolio values, and actual charges
+- **Linear Price Convergence**: Gilt price converges from current market price to £100 at maturity with precise monthly calculations
+- **Maximum Charge Indicators**: Clear "(max)" labels when monthly charges hit the user-defined ceiling
+- **Professional Visual Design**: Color-coded sections with yellow highlights for account charges, green for coupons
+- **Comprehensive Summary Section**: Complete investment overview with side-by-side income/cost breakdown
 
 **Technical Implementation:**
 - **Dynamic Gilt Valuation**: Calculates gilt price at each month based on linear convergence to par value
