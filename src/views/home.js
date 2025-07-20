@@ -1111,12 +1111,12 @@ export async function renderHomePage(request, env) {
                 updateTaxSettings();
             }
             
-            // Skip API entirely and use fallback data for rate-limited scenarios
-            console.log('=== STARTING IMMEDIATE FALLBACK DATA LOAD ===');
+            // Load gilt data using the new daily caching system
+            console.log('=== STARTING GILT DATA LOAD WITH DAILY CACHING ===');
             
             // Add a small delay to ensure DOM is ready
             setTimeout(() => {
-                loadFallbackData();
+                loadGiltData();
             }, 100);
         }
         

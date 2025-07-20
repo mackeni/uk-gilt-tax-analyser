@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-YRDBuE/checked-fetch.js
+// .wrangler/tmp/bundle-41SKAd/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-YRDBuE/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-41SKAd/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-YRDBuE/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-41SKAd/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-YRDBuE/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-41SKAd/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -2893,7 +2893,7 @@ var GiltDataFetcher = class {
               data: processedData,
               dataSource: "live",
               lastUpdated: (/* @__PURE__ */ new Date()).toISOString(),
-              priceDate: (/* @__PURE__ */ new Date()).toLocaleDateString("en-GB")
+              priceDate: this.getLastTradingDate()
             };
           }
         } catch (liveError) {
@@ -2921,7 +2921,7 @@ var GiltDataFetcher = class {
     const cacheData = {
       data: liveData,
       fetchDate: today,
-      priceDate: (/* @__PURE__ */ new Date()).toLocaleDateString("en-GB"),
+      priceDate: this.getLastTradingDate(),
       lastUpdated: (/* @__PURE__ */ new Date()).toISOString()
     };
     if (typeof localStorage !== "undefined") {
@@ -2957,8 +2957,19 @@ var GiltDataFetcher = class {
       data: fallbackData,
       dataSource: "fallback",
       lastUpdated: (/* @__PURE__ */ new Date("2025-07-19")).toISOString(),
-      priceDate: "19/07/2025"
+      priceDate: this.getLastTradingDate()
     };
+  }
+  getLastTradingDate() {
+    const today = /* @__PURE__ */ new Date();
+    const dayOfWeek = today.getDay();
+    let tradingDate = new Date(today);
+    if (dayOfWeek === 0) {
+      tradingDate.setDate(today.getDate() - 2);
+    } else if (dayOfWeek === 6) {
+      tradingDate.setDate(today.getDate() - 1);
+    }
+    return tradingDate.toLocaleDateString("en-GB");
   }
   async addCouponPaymentDates(giltData) {
     const { CouponScheduler: CouponScheduler2 } = await Promise.resolve().then(() => (init_coupon_scheduler(), coupon_scheduler_exports));
@@ -4487,12 +4498,12 @@ async function renderHomePage(request, env) {
                 updateTaxSettings();
             }
             
-            // Skip API entirely and use fallback data for rate-limited scenarios
-            console.log('=== STARTING IMMEDIATE FALLBACK DATA LOAD ===');
+            // Load gilt data using the new daily caching system
+            console.log('=== STARTING GILT DATA LOAD WITH DAILY CACHING ===');
             
             // Add a small delay to ensure DOM is ready
             setTimeout(() => {
-                loadFallbackData();
+                loadGiltData();
             }, 100);
         }
         
@@ -7026,7 +7037,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-YRDBuE/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-41SKAd/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -7060,7 +7071,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-YRDBuE/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-41SKAd/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
