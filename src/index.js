@@ -38,7 +38,13 @@ export default {
       case '/analysis':
         return await renderAnalysisPage(request, env);
       default:
-        return new Response('Not Found', { status: 404 });
+        return new Response('Not Found', { 
+          status: 404,
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-Content-Type-Options': 'nosniff'
+          }
+        });
     }
   },
 };
@@ -226,18 +232,31 @@ export function getCachedCalculation(key, calculationFn, ...args) {
       headers: {
         'Content-Type': 'application/javascript; charset=utf-8',
         'Cache-Control': 'public, max-age=31536000, immutable',
-        'ETag': '"utils-v1.0"'
+        'ETag': '"utils-v1.0"',
+        'X-Content-Type-Options': 'nosniff'
       }
     });
   }
   
-  return new Response('Library file not found', { status: 404 });
+  return new Response('Library file not found', { 
+    status: 404,
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'X-Content-Type-Options': 'nosniff'
+    }
+  });
 }
 
 async function handleStaticFile(request, env) {
   // In a real implementation, you'd serve from R2 or KV
   // For now, return a basic response
-  return new Response('Static file not found', { status: 404 });
+  return new Response('Static file not found', { 
+    status: 404,
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'X-Content-Type-Options': 'nosniff'
+    }
+  });
 }
 
 async function handleAPIRequest(request, env, path) {
@@ -252,7 +271,13 @@ async function handleAPIRequest(request, env, path) {
       case '/api/coupon-schedule':
         return await getCouponSchedule(request, env);
       default:
-        return new Response('API endpoint not found', { status: 404 });
+        return new Response('API endpoint not found', { 
+          status: 404,
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+            'X-Content-Type-Options': 'nosniff'
+          }
+        });
     }
   } catch (error) {
     console.error('API Error:', error);
@@ -260,7 +285,8 @@ async function handleAPIRequest(request, env, path) {
       status: 500,
       headers: { 
         'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'X-Content-Type-Options': 'nosniff'
       }
     });
   }
@@ -284,7 +310,8 @@ async function getGiltData(request, env) {
       headers: { 
         'Content-Type': 'application/json; charset=utf-8',
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'X-Content-Type-Options': 'nosniff'
       }
     });
   } catch (error) {
@@ -298,7 +325,8 @@ async function getGiltData(request, env) {
       headers: { 
         'Content-Type': 'application/json; charset=utf-8',
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'X-Content-Type-Options': 'nosniff'
       }
     });
   }
@@ -306,7 +334,13 @@ async function getGiltData(request, env) {
 
 async function calculateTax(request, env) {
   if (request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response('Method not allowed', { 
+      status: 405,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Content-Type-Options': 'nosniff'
+      }
+    });
   }
   
   try {
@@ -384,7 +418,8 @@ async function calculateTax(request, env) {
         headers: { 
           'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'no-cache, no-store, must-revalidate'
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'X-Content-Type-Options': 'nosniff'
         }
       });
     } else {
@@ -402,7 +437,8 @@ async function calculateTax(request, env) {
         headers: { 
           'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'no-cache, no-store, must-revalidate'
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'X-Content-Type-Options': 'nosniff'
         }
       });
     }
@@ -412,7 +448,8 @@ async function calculateTax(request, env) {
       headers: { 
         'Content-Type': 'application/json; charset=utf-8',
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'X-Content-Type-Options': 'nosniff'
       }
     });
   }
@@ -501,7 +538,13 @@ function createScheduleTooltip(scheduleResult, taxpayerType) {
 
 async function getCouponSchedule(request, env) {
   if (request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
+    return new Response('Method not allowed', { 
+      status: 405,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Content-Type-Options': 'nosniff'
+      }
+    });
   }
   
   const body = await request.json();
@@ -517,7 +560,8 @@ async function getCouponSchedule(request, env) {
     headers: { 
       'Content-Type': 'application/json; charset=utf-8',
       'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'no-cache, no-store, must-revalidate'
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'X-Content-Type-Options': 'nosniff'
     }
   });
 }

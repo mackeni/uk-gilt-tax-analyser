@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-O5ioBO/checked-fetch.js
+// .wrangler/tmp/bundle-WceB6g/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-O5ioBO/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-WceB6g/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-O5ioBO/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-WceB6g/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-O5ioBO/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-WceB6g/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -6145,7 +6145,8 @@ async function renderHomePage(request, env) {
   return new Response(html, {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "no-cache, no-store, must-revalidate"
+      "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+      "X-Content-Type-Options": "nosniff"
     }
   });
 }
@@ -6402,7 +6403,8 @@ async function renderAnalysisPage(request, env) {
   return new Response(html, {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
-      "Cache-Control": "no-cache, no-store, must-revalidate"
+      "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+      "X-Content-Type-Options": "nosniff"
     }
   });
 }
@@ -6432,7 +6434,13 @@ var src_default = {
       case "/analysis":
         return await renderAnalysisPage(request, env);
       default:
-        return new Response("Not Found", { status: 404 });
+        return new Response("Not Found", {
+          status: 404,
+          headers: {
+            "Content-Type": "text/plain; charset=utf-8",
+            "X-Content-Type-Options": "nosniff"
+          }
+        });
     }
   }
 };
@@ -6617,15 +6625,28 @@ export function getCachedCalculation(key, calculationFn, ...args) {
       headers: {
         "Content-Type": "application/javascript; charset=utf-8",
         "Cache-Control": "public, max-age=31536000, immutable",
-        "ETag": '"utils-v1.0"'
+        "ETag": '"utils-v1.0"',
+        "X-Content-Type-Options": "nosniff"
       }
     });
   }
-  return new Response("Library file not found", { status: 404 });
+  return new Response("Library file not found", {
+    status: 404,
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "X-Content-Type-Options": "nosniff"
+    }
+  });
 }
 __name(handleLibFile, "handleLibFile");
 async function handleStaticFile(request, env) {
-  return new Response("Static file not found", { status: 404 });
+  return new Response("Static file not found", {
+    status: 404,
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "X-Content-Type-Options": "nosniff"
+    }
+  });
 }
 __name(handleStaticFile, "handleStaticFile");
 async function handleAPIRequest(request, env, path) {
@@ -6639,7 +6660,13 @@ async function handleAPIRequest(request, env, path) {
       case "/api/coupon-schedule":
         return await getCouponSchedule(request, env);
       default:
-        return new Response("API endpoint not found", { status: 404 });
+        return new Response("API endpoint not found", {
+          status: 404,
+          headers: {
+            "Content-Type": "text/plain; charset=utf-8",
+            "X-Content-Type-Options": "nosniff"
+          }
+        });
     }
   } catch (error) {
     console.error("API Error:", error);
@@ -6647,7 +6674,8 @@ async function handleAPIRequest(request, env, path) {
       status: 500,
       headers: {
         "Content-Type": "application/json; charset=utf-8",
-        "Cache-Control": "no-cache, no-store, must-revalidate"
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "X-Content-Type-Options": "nosniff"
       }
     });
   }
@@ -6668,7 +6696,8 @@ async function getGiltData(request, env) {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "no-cache, no-store, must-revalidate"
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "X-Content-Type-Options": "nosniff"
       }
     });
   } catch (error) {
@@ -6682,7 +6711,8 @@ async function getGiltData(request, env) {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "no-cache, no-store, must-revalidate"
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "X-Content-Type-Options": "nosniff"
       }
     });
   }
@@ -6690,7 +6720,13 @@ async function getGiltData(request, env) {
 __name(getGiltData, "getGiltData");
 async function calculateTax(request, env) {
   if (request.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Content-Type-Options": "nosniff"
+      }
+    });
   }
   try {
     const body = await request.json();
@@ -6753,7 +6789,8 @@ async function calculateTax(request, env) {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
           "Access-Control-Allow-Origin": "*",
-          "Cache-Control": "no-cache, no-store, must-revalidate"
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "X-Content-Type-Options": "nosniff"
         }
       });
     } else {
@@ -6769,7 +6806,8 @@ async function calculateTax(request, env) {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
           "Access-Control-Allow-Origin": "*",
-          "Cache-Control": "no-cache, no-store, must-revalidate"
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "X-Content-Type-Options": "nosniff"
         }
       });
     }
@@ -6779,7 +6817,8 @@ async function calculateTax(request, env) {
       headers: {
         "Content-Type": "application/json; charset=utf-8",
         "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "no-cache, no-store, must-revalidate"
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "X-Content-Type-Options": "nosniff"
       }
     });
   }
@@ -6862,7 +6901,13 @@ function createScheduleTooltip(scheduleResult, taxpayerType) {
 __name(createScheduleTooltip, "createScheduleTooltip");
 async function getCouponSchedule(request, env) {
   if (request.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Content-Type-Options": "nosniff"
+      }
+    });
   }
   const body = await request.json();
   const scheduler = new CouponScheduler();
@@ -6875,7 +6920,8 @@ async function getCouponSchedule(request, env) {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
       "Access-Control-Allow-Origin": "*",
-      "Cache-Control": "no-cache, no-store, must-revalidate"
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "X-Content-Type-Options": "nosniff"
     }
   });
 }
@@ -6926,7 +6972,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-O5ioBO/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-WceB6g/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6960,7 +7006,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-O5ioBO/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-WceB6g/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
