@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-WNuorc/checked-fetch.js
+// .wrangler/tmp/bundle-32VC83/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-WNuorc/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-32VC83/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-WNuorc/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-32VC83/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-WNuorc/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-32VC83/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4189,11 +4189,13 @@ async function renderHomePage(request, env) {
         }
         
         // Helper function to format any monetary amount with commas
+        // Optimized helper functions
+        function roundToTwo(num) {
+            return Math.round(num * 100) / 100;
+        }
+        
         function formatMoney(amount) {
-            if (isNaN(amount) || amount === null || amount === undefined) {
-                return '0.00';
-            }
-            return amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            return formatCurrency(amount, '');
         }
 
         function formatPercentage(percentage, decimalPlaces = 2) {
@@ -4987,9 +4989,9 @@ async function renderHomePage(request, env) {
             // Process complete years in batch with 2-decimal rounding
             if (completeYears > 0) {
                 for (let year = 1; year <= completeYears; year++) {
-                    const grossInterest = Math.round(currentBalance * savingsRateDecimal * 100) / 100;
+                    const grossInterest = roundToTwo(currentBalance * savingsRateDecimal);
                     const taxableInterest = Math.max(0, grossInterest - psaAmount);
-                    const tax = Math.round(taxableInterest * incomeTaxRate * 100) / 100;
+                    const tax = roundToTwo(taxableInterest * incomeTaxRate);
                     const netInterest = grossInterest - tax;
                     currentBalance += netInterest;
                 }
@@ -4998,11 +5000,11 @@ async function renderHomePage(request, env) {
             // Handle remaining days if any with 2-decimal rounding
             if (remainingDays > 0) {
                 const dailyRate = savingsRateDecimal / 365;
-                const grossInterest = Math.round(currentBalance * dailyRate * remainingDays * 100) / 100;
+                const grossInterest = roundToTwo(currentBalance * dailyRate * remainingDays);
                 const partialYearFraction = remainingDays / 365;
                 const availablePSAPartialYear = psaAmount * partialYearFraction;
                 const taxableInterest = Math.max(0, grossInterest - availablePSAPartialYear);
-                const tax = Math.round(taxableInterest * incomeTaxRate * 100) / 100;
+                const tax = roundToTwo(taxableInterest * incomeTaxRate);
                 const netInterest = grossInterest - tax;
                 currentBalance += netInterest;
             }
@@ -5024,11 +5026,9 @@ async function renderHomePage(request, env) {
             const tempSchedule = [];
             while (currentTime > todayTime) {
                 const grossAmount = semiAnnualCoupon;
-                // Round gross amount to 2 decimal places
-                const roundedGrossAmount = Math.round(grossAmount * 100) / 100;
+                const roundedGrossAmount = roundToTwo(grossAmount);
                 const taxAmount = roundedGrossAmount * incomeTaxRate;
-                // Apply 2-decimal rounding to tax amount
-                const roundedTaxAmount = Math.round(taxAmount * 100) / 100;
+                const roundedTaxAmount = roundToTwo(taxAmount);
                 const roundedAfterTaxAmount = roundedGrossAmount - roundedTaxAmount;
                 
                 tempSchedule.push({
@@ -5086,9 +5086,8 @@ async function renderHomePage(request, env) {
                 const monthlyRate = currentSettings.accountChargeRate / 100 / 12;
                 const monthlyCharge = giltValue * monthlyRate;
                 
-                // Apply monthly cap and 2-decimal rounding (consistent with coupon calculations)
                 const cappedCharge = Math.min(monthlyCharge, currentSettings.accountChargeMax);
-                const roundedCharge = Math.round(cappedCharge * 100) / 100;
+                const roundedCharge = roundToTwo(cappedCharge);
                 
                 accountCharges.push({
                     date: chargeDate,
@@ -5443,8 +5442,7 @@ async function renderHomePage(request, env) {
                         // Add coupon payments with rounded tax calculations
                         gilt.couponSchedule.forEach(payment => {
                             const paymentDate = new Date(payment.date).toLocaleDateString('en-GB');
-                            // Apply 2-decimal rounding to each coupon tax calculation
-                            const roundedTaxAmount = Math.round(payment.taxAmount * 100) / 100;
+                            const roundedTaxAmount = roundToTwo(payment.taxAmount);
                             const roundedAfterTaxAmount = payment.grossAmount - roundedTaxAmount;
                             scheduleHTML += \`
                                 <tr>
@@ -5471,8 +5469,8 @@ async function renderHomePage(request, env) {
                         
                         // Calculate grand totals including monthly charges with rounded tax
                         const totalGrossCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0);
-                        const totalCouponTax = gilt.couponSchedule.reduce((sum, payment) => sum + Math.round(payment.taxAmount * 100) / 100, 0);
-                        const totalNetCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + (payment.grossAmount - Math.round(payment.taxAmount * 100) / 100), 0);
+                        const totalCouponTax = gilt.couponSchedule.reduce((sum, payment) => sum + roundToTwo(payment.taxAmount), 0);
+                        const totalNetCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + (payment.grossAmount - roundToTwo(payment.taxAmount)), 0);
                         const totalAccountCharges = monthlyChargeSchedule.reduce((sum, charge) => sum + charge.amount, 0);
                         const grandTotalGross = totalGrossCoupons + principalAmount;
                         // Total costs = Income Tax + Account Charges (both reduce net returns)
@@ -5682,7 +5680,7 @@ async function renderHomePage(request, env) {
                     // Calculate units owned using same method as IRR tooltip
                     const advantageDealingCharge = currentSettings.dealingCharge || 0;
                     const advantageEffectiveInvestment = investmentAmount - advantageDealingCharge;
-                    const advantageUnitsOwned = Math.round((advantageEffectiveInvestment / gilt.dirtyPrice * 100) * 100) / 100;
+                    const advantageUnitsOwned = roundToTwo((advantageEffectiveInvestment / gilt.dirtyPrice) * 100);
                     
                     // Calculate precise total cash flows - ensure we use the function that includes charges
                     const giltTotalCash = calculateTotalCashFromGilt(gilt, advantageUnitsOwned, modalTaxRate / 100);
@@ -5736,7 +5734,7 @@ async function renderHomePage(request, env) {
                                 const totalGrossCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0) : 0;
                                 const totalCouponTax = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.taxAmount, 0) : 0;
                                 const totalNetCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.afterTaxAmount, 0) : 0;
-                                const principalAmount = Math.round(advantageUnitsOwned * 100) / 100;
+                                const principalAmount = roundToTwo(advantageUnitsOwned);
                                 const numPayments = gilt.couponSchedule ? gilt.couponSchedule.length : 0;
                                 const semiAnnualRate = gilt.couponRate / 2;
                                 const displayEffectiveInvestment = investmentAmount - (currentSettings.dealingCharge || 0);
@@ -6771,7 +6769,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-WNuorc/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-32VC83/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6805,7 +6803,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-WNuorc/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-32VC83/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
