@@ -268,14 +268,15 @@ async function getGiltData(request, env) {
     const fetcher = new GiltDataFetcher(env);
     console.log('GiltDataFetcher created');
     
-    const data = await fetcher.getGiltData();
-    console.log(`Fetched ${data?.length || 0} gilts`);
+    const result = await fetcher.getGiltData();
+    console.log(`Fetched ${result?.data?.length || 0} gilts from ${result?.dataSource || 'unknown'} source`);
+    console.log('Price date:', result?.priceDate);
     
-    if (!data || data.length === 0) {
+    if (!result?.data || result.data.length === 0) {
       throw new Error('No gilt data available from any source');
     }
     
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify(result), {
       headers: { 
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'

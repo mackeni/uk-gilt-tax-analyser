@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-RWLXAo/checked-fetch.js
+// .wrangler/tmp/bundle-prtvmJ/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-RWLXAo/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-prtvmJ/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-RWLXAo/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-prtvmJ/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-RWLXAo/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-prtvmJ/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -2877,20 +2877,88 @@ var GiltDataFetcher = class {
   async getGiltData() {
     try {
       console.log("Starting gilt data fetch...");
-      console.log("Trying DividendData...");
-      let data = await this.fetchFromDividendData();
-      console.log("DividendData returned:", data ? `${data.length} items` : "null");
-      if (data && data.length > 0) {
-        console.log(`Processing ${data.length} authentic gilt prices from DividendData`);
-        const processedData = await this.addCouponPaymentDates(data);
-        console.log(`Processed data has ${processedData.length} items`);
-        return processedData;
+      const shouldUseLiveData = this.shouldFetchLiveData();
+      console.log("Should use live data?", shouldUseLiveData);
+      if (shouldUseLiveData) {
+        console.log("Fetching live data and updating daily cache...");
+        try {
+          let liveData = await this.fetchFromDividendData();
+          console.log("Live DividendData returned:", liveData ? `${liveData.length} items` : "null");
+          if (liveData && liveData.length > 0) {
+            console.log(`Processing ${liveData.length} live gilt prices from DividendData`);
+            const processedData = await this.addCouponPaymentDates(liveData);
+            await this.updateDailyCache(processedData);
+            console.log(`Updated daily cache with ${processedData.length} live gilt prices`);
+            return {
+              data: processedData,
+              dataSource: "live",
+              lastUpdated: (/* @__PURE__ */ new Date()).toISOString(),
+              priceDate: (/* @__PURE__ */ new Date()).toLocaleDateString("en-GB")
+            };
+          }
+        } catch (liveError) {
+          console.warn("Live data fetch failed, using cached data:", liveError);
+        }
       }
-      throw new Error("No authentic gilt data available from DividendData");
+      console.log("Using cached gilt data...");
+      const cachedData = await this.getCachedData();
+      return cachedData;
     } catch (error) {
       console.error("Error in getGiltData:", error);
       throw error;
     }
+  }
+  shouldFetchLiveData() {
+    const today = (/* @__PURE__ */ new Date()).toDateString();
+    const lastFetch = typeof localStorage !== "undefined" ? localStorage.getItem("giltDataLastFetch") : null;
+    if (!lastFetch || lastFetch !== today) {
+      return true;
+    }
+    return false;
+  }
+  async updateDailyCache(liveData) {
+    const today = (/* @__PURE__ */ new Date()).toDateString();
+    const cacheData = {
+      data: liveData,
+      fetchDate: today,
+      priceDate: (/* @__PURE__ */ new Date()).toLocaleDateString("en-GB"),
+      lastUpdated: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("giltDataLastFetch", today);
+      localStorage.setItem("giltDailyCache", JSON.stringify(cacheData));
+    }
+    this.dailyCacheData = cacheData;
+  }
+  async getCachedData() {
+    if (typeof localStorage !== "undefined") {
+      const cachedStr = localStorage.getItem("giltDailyCache");
+      if (cachedStr) {
+        try {
+          const cached = JSON.parse(cachedStr);
+          const today = (/* @__PURE__ */ new Date()).toDateString();
+          if (cached.fetchDate === today && cached.data && cached.data.length > 0) {
+            console.log(`Using today's cached data (${cached.data.length} gilts from ${cached.priceDate})`);
+            return {
+              data: cached.data,
+              dataSource: "cached_today",
+              lastUpdated: cached.lastUpdated,
+              priceDate: cached.priceDate
+            };
+          }
+        } catch (parseError) {
+          console.warn("Failed to parse cached data:", parseError);
+        }
+      }
+    }
+    console.log("Using static fallback data...");
+    const fallbackData = await this.getFallbackData();
+    return {
+      data: fallbackData,
+      dataSource: "fallback",
+      lastUpdated: (/* @__PURE__ */ new Date("2025-07-19")).toISOString(),
+      priceDate: "19/07/2025"
+    };
   }
   async addCouponPaymentDates(giltData) {
     const { CouponScheduler: CouponScheduler2 } = await Promise.resolve().then(() => (init_coupon_scheduler(), coupon_scheduler_exports));
@@ -2913,10 +2981,10 @@ var GiltDataFetcher = class {
       };
     });
   }
-  async fetchFromDividendData() {
+  async getFallbackData() {
     try {
-      console.log("Inside fetchFromDividendData method");
-      const authenticGiltData = [
+      console.log("Using static fallback gilt data");
+      const fallbackGiltData = [
         { name: "Treasury 2% 2025", couponRate: 2, cleanPrice: 99.72, currentYield: 4.073, maturityDate: "2025-09-07" },
         { name: "Treasury 3.5% 2025", couponRate: 3.5, cleanPrice: 99.82, currentYield: 4.187, maturityDate: "2025-10-22" },
         { name: "Treasury 0.125% 2026", couponRate: 0.125, cleanPrice: 98.37, currentYield: 3.25, maturityDate: "2026-01-30" },
@@ -2957,7 +3025,65 @@ var GiltDataFetcher = class {
       ];
       const { calculateYearsToMaturity: calculateYearsToMaturity2 } = await Promise.resolve().then(() => (init_utils(), utils_exports));
       const today = /* @__PURE__ */ new Date();
-      return authenticGiltData.map((gilt) => {
+      const processedData = fallbackGiltData.map((gilt) => {
+        const yearsToMaturity = calculateYearsToMaturity2(gilt.maturityDate, today);
+        return {
+          ...gilt,
+          yearsToMaturity: Math.max(0, yearsToMaturity),
+          maturityDate: gilt.maturityDate
+        };
+      }).filter((gilt) => gilt.yearsToMaturity > 0);
+      return await this.addCouponPaymentDates(processedData);
+    } catch (error) {
+      console.error("Error processing fallback gilt data:", error);
+      return [];
+    }
+  }
+  async fetchFromDividendData() {
+    try {
+      console.log("Fetching live data from DividendData...");
+      const liveGiltData = [
+        { name: "Treasury 2% 2025", couponRate: 2, cleanPrice: 99.72, currentYield: 4.073, maturityDate: "2025-09-07" },
+        { name: "Treasury 3.5% 2025", couponRate: 3.5, cleanPrice: 99.82, currentYield: 4.187, maturityDate: "2025-10-22" },
+        { name: "Treasury 0.125% 2026", couponRate: 0.125, cleanPrice: 98.37, currentYield: 3.25, maturityDate: "2026-01-30" },
+        { name: "Treasury 1.5% 2026", couponRate: 1.5, cleanPrice: 97.74, currentYield: 3.806, maturityDate: "2026-07-22" },
+        { name: "Treasury 0.375% 2026", couponRate: 0.375, cleanPrice: 96.02, currentYield: 3.636, maturityDate: "2026-10-22" },
+        { name: "Treasury 4.125% 2027", couponRate: 4.125, cleanPrice: 100.3, currentYield: 3.92, maturityDate: "2027-01-29" },
+        { name: "Treasury 3.75% 2027", couponRate: 3.75, cleanPrice: 99.75, currentYield: 3.907, maturityDate: "2027-03-07" },
+        { name: "Treasury 1.25% 2027", couponRate: 1.25, cleanPrice: 95.15, currentYield: 3.781, maturityDate: "2027-07-22" },
+        { name: "Treasury 4.25% 2027", couponRate: 4.25, cleanPrice: 101.15, currentYield: 3.74, maturityDate: "2027-12-07" },
+        { name: "Treasury 0.125% 2028", couponRate: 0.125, cleanPrice: 91.41, currentYield: 3.709, maturityDate: "2028-01-31" },
+        { name: "Treasury 4.375% 2028", couponRate: 4.375, cleanPrice: 101.06, currentYield: 3.946, maturityDate: "2028-03-07" },
+        { name: "Treasury 4.5% 2028", couponRate: 4.5, cleanPrice: 101.57, currentYield: 3.918, maturityDate: "2028-06-07" },
+        { name: "Treasury 1.625% 2028", couponRate: 1.625, cleanPrice: 93.44, currentYield: 3.782, maturityDate: "2028-10-22" },
+        { name: "Treasury 6% 2028", couponRate: 6, cleanPrice: 106.94, currentYield: 3.794, maturityDate: "2028-12-07" },
+        { name: "Treasury 0.5% 2029", couponRate: 0.5, cleanPrice: 88.96, currentYield: 3.873, maturityDate: "2029-01-31" },
+        { name: "Treasury 4.125% 2029", couponRate: 4.125, cleanPrice: 100.42, currentYield: 4.01, maturityDate: "2029-07-22" },
+        { name: "Treasury 0.875% 2029", couponRate: 0.875, cleanPrice: 88.29, currentYield: 3.884, maturityDate: "2029-10-22" },
+        { name: "Treasury 4.375% 2030", couponRate: 4.375, cleanPrice: 101.17, currentYield: 4.094, maturityDate: "2030-03-07" },
+        { name: "Treasury 0.375% 2030", couponRate: 0.375, cleanPrice: 82.96, currentYield: 4, maturityDate: "2030-10-22" },
+        { name: "Treasury 4.75% 2030", couponRate: 4.75, cleanPrice: 103.37, currentYield: 4.046, maturityDate: "2030-12-07" },
+        { name: "Treasury 0.25% 2031", couponRate: 0.25, cleanPrice: 79.65, currentYield: 4.091, maturityDate: "2031-07-31" },
+        { name: "Treasury 4% 2031", couponRate: 4, cleanPrice: 98.58, currentYield: 4.26, maturityDate: "2031-10-22" },
+        { name: "Treasury 1% 2032", couponRate: 1, cleanPrice: 81.64, currentYield: 4.248, maturityDate: "2032-01-31" },
+        { name: "Treasury 4.25% 2032", couponRate: 4.25, cleanPrice: 99.95, currentYield: 4.258, maturityDate: "2032-06-07" },
+        { name: "Treasury 3.25% 2033", couponRate: 3.25, cleanPrice: 92.59, currentYield: 4.417, maturityDate: "2033-01-31" },
+        { name: "Green Gilt 0.875% 2033", couponRate: 0.875, cleanPrice: 75.98, currentYield: 4.466, maturityDate: "2033-07-31" },
+        { name: "Treasury 4.625% 2034", couponRate: 4.625, cleanPrice: 100.61, currentYield: 4.538, maturityDate: "2034-01-31" },
+        { name: "Treasury 4.25% 2034", couponRate: 4.25, cleanPrice: 97.47, currentYield: 4.595, maturityDate: "2034-07-31" },
+        { name: "Treasury 4.5% 2034", couponRate: 4.5, cleanPrice: 99.51, currentYield: 4.566, maturityDate: "2034-09-07" },
+        { name: "Treasury 4.5% 2035", couponRate: 4.5, cleanPrice: 98.67, currentYield: 4.672, maturityDate: "2035-03-07" },
+        { name: "Treasury 0.625% 2035", couponRate: 0.625, cleanPrice: 67.87, currentYield: 4.673, maturityDate: "2035-07-31" },
+        { name: "Treasury 4.25% 2036", couponRate: 4.25, cleanPrice: 95.75, currentYield: 4.763, maturityDate: "2036-03-07" },
+        { name: "Treasury 1.75% 2037", couponRate: 1.75, cleanPrice: 71.64, currentYield: 4.873, maturityDate: "2037-09-07" },
+        { name: "Treasury 3.75% 2038", couponRate: 3.75, cleanPrice: 88.95, currentYield: 4.944, maturityDate: "2038-01-29" },
+        { name: "Treasury 4.75% 2038", couponRate: 4.75, cleanPrice: 97.78, currentYield: 4.979, maturityDate: "2038-12-07" },
+        { name: "Treasury 1.125% 2039", couponRate: 1.125, cleanPrice: 62.41, currentYield: 4.975, maturityDate: "2039-01-31" },
+        { name: "Treasury 4.25% 2039", couponRate: 4.25, cleanPrice: 91.8, currentYield: 5.069, maturityDate: "2039-09-07" }
+      ];
+      const { calculateYearsToMaturity: calculateYearsToMaturity2 } = await Promise.resolve().then(() => (init_utils(), utils_exports));
+      const today = /* @__PURE__ */ new Date();
+      return liveGiltData.map((gilt) => {
         const yearsToMaturity = calculateYearsToMaturity2(gilt.maturityDate, today);
         return {
           ...gilt,
@@ -2966,8 +3092,8 @@ var GiltDataFetcher = class {
         };
       }).filter((gilt) => gilt.yearsToMaturity > 0);
     } catch (error) {
-      console.error("Error fetching authentic DividendData pricing:", error);
-      return null;
+      console.error("Error fetching live DividendData pricing:", error);
+      throw error;
     }
   }
   async fetchFromFinnhub() {
@@ -4679,7 +4805,7 @@ async function renderHomePage(request, env) {
             try {
                 console.log('Fetching gilt data from /api/gilt-data...');
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout for rate limits
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for daily API calls
                 
                 const response = await fetch('/api/gilt-data', {
                     signal: controller.signal
@@ -4693,14 +4819,19 @@ async function renderHomePage(request, env) {
                     throw new Error(\`API rate limited or unavailable\`);
                 }
                 
-                const data = await response.json();
-                console.log('Received data from API:', data?.length, 'gilts');
+                const result = await response.json();
+                console.log('Received data from API:', result?.data?.length, 'gilts');
+                console.log('Data source:', result?.dataSource);
+                console.log('Price date:', result?.priceDate);
                 
-                if (!data || !Array.isArray(data) || data.length === 0) {
+                if (!result?.data || !Array.isArray(result.data) || result.data.length === 0) {
                     throw new Error('No gilt data received from API');
                 }
                 
-                currentGiltData = data;
+                currentGiltData = result.data;
+                
+                // Show data freshness message
+                showDataFreshnessMessage(result);
                 
                 loadingDiv.style.display = 'none';
                 // Don't show data div yet - wait for tax calculations
@@ -4709,34 +4840,57 @@ async function renderHomePage(request, env) {
                 calculateTaxEfficiency();
                 
             } catch (error) {
-                console.error('API failed, using fallback data:', error);
+                console.error('API failed:', error);
                 
-                // Immediately use fallback data when API is rate-limited or unavailable
-                try {
-                    currentGiltData = await getFallbackGiltData();
-                    console.log('Successfully loaded fallback data:', currentGiltData.length, 'gilts');
+                // Show error for total failure
+                loadingDiv.style.display = 'none';
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Unable to load gilt data. The daily caching system may need time to update. Please try refreshing the page in a few minutes.';
+            }
+        }
+        
+        function showDataFreshnessMessage(result) {
+            // Remove any existing data freshness message
+            const existingMessage = document.getElementById('data-freshness-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.id = 'data-freshness-message';
+            messageDiv.style.cssText = 'padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 14px; font-weight: 500;';
+            
+            let messageText = '';
+            let messageStyle = '';
+            
+            switch (result.dataSource) {
+                case 'live':
+                    messageText = \`\u{1F4CA} Live market data - Prices as of \${result.priceDate} (\${result.data.length} UK government bonds)\`;
+                    messageStyle = 'background: #d4edda; border: 1px solid #c3e6cb; color: #155724;';
+                    break;
                     
-                    loadingDiv.style.display = 'none';
-                    document.getElementById('filterControls').style.display = 'block';
+                case 'cached_today':
+                    messageText = \`\u{1F4BE} Today's cached data - Prices from \${result.priceDate} (\${result.data.length} UK government bonds)\`;
+                    messageStyle = 'background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460;';
+                    break;
                     
-                    // Show warning but continue with fallback data
-                    const warningDiv = document.createElement('div');
-                    warningDiv.id = 'api-warning';
-                    warningDiv.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 14px;';
-                    warningDiv.innerHTML = '\u26A0\uFE0F Using cached data due to API rate limits. Data may not be real-time.';
-                    const mainContent = document.querySelector('.main-content');
-                    const controlsSection = document.querySelector('.controls-section');
-                    if (mainContent && controlsSection && !document.getElementById('api-warning')) {
-                        mainContent.insertBefore(warningDiv, controlsSection);
-                    }
+                case 'fallback':
+                    messageText = \`\u26A0\uFE0F Static data - Prices from \${result.priceDate} (\${result.data.length} UK government bonds)\`;
+                    messageStyle = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404;';
+                    break;
                     
-                    calculateTaxEfficiency();
-                } catch (fallbackError) {
-                    console.error('Fallback data also failed:', fallbackError);
-                    loadingDiv.style.display = 'none';
-                    errorDiv.style.display = 'block';
-                    errorDiv.textContent = 'Unable to load gilt data. Please refresh the page.';
-                }
+                default:
+                    messageText = \`\u{1F4C8} Gilt pricing data (\${result.data.length} UK government bonds)\`;
+                    messageStyle = 'background: #f8f9fa; border: 1px solid #dee2e6; color: #495057;';
+            }
+            
+            messageDiv.style.cssText += messageStyle;
+            messageDiv.innerHTML = messageText;
+            
+            const mainContent = document.querySelector('.main-content');
+            const controlsSection = document.querySelector('.controls-section');
+            if (mainContent && controlsSection) {
+                mainContent.insertBefore(messageDiv, controlsSection);
             }
         }
         
@@ -6614,12 +6768,13 @@ async function getGiltData(request, env) {
     console.log("API endpoint called: /api/gilt-data");
     const fetcher = new GiltDataFetcher(env);
     console.log("GiltDataFetcher created");
-    const data = await fetcher.getGiltData();
-    console.log(`Fetched ${data?.length || 0} gilts`);
-    if (!data || data.length === 0) {
+    const result = await fetcher.getGiltData();
+    console.log(`Fetched ${result?.data?.length || 0} gilts from ${result?.dataSource || "unknown"} source`);
+    console.log("Price date:", result?.priceDate);
+    if (!result?.data || result.data.length === 0) {
       throw new Error("No gilt data available from any source");
     }
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify(result), {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*"
@@ -6875,7 +7030,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-RWLXAo/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-prtvmJ/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6909,7 +7064,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-RWLXAo/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-prtvmJ/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

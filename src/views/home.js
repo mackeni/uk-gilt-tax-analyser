@@ -1429,7 +1429,7 @@ export async function renderHomePage(request, env) {
             try {
                 console.log('Fetching gilt data from /api/gilt-data...');
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout for rate limits
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for daily API calls
                 
                 const response = await fetch('/api/gilt-data', {
                     signal: controller.signal
@@ -1443,14 +1443,19 @@ export async function renderHomePage(request, env) {
                     throw new Error(\`API rate limited or unavailable\`);
                 }
                 
-                const data = await response.json();
-                console.log('Received data from API:', data?.length, 'gilts');
+                const result = await response.json();
+                console.log('Received data from API:', result?.data?.length, 'gilts');
+                console.log('Data source:', result?.dataSource);
+                console.log('Price date:', result?.priceDate);
                 
-                if (!data || !Array.isArray(data) || data.length === 0) {
+                if (!result?.data || !Array.isArray(result.data) || result.data.length === 0) {
                     throw new Error('No gilt data received from API');
                 }
                 
-                currentGiltData = data;
+                currentGiltData = result.data;
+                
+                // Show data freshness message
+                showDataFreshnessMessage(result);
                 
                 loadingDiv.style.display = 'none';
                 // Don't show data div yet - wait for tax calculations
@@ -1459,34 +1464,57 @@ export async function renderHomePage(request, env) {
                 calculateTaxEfficiency();
                 
             } catch (error) {
-                console.error('API failed, using fallback data:', error);
+                console.error('API failed:', error);
                 
-                // Immediately use fallback data when API is rate-limited or unavailable
-                try {
-                    currentGiltData = await getFallbackGiltData();
-                    console.log('Successfully loaded fallback data:', currentGiltData.length, 'gilts');
+                // Show error for total failure
+                loadingDiv.style.display = 'none';
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Unable to load gilt data. The daily caching system may need time to update. Please try refreshing the page in a few minutes.';
+            }
+        }
+        
+        function showDataFreshnessMessage(result) {
+            // Remove any existing data freshness message
+            const existingMessage = document.getElementById('data-freshness-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.id = 'data-freshness-message';
+            messageDiv.style.cssText = 'padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 14px; font-weight: 500;';
+            
+            let messageText = '';
+            let messageStyle = '';
+            
+            switch (result.dataSource) {
+                case 'live':
+                    messageText = \`📊 Live market data - Prices as of \${result.priceDate} (\${result.data.length} UK government bonds)\`;
+                    messageStyle = 'background: #d4edda; border: 1px solid #c3e6cb; color: #155724;';
+                    break;
                     
-                    loadingDiv.style.display = 'none';
-                    document.getElementById('filterControls').style.display = 'block';
+                case 'cached_today':
+                    messageText = \`💾 Today's cached data - Prices from \${result.priceDate} (\${result.data.length} UK government bonds)\`;
+                    messageStyle = 'background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460;';
+                    break;
                     
-                    // Show warning but continue with fallback data
-                    const warningDiv = document.createElement('div');
-                    warningDiv.id = 'api-warning';
-                    warningDiv.style.cssText = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 14px;';
-                    warningDiv.innerHTML = '⚠️ Using cached data due to API rate limits. Data may not be real-time.';
-                    const mainContent = document.querySelector('.main-content');
-                    const controlsSection = document.querySelector('.controls-section');
-                    if (mainContent && controlsSection && !document.getElementById('api-warning')) {
-                        mainContent.insertBefore(warningDiv, controlsSection);
-                    }
+                case 'fallback':
+                    messageText = \`⚠️ Static data - Prices from \${result.priceDate} (\${result.data.length} UK government bonds)\`;
+                    messageStyle = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404;';
+                    break;
                     
-                    calculateTaxEfficiency();
-                } catch (fallbackError) {
-                    console.error('Fallback data also failed:', fallbackError);
-                    loadingDiv.style.display = 'none';
-                    errorDiv.style.display = 'block';
-                    errorDiv.textContent = 'Unable to load gilt data. Please refresh the page.';
-                }
+                default:
+                    messageText = \`📈 Gilt pricing data (\${result.data.length} UK government bonds)\`;
+                    messageStyle = 'background: #f8f9fa; border: 1px solid #dee2e6; color: #495057;';
+            }
+            
+            messageDiv.style.cssText += messageStyle;
+            messageDiv.innerHTML = messageText;
+            
+            const mainContent = document.querySelector('.main-content');
+            const controlsSection = document.querySelector('.controls-section');
+            if (mainContent && controlsSection) {
+                mainContent.insertBefore(messageDiv, controlsSection);
             }
         }
         
