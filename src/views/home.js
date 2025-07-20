@@ -1600,13 +1600,11 @@ export async function renderHomePage(request, env) {
                 const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge
                 const unitsOwned = getCachedComplexCalculation('unitsOwned_' + dealingCharge + '_' + investmentAmount, calculateUnitsOwned, effectiveInvestmentAmount, gilt.dirtyPrice);
                 
-                // ALWAYS generate coupon schedule to ensure gilt object has required properties
-                if (!gilt.couponSchedule) {
-                    gilt.couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
-                }
+                // ALWAYS regenerate coupon schedule since it depends on unitsOwned (investment amount)
+                gilt.couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
                 
-                // ALWAYS generate account charges if enabled
-                if (currentSettings.accountChargeEnabled && !gilt.accountCharges) {
+                // ALWAYS regenerate account charges if enabled since they depend on unitsOwned
+                if (currentSettings.accountChargeEnabled) {
                     gilt.accountCharges = calculateAccountCharges(gilt, unitsOwned);
                 }
                 
