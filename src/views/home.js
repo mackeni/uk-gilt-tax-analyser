@@ -2424,8 +2424,8 @@ export async function renderHomePage(request, env) {
                     const investmentAmount = currentSettings.investmentAmount || 10000;
                     
                     // Calculate units owned using same method as IRR tooltip
-                    const dealingCharge = currentSettings.dealingCharge || 0;
-                    const effectiveInvestment = investmentAmount - dealingCharge;
+                    const advantageDealingCharge = currentSettings.dealingCharge || 0;
+                    const effectiveInvestment = investmentAmount - advantageDealingCharge;
                     const unitsOwned = Math.round((effectiveInvestment / gilt.dirtyPrice * 100) * 100) / 100;
                     
                     // Calculate precise total cash flows - ensure we use the function that includes charges
