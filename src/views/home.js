@@ -2195,7 +2195,6 @@ export async function renderHomePage(request, env) {
                                         <h5 style="margin-bottom: 8px;">Net Returns:</h5>
                                         <p style="margin: 3px 0;"><strong>Total Cash Received:</strong> £\${grandTotalGross.toFixed(2)}</p>
                                         <p style="margin: 3px 0;"><strong>Total Costs:</strong> £\${grandTotalCosts.toFixed(2)} (Tax: £\${totalCouponTax.toFixed(2)} + Charges: £\${totalAccountCharges.toFixed(2)})</p>
-                                        \${monthlyChargeSchedule.length > 0 ? '<p style="margin: 1px 0; color: #666; font-size: 10px;">IRR Debug: £' + totalAccountCharges.toFixed(6) + ' (' + monthlyChargeSchedule.length + ' charges)</p>' : ''}
                                         <p style="margin: 3px 0; font-size: 16px;"><strong style="color: #007bff;">Net After-Tax Return:</strong> £\${grandTotalNet.toFixed(2)}</p>
                                     </div>
                                 </div>
@@ -2282,7 +2281,7 @@ export async function renderHomePage(request, env) {
                             <p><strong>Dealing Charge:</strong> \${currentSettings.dealingCharge > 0 ? '£' + currentSettings.dealingCharge.toFixed(2) : 'None (£0.00)'}</p>
                             <p><strong>Monthly Account Charge:</strong> \${currentSettings.accountChargeEnabled ? currentSettings.accountChargeRate + '% annually (£' + (currentSettings.accountChargeRate / 12).toFixed(3) + '% monthly, max £' + currentSettings.accountChargeMax.toFixed(2) + '/month)' : 'None'}</p>
                             <p><strong>Available for Gilts:</strong> \${formatCurrency((currentSettings.investmentAmount || 10000) - (currentSettings.dealingCharge || 0))}</p>
-                            <p><strong>Purchase Price:</strong> £\${gilt.dirtyPrice.toFixed(6)} per £100 (including accrued interest)</p>
+                            <p><strong>Purchase Price:</strong> £\${gilt.dirtyPrice.toFixed(2)} per £100 (including accrued interest)</p>
                             <p><strong>Your Tax Rate:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ')} (\${getCurrentTaxRate()}%)</p>
                         </div>
                         <div class="calculation-step" style="background: #f8f9fa; border-left: 4px solid #007bff; padding: 15px;">
@@ -2426,11 +2425,11 @@ export async function renderHomePage(request, env) {
                                 
                                 return \`
                                 <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; padding: 12px; margin: 10px 0;">
-                                    <h5 style="margin: 0 0 8px 0; color: #007bff;">Coupon Payment Totals & Precision:</h5>
+                                    <h5 style="margin: 0 0 8px 0; color: #007bff;">Coupon Payment Totals:</h5>
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
                                         <div>
                                             <p style="margin: 2px 0;"><strong>Total Gross Coupons:</strong> £\${totalGrossCoupons.toFixed(2)}</p>
-                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(\${numPayments} payments × £\${(totalGrossCoupons/numPayments).toFixed(6)} each)</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(\${numPayments} payments)</p>
                                             <p style="margin: 2px 0;"><strong>Income Tax:</strong> £\${totalCouponTax.toFixed(2)}</p>
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">(Each payment taxed at \${modalTaxRate}%)</p>
                                             <p style="margin: 2px 0;"><strong>Net Coupon Income:</strong> £\${totalNetCoupons.toFixed(2)}</p>
@@ -2438,55 +2437,16 @@ export async function renderHomePage(request, env) {
                                         </div>
                                         <div>
                                             <p style="margin: 2px 0;"><strong>Calculation Base:</strong></p>
-                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Units Owned: \${(principalAmount/100).toFixed(6)}</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Units Owned: \${(principalAmount/100).toFixed(2)}</p>
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">Semi-Annual Rate: \${semiAnnualRate.toFixed(3)}%</p>
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">Effective Investment: £\${effectiveInvestment.toFixed(2)}</p>
                                             <p style="margin: 2px 0;"><strong>Principal Repayment:</strong> £\${principalAmount.toFixed(2)}</p>
                                             \${currentSettings.accountChargeEnabled && totalMonthlyCharges > 0 ? '<p style="margin: 2px 0;"><strong>Account Charges:</strong> £' + totalMonthlyCharges.toFixed(2) + '</p>' : ''}
                                             <p style="margin: 2px 0; font-weight: bold; color: #007bff;"><strong>Total Cash:</strong> £\${giltTotalCash.toFixed(2)}</p>
-                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(Precision: £\${giltTotalCash.toFixed(6)})</p>
                                         </div>
                                     </div>
                                     
-                                    <div style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 8px; margin-top: 8px;">
-                                        <h6 style="margin: 0 0 5px 0; color: #333;">Total Cash Calculation Detail:</h6>
-                                        <div style="font-family: monospace; font-size: 10px; line-height: 1.3;">
-                                            <p style="margin: 1px 0;">Net Coupon Income: £\${totalNetCoupons.toFixed(6)}</p>
-                                            <p style="margin: 1px 0;">+ Principal Repayment: £\${principalAmount.toFixed(6)}</p>
-                                            \${currentSettings.accountChargeEnabled && totalMonthlyCharges > 0 ? 
-                                                '<p style="margin: 1px 0;">- Account Charges: £' + totalMonthlyCharges.toFixed(6) + '</p>' : 
-                                                '<p style="margin: 1px 0;">- Account Charges: £0.000000</p>'
-                                            }
-                                            \${(() => {
-                                                const manualCalc = totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0);
-                                                return '<p style="margin: 1px 0; border-top: 1px solid #ddd; padding-top: 2px; font-weight: bold;">= Manual Check: £' + manualCalc.toFixed(6) + '</p>';
-                                            })()}
-                                            <p style="margin: 1px 0; font-weight: bold; color: \${Math.abs(giltTotalCash - (totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0))) < 0.01 ? '#28a745' : '#dc3545'};">Function Result: £\${giltTotalCash.toFixed(6)}</p>
-                                            \${(() => {
-                                                // Debug account charges discrepancy
-                                                const storedCharges = gilt.accountCharges ? gilt.accountCharges.reduce((sum, charge) => sum + charge.amount, 0) : 0;
-                                                const chargeCount = gilt.accountCharges ? gilt.accountCharges.length : 0;
-                                                return currentSettings.accountChargeEnabled ? 
-                                                    '<p style="margin: 1px 0; color: #666; font-size: 9px;">Debug: Advantage charges £' + totalMonthlyCharges.toFixed(6) + ' (' + chargeCount + ' charges) vs Function charges £' + storedCharges.toFixed(6) + '</p>' : '';
-                                            })()}
-                                            <p style="margin: 1px 0; color: #666;">Rounded Display: £\${giltTotalCash.toFixed(2)}</p>
-                                            \${(() => {
-                                                const diff = Math.abs(giltTotalCash - (totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0)));
-                                                return diff > 0.01 ? '<p style="margin: 1px 0; color: #dc3545; font-weight: bold;">DIFFERENCE: £' + diff.toFixed(6) + '</p>' : '<p style="margin: 1px 0; color: #28a745;">✓ Calculations match</p>';
-                                            })()}
-                                        </div>
-                                    </div>
-                                    
-                                    <div style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 8px; margin-top: 5px;">
-                                        <h6 style="margin: 0 0 5px 0; color: #333;">Verification Steps:</h6>
-                                        <div style="font-family: monospace; font-size: 10px; line-height: 1.3;">
-                                            <p style="margin: 1px 0;">1. Each coupon: £\${(totalGrossCoupons/numPayments).toFixed(6)} gross</p>
-                                            <p style="margin: 1px 0;">2. Tax per coupon: £\${((totalGrossCoupons/numPayments) * modalTaxRate/100).toFixed(6)} (before rounding)</p>
-                                            <p style="margin: 1px 0;">3. Rounded tax per coupon: £\${(totalCouponTax/numPayments).toFixed(6)}</p>
-                                            <p style="margin: 1px 0;">4. Net per coupon: £\${(totalNetCoupons/numPayments).toFixed(6)}</p>
-                                            <p style="margin: 1px 0;">5. Total net (\${numPayments} payments): £\${totalNetCoupons.toFixed(6)}</p>
-                                        </div>
-                                    </div>
+
                                 </div>
                                 \`;
                             })()}
@@ -2496,7 +2456,7 @@ export async function renderHomePage(request, env) {
                                 \${currentSettings.accountChargeEnabled ? '<p><small>• Monthly account charges: ' + (totalMonthlyCharges > 0 ? '£' + totalMonthlyCharges.toFixed(2) + ' total deducted' : 'None calculated') + '</small></p>' : ''}
                                 <p><small>• Principal repayment: £\${unitsOwned.toFixed(2)} (tax-free)</small></p>
                                 <p><small>• Based on actual payment schedule with exact dates</small></p>
-                                \${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: £' + giltTotalCash.toFixed(2) + ' (Precision: £' + giltTotalCash.toFixed(6) + ')</small></p>' : ''}
+                                \${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: £' + giltTotalCash.toFixed(2) + '</small></p>' : ''}
                             </div>
                         </div>
                         
@@ -2512,7 +2472,7 @@ export async function renderHomePage(request, env) {
                                 const remainingDays = totalDays % 365;
                                 return years + ' years + ' + remainingDays + ' days (' + totalDays + ' total days)';
                             })()} </p>
-                            <p><strong>Total Cash Received:</strong> £\${savingsTotalCash.toFixed(2)} (Precision: £\${savingsTotalCash.toFixed(6)})</p>
+                            <p><strong>Total Cash Received:</strong> £\${savingsTotalCash.toFixed(2)}</p>
                             
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
                                 <h5 style="margin-top: 0;">Detailed Interest Calculation:</h5>
@@ -2536,7 +2496,7 @@ export async function renderHomePage(request, env) {
                                 
                                 <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
                                     <strong>Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit over \${(gilt.yearsToMaturity || 0).toFixed(2)} years<br>
-                                    <strong>Return Precision:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(6)} profit
+
                                 </p>
                             </div>
                         </div>
@@ -2549,11 +2509,11 @@ export async function renderHomePage(request, env) {
                                 <strong>Calculation:</strong><br>
                                 £\${giltTotalCash.toFixed(2)} - £\${savingsTotalCash.toFixed(2)}<br>
                                 = <strong>£\${extraIncomeTotal.toFixed(2)}</strong><br>
-                                <small style="color: #666;">Precision: £\${giltTotalCash.toFixed(6)} - £\${savingsTotalCash.toFixed(6)} = £\${extraIncomeTotal.toFixed(6)}</small>
+
                             </div>
-                            <p><strong>Gilt Total Return:</strong> £\${(giltTotalCash - investmentAmount).toFixed(2)} profit (Precision: £\${(giltTotalCash - investmentAmount).toFixed(6)})</p>
-                            <p><strong>Savings Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit (Precision: £\${(savingsTotalCash - investmentAmount).toFixed(6)})</p>
-                            <p><strong>Total Advantage:</strong> £\${extraIncomeTotal.toFixed(2)} over \${(gilt.yearsToMaturity || 0).toFixed(2)} years (Precision: £\${extraIncomeTotal.toFixed(6)})</p>
+                            <p><strong>Gilt Total Return:</strong> £\${(giltTotalCash - investmentAmount).toFixed(2)} profit</p>
+                            <p><strong>Savings Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit</p>
+                            <p><strong>Total Advantage:</strong> £\${extraIncomeTotal.toFixed(2)} over \${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
                             <p style="margin-top: 15px; font-weight: bold; color: \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'};">
                                 \${advantagePercent >= 0 ? 
                                     \`This gilt will earn you £\${Math.abs(extraIncomeTotal).toFixed(2)} MORE than a savings account.\` : 

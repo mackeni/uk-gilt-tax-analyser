@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-u8xJAM/checked-fetch.js
+// .wrangler/tmp/bundle-uZt4q3/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-u8xJAM/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-uZt4q3/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-u8xJAM/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-uZt4q3/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-u8xJAM/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-uZt4q3/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5445,7 +5445,6 @@ async function renderHomePage(request, env) {
                                         <h5 style="margin-bottom: 8px;">Net Returns:</h5>
                                         <p style="margin: 3px 0;"><strong>Total Cash Received:</strong> \xA3\${grandTotalGross.toFixed(2)}</p>
                                         <p style="margin: 3px 0;"><strong>Total Costs:</strong> \xA3\${grandTotalCosts.toFixed(2)} (Tax: \xA3\${totalCouponTax.toFixed(2)} + Charges: \xA3\${totalAccountCharges.toFixed(2)})</p>
-                                        \${monthlyChargeSchedule.length > 0 ? '<p style="margin: 1px 0; color: #666; font-size: 10px;">IRR Debug: \xA3' + totalAccountCharges.toFixed(6) + ' (' + monthlyChargeSchedule.length + ' charges)</p>' : ''}
                                         <p style="margin: 3px 0; font-size: 16px;"><strong style="color: #007bff;">Net After-Tax Return:</strong> \xA3\${grandTotalNet.toFixed(2)}</p>
                                     </div>
                                 </div>
@@ -5532,7 +5531,7 @@ async function renderHomePage(request, env) {
                             <p><strong>Dealing Charge:</strong> \${currentSettings.dealingCharge > 0 ? '\xA3' + currentSettings.dealingCharge.toFixed(2) : 'None (\xA30.00)'}</p>
                             <p><strong>Monthly Account Charge:</strong> \${currentSettings.accountChargeEnabled ? currentSettings.accountChargeRate + '% annually (\xA3' + (currentSettings.accountChargeRate / 12).toFixed(3) + '% monthly, max \xA3' + currentSettings.accountChargeMax.toFixed(2) + '/month)' : 'None'}</p>
                             <p><strong>Available for Gilts:</strong> \${formatCurrency((currentSettings.investmentAmount || 10000) - (currentSettings.dealingCharge || 0))}</p>
-                            <p><strong>Purchase Price:</strong> \xA3\${gilt.dirtyPrice.toFixed(6)} per \xA3100 (including accrued interest)</p>
+                            <p><strong>Purchase Price:</strong> \xA3\${gilt.dirtyPrice.toFixed(2)} per \xA3100 (including accrued interest)</p>
                             <p><strong>Your Tax Rate:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ')} (\${getCurrentTaxRate()}%)</p>
                         </div>
                         <div class="calculation-step" style="background: #f8f9fa; border-left: 4px solid #007bff; padding: 15px;">
@@ -5676,11 +5675,11 @@ async function renderHomePage(request, env) {
                                 
                                 return \`
                                 <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; padding: 12px; margin: 10px 0;">
-                                    <h5 style="margin: 0 0 8px 0; color: #007bff;">Coupon Payment Totals & Precision:</h5>
+                                    <h5 style="margin: 0 0 8px 0; color: #007bff;">Coupon Payment Totals:</h5>
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
                                         <div>
                                             <p style="margin: 2px 0;"><strong>Total Gross Coupons:</strong> \xA3\${totalGrossCoupons.toFixed(2)}</p>
-                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(\${numPayments} payments \xD7 \xA3\${(totalGrossCoupons/numPayments).toFixed(6)} each)</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(\${numPayments} payments)</p>
                                             <p style="margin: 2px 0;"><strong>Income Tax:</strong> \xA3\${totalCouponTax.toFixed(2)}</p>
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">(Each payment taxed at \${modalTaxRate}%)</p>
                                             <p style="margin: 2px 0;"><strong>Net Coupon Income:</strong> \xA3\${totalNetCoupons.toFixed(2)}</p>
@@ -5688,55 +5687,16 @@ async function renderHomePage(request, env) {
                                         </div>
                                         <div>
                                             <p style="margin: 2px 0;"><strong>Calculation Base:</strong></p>
-                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Units Owned: \${(principalAmount/100).toFixed(6)}</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Units Owned: \${(principalAmount/100).toFixed(2)}</p>
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">Semi-Annual Rate: \${semiAnnualRate.toFixed(3)}%</p>
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">Effective Investment: \xA3\${effectiveInvestment.toFixed(2)}</p>
                                             <p style="margin: 2px 0;"><strong>Principal Repayment:</strong> \xA3\${principalAmount.toFixed(2)}</p>
                                             \${currentSettings.accountChargeEnabled && totalMonthlyCharges > 0 ? '<p style="margin: 2px 0;"><strong>Account Charges:</strong> \xA3' + totalMonthlyCharges.toFixed(2) + '</p>' : ''}
                                             <p style="margin: 2px 0; font-weight: bold; color: #007bff;"><strong>Total Cash:</strong> \xA3\${giltTotalCash.toFixed(2)}</p>
-                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(Precision: \xA3\${giltTotalCash.toFixed(6)})</p>
                                         </div>
                                     </div>
                                     
-                                    <div style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 8px; margin-top: 8px;">
-                                        <h6 style="margin: 0 0 5px 0; color: #333;">Total Cash Calculation Detail:</h6>
-                                        <div style="font-family: monospace; font-size: 10px; line-height: 1.3;">
-                                            <p style="margin: 1px 0;">Net Coupon Income: \xA3\${totalNetCoupons.toFixed(6)}</p>
-                                            <p style="margin: 1px 0;">+ Principal Repayment: \xA3\${principalAmount.toFixed(6)}</p>
-                                            \${currentSettings.accountChargeEnabled && totalMonthlyCharges > 0 ? 
-                                                '<p style="margin: 1px 0;">- Account Charges: \xA3' + totalMonthlyCharges.toFixed(6) + '</p>' : 
-                                                '<p style="margin: 1px 0;">- Account Charges: \xA30.000000</p>'
-                                            }
-                                            \${(() => {
-                                                const manualCalc = totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0);
-                                                return '<p style="margin: 1px 0; border-top: 1px solid #ddd; padding-top: 2px; font-weight: bold;">= Manual Check: \xA3' + manualCalc.toFixed(6) + '</p>';
-                                            })()}
-                                            <p style="margin: 1px 0; font-weight: bold; color: \${Math.abs(giltTotalCash - (totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0))) < 0.01 ? '#28a745' : '#dc3545'};">Function Result: \xA3\${giltTotalCash.toFixed(6)}</p>
-                                            \${(() => {
-                                                // Debug account charges discrepancy
-                                                const storedCharges = gilt.accountCharges ? gilt.accountCharges.reduce((sum, charge) => sum + charge.amount, 0) : 0;
-                                                const chargeCount = gilt.accountCharges ? gilt.accountCharges.length : 0;
-                                                return currentSettings.accountChargeEnabled ? 
-                                                    '<p style="margin: 1px 0; color: #666; font-size: 9px;">Debug: Advantage charges \xA3' + totalMonthlyCharges.toFixed(6) + ' (' + chargeCount + ' charges) vs Function charges \xA3' + storedCharges.toFixed(6) + '</p>' : '';
-                                            })()}
-                                            <p style="margin: 1px 0; color: #666;">Rounded Display: \xA3\${giltTotalCash.toFixed(2)}</p>
-                                            \${(() => {
-                                                const diff = Math.abs(giltTotalCash - (totalNetCoupons + principalAmount - (currentSettings.accountChargeEnabled ? totalMonthlyCharges : 0)));
-                                                return diff > 0.01 ? '<p style="margin: 1px 0; color: #dc3545; font-weight: bold;">DIFFERENCE: \xA3' + diff.toFixed(6) + '</p>' : '<p style="margin: 1px 0; color: #28a745;">\u2713 Calculations match</p>';
-                                            })()}
-                                        </div>
-                                    </div>
-                                    
-                                    <div style="background: #fff; border: 1px solid #ccc; border-radius: 3px; padding: 8px; margin-top: 5px;">
-                                        <h6 style="margin: 0 0 5px 0; color: #333;">Verification Steps:</h6>
-                                        <div style="font-family: monospace; font-size: 10px; line-height: 1.3;">
-                                            <p style="margin: 1px 0;">1. Each coupon: \xA3\${(totalGrossCoupons/numPayments).toFixed(6)} gross</p>
-                                            <p style="margin: 1px 0;">2. Tax per coupon: \xA3\${((totalGrossCoupons/numPayments) * modalTaxRate/100).toFixed(6)} (before rounding)</p>
-                                            <p style="margin: 1px 0;">3. Rounded tax per coupon: \xA3\${(totalCouponTax/numPayments).toFixed(6)}</p>
-                                            <p style="margin: 1px 0;">4. Net per coupon: \xA3\${(totalNetCoupons/numPayments).toFixed(6)}</p>
-                                            <p style="margin: 1px 0;">5. Total net (\${numPayments} payments): \xA3\${totalNetCoupons.toFixed(6)}</p>
-                                        </div>
-                                    </div>
+
                                 </div>
                                 \`;
                             })()}
@@ -5746,7 +5706,7 @@ async function renderHomePage(request, env) {
                                 \${currentSettings.accountChargeEnabled ? '<p><small>\u2022 Monthly account charges: ' + (totalMonthlyCharges > 0 ? '\xA3' + totalMonthlyCharges.toFixed(2) + ' total deducted' : 'None calculated') + '</small></p>' : ''}
                                 <p><small>\u2022 Principal repayment: \xA3\${unitsOwned.toFixed(2)} (tax-free)</small></p>
                                 <p><small>\u2022 Based on actual payment schedule with exact dates</small></p>
-                                \${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: \xA3' + giltTotalCash.toFixed(2) + ' (Precision: \xA3' + giltTotalCash.toFixed(6) + ')</small></p>' : ''}
+                                \${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: \xA3' + giltTotalCash.toFixed(2) + '</small></p>' : ''}
                             </div>
                         </div>
                         
@@ -5762,7 +5722,7 @@ async function renderHomePage(request, env) {
                                 const remainingDays = totalDays % 365;
                                 return years + ' years + ' + remainingDays + ' days (' + totalDays + ' total days)';
                             })()} </p>
-                            <p><strong>Total Cash Received:</strong> \xA3\${savingsTotalCash.toFixed(2)} (Precision: \xA3\${savingsTotalCash.toFixed(6)})</p>
+                            <p><strong>Total Cash Received:</strong> \xA3\${savingsTotalCash.toFixed(2)}</p>
                             
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
                                 <h5 style="margin-top: 0;">Detailed Interest Calculation:</h5>
@@ -5786,7 +5746,7 @@ async function renderHomePage(request, env) {
                                 
                                 <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
                                     <strong>Total Return:</strong> \xA3\${(savingsTotalCash - investmentAmount).toFixed(2)} profit over \${(gilt.yearsToMaturity || 0).toFixed(2)} years<br>
-                                    <strong>Return Precision:</strong> \xA3\${(savingsTotalCash - investmentAmount).toFixed(6)} profit
+
                                 </p>
                             </div>
                         </div>
@@ -5799,11 +5759,11 @@ async function renderHomePage(request, env) {
                                 <strong>Calculation:</strong><br>
                                 \xA3\${giltTotalCash.toFixed(2)} - \xA3\${savingsTotalCash.toFixed(2)}<br>
                                 = <strong>\xA3\${extraIncomeTotal.toFixed(2)}</strong><br>
-                                <small style="color: #666;">Precision: \xA3\${giltTotalCash.toFixed(6)} - \xA3\${savingsTotalCash.toFixed(6)} = \xA3\${extraIncomeTotal.toFixed(6)}</small>
+
                             </div>
-                            <p><strong>Gilt Total Return:</strong> \xA3\${(giltTotalCash - investmentAmount).toFixed(2)} profit (Precision: \xA3\${(giltTotalCash - investmentAmount).toFixed(6)})</p>
-                            <p><strong>Savings Total Return:</strong> \xA3\${(savingsTotalCash - investmentAmount).toFixed(2)} profit (Precision: \xA3\${(savingsTotalCash - investmentAmount).toFixed(6)})</p>
-                            <p><strong>Total Advantage:</strong> \xA3\${extraIncomeTotal.toFixed(2)} over \${(gilt.yearsToMaturity || 0).toFixed(2)} years (Precision: \xA3\${extraIncomeTotal.toFixed(6)})</p>
+                            <p><strong>Gilt Total Return:</strong> \xA3\${(giltTotalCash - investmentAmount).toFixed(2)} profit</p>
+                            <p><strong>Savings Total Return:</strong> \xA3\${(savingsTotalCash - investmentAmount).toFixed(2)} profit</p>
+                            <p><strong>Total Advantage:</strong> \xA3\${extraIncomeTotal.toFixed(2)} over \${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
                             <p style="margin-top: 15px; font-weight: bold; color: \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'};">
                                 \${advantagePercent >= 0 ? 
                                     \`This gilt will earn you \xA3\${Math.abs(extraIncomeTotal).toFixed(2)} MORE than a savings account.\` : 
@@ -6778,7 +6738,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-u8xJAM/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-uZt4q3/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6812,7 +6772,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-u8xJAM/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-uZt4q3/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

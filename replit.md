@@ -585,6 +585,34 @@ This migration maintains all original functionality while dramatically improving
 - **Input Handling**: Empty or invalid inputs default to £5 (realistic broker charge)
 - **Calculation Logic**: All calculations properly handle both £0 and positive dealing charges
 
+### July 20, 2025 - Precision Details Removal and Interest Calculation Rounding Enhancement
+
+**Version ID**: 3ee9e2f4-ad3e-4d62-8181-6d4af0dbb3f9
+
+**Clean Tooltip Implementation:**
+- **All Precision Details Removed**: Eliminated all debug information, precision details, and toFixed(6) displays from tooltips
+- **Clean 2-Decimal Display**: All monetary values now show only 2 decimal places for professional appearance
+- **Calculation Accuracy Maintained**: Behind-the-scenes calculations retain full precision for mathematical accuracy
+- **Simplified User Experience**: Tooltips now focus on essential information without technical clutter
+
+**Enhanced Savings Interest Calculations:**
+- **2-Decimal Rounding in Calculations**: Applied Math.round() to 2 decimal places for all savings interest calculations
+- **Complete Years Processing**: Gross interest and tax amounts rounded to 2 decimals during calculation
+- **Remaining Days Processing**: Partial year interest and tax calculations use 2-decimal rounding
+- **Consistent Methodology**: Savings calculations now match gilt calculation rounding precision
+
+**Technical Implementation:**
+- **Tooltip Cleanup**: Removed all .toFixed(6), precision details, debug sections, and verification steps
+- **Interest Calculation Enhancement**: Both complete years and remaining days use Math.round(amount * 100) / 100
+- **Consistent Display**: Purchase prices, total cash amounts, and all financial displays standardized to 2 decimals
+- **Professional Interface**: Clean, production-ready tooltips without development artifacts
+
+**User Experience Improvements:**
+- Professional, clean tooltips focused on essential calculation information
+- Consistent 2-decimal precision across all financial calculations and displays
+- Eliminated technical clutter while maintaining calculation transparency
+- Streamlined interface suitable for end-user financial analysis
+
 ### July 19, 2025 - Previous: Dealing Charge Update Bug Fix
 
 **Version ID**: 96dc83b6-2236-4cca-8ce5-62a41a07252e
@@ -596,24 +624,6 @@ This migration maintains all original functionality while dramatically improving
 - **Duplicate Event Listener Cleanup**: Removed redundant event listeners to prevent conflicts
 - **Production Testing Confirmed**: Dealing charge values from £0 to £1000 now update calculations immediately
 - **Enhanced Error Handling**: Improved parsing of empty and invalid dealing charge values with proper defaults
-
-**Technical Implementation:**
-- **Event Delegation Pattern**: Single document-level listener captures all dealing charge input changes
-- **Intelligent Value Parsing**: Handles empty strings, null values, and invalid inputs with £5 default
-- **Change Detection Logic**: Only triggers recalculation when dealing charge value actually changes
-- **Cache Management**: Comprehensive cache clearing ensures fresh calculations with new dealing charge values
-
-**Previous Issues Resolved:**
-- ✓ Dealing charge input not responding to user changes
-- ✓ Calculations not updating when dealing charge modified
-- ✓ Cache returning stale results despite user input changes
-- ✓ Multiple redundant event listeners causing confusion
-
-**User Experience Improvements:**
-- Immediate visual feedback when changing dealing charge values
-- Consistent calculation updates across all gilt investments
-- Proper handling of edge cases (empty input, invalid values)
-- Clean, production-ready implementation without debug logging
 
 **Successful Cloudflare Workers Deployment:**
 - **Live URL**: https://uk-gilt-tax-analyser.ian-a04.workers.dev
