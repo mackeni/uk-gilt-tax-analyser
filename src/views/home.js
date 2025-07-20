@@ -1629,6 +1629,11 @@ export async function renderHomePage(request, env) {
             console.log('Using tax rates:', taxInfo);
             
             return giltData.map(gilt => {
+                // Ensure yearsToMaturity is calculated
+                if (!gilt.yearsToMaturity || gilt.yearsToMaturity === null) {
+                    gilt.yearsToMaturity = calculateYearsToMaturity(gilt.maturityDate);
+                }
+                
                 // Include dealing charge in units calculation (if any)
                 const dealingCharge = currentSettings.dealingCharge || 0;
                 const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge

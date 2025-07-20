@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-W5b1U7/checked-fetch.js
+// .wrangler/tmp/bundle-1CfXrs/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-W5b1U7/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-1CfXrs/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-W5b1U7/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-1CfXrs/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-W5b1U7/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-1CfXrs/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4908,6 +4908,11 @@ async function renderHomePage(request, env) {
             console.log('Using tax rates:', taxInfo);
             
             return giltData.map(gilt => {
+                // Ensure yearsToMaturity is calculated
+                if (!gilt.yearsToMaturity || gilt.yearsToMaturity === null) {
+                    gilt.yearsToMaturity = calculateYearsToMaturity(gilt.maturityDate);
+                }
+                
                 // Include dealing charge in units calculation (if any)
                 const dealingCharge = currentSettings.dealingCharge || 0;
                 const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge
@@ -6935,7 +6940,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-W5b1U7/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-1CfXrs/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6969,7 +6974,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-W5b1U7/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-1CfXrs/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
