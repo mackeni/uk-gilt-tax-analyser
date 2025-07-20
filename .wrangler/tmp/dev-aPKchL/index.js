@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-epNUvt/checked-fetch.js
+// .wrangler/tmp/bundle-u8xJAM/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-epNUvt/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-u8xJAM/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-epNUvt/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-u8xJAM/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-epNUvt/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-u8xJAM/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4962,25 +4962,27 @@ async function renderHomePage(request, env) {
             
             let currentBalance = investmentAmount;
             
-            // Process complete years in batch
+            // Process complete years in batch with 2-decimal rounding
             if (completeYears > 0) {
                 for (let year = 1; year <= completeYears; year++) {
-                    const grossInterest = currentBalance * savingsRateDecimal;
+                    const grossInterest = Math.round(currentBalance * savingsRateDecimal * 100) / 100;
                     const taxableInterest = Math.max(0, grossInterest - psaAmount);
-                    const tax = taxableInterest * incomeTaxRate;
-                    currentBalance += (grossInterest - tax);
+                    const tax = Math.round(taxableInterest * incomeTaxRate * 100) / 100;
+                    const netInterest = grossInterest - tax;
+                    currentBalance += netInterest;
                 }
             }
             
-            // Handle remaining days if any
+            // Handle remaining days if any with 2-decimal rounding
             if (remainingDays > 0) {
                 const dailyRate = savingsRateDecimal / 365;
-                const grossInterest = currentBalance * dailyRate * remainingDays;
+                const grossInterest = Math.round(currentBalance * dailyRate * remainingDays * 100) / 100;
                 const partialYearFraction = remainingDays / 365;
                 const availablePSAPartialYear = psaAmount * partialYearFraction;
                 const taxableInterest = Math.max(0, grossInterest - availablePSAPartialYear);
-                const tax = taxableInterest * incomeTaxRate;
-                currentBalance += (grossInterest - tax);
+                const tax = Math.round(taxableInterest * incomeTaxRate * 100) / 100;
+                const netInterest = grossInterest - tax;
+                currentBalance += netInterest;
             }
             
             return currentBalance;
@@ -6776,7 +6778,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-epNUvt/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-u8xJAM/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6810,7 +6812,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-epNUvt/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-u8xJAM/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

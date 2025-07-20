@@ -1712,25 +1712,27 @@ export async function renderHomePage(request, env) {
             
             let currentBalance = investmentAmount;
             
-            // Process complete years in batch
+            // Process complete years in batch with 2-decimal rounding
             if (completeYears > 0) {
                 for (let year = 1; year <= completeYears; year++) {
-                    const grossInterest = currentBalance * savingsRateDecimal;
+                    const grossInterest = Math.round(currentBalance * savingsRateDecimal * 100) / 100;
                     const taxableInterest = Math.max(0, grossInterest - psaAmount);
-                    const tax = taxableInterest * incomeTaxRate;
-                    currentBalance += (grossInterest - tax);
+                    const tax = Math.round(taxableInterest * incomeTaxRate * 100) / 100;
+                    const netInterest = grossInterest - tax;
+                    currentBalance += netInterest;
                 }
             }
             
-            // Handle remaining days if any
+            // Handle remaining days if any with 2-decimal rounding
             if (remainingDays > 0) {
                 const dailyRate = savingsRateDecimal / 365;
-                const grossInterest = currentBalance * dailyRate * remainingDays;
+                const grossInterest = Math.round(currentBalance * dailyRate * remainingDays * 100) / 100;
                 const partialYearFraction = remainingDays / 365;
                 const availablePSAPartialYear = psaAmount * partialYearFraction;
                 const taxableInterest = Math.max(0, grossInterest - availablePSAPartialYear);
-                const tax = taxableInterest * incomeTaxRate;
-                currentBalance += (grossInterest - tax);
+                const tax = Math.round(taxableInterest * incomeTaxRate * 100) / 100;
+                const netInterest = grossInterest - tax;
+                currentBalance += netInterest;
             }
             
             return currentBalance;
