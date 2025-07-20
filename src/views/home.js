@@ -177,19 +177,10 @@ export async function renderHomePage(request, env) {
         let utils = {};
         
         async function ensureUtilsLoaded() {
-            console.log('ensureUtilsLoaded called, utilsLoaded:', utilsLoaded);
             if (!utilsLoaded) {
-                console.log('Loading utils module from /lib/utils.js...');
-                try {
-                    utils = await import('/lib/utils.js?v=1.0');
-                    console.log('Utils import successful:', Object.keys(utils));
-                    utilsLoaded = true;
-                } catch (importError) {
-                    console.error('Failed to import utils module:', importError);
-                    throw importError;
-                }
+                utils = await import('/lib/utils.js?v=1.0');
+                utilsLoaded = true;
             }
-            console.log('Utils ready, returning:', !!utils);
             return utils;
         }
         
@@ -575,36 +566,20 @@ export async function renderHomePage(request, env) {
         }
         
         async function loadGiltData() {
-            console.log('loadGiltData called - starting data fetch process');
             const loadingDiv = document.getElementById('loading');
             const errorDiv = document.getElementById('error');
             const dataDiv = document.getElementById('giltData');
             const metricsDiv = document.getElementById('metrics');
-            
-            console.log('Found DOM elements:', {
-                loading: !!loadingDiv,
-                error: !!errorDiv, 
-                data: !!dataDiv,
-                metrics: !!metricsDiv
-            });
             
             loadingDiv.style.display = 'block';
             errorDiv.style.display = 'none';
             dataDiv.style.display = 'none';
             metricsDiv.style.display = 'none';
             
-            console.log('About to ensure utils are loaded...');
             // Ensure utils are loaded first
-            try {
-                await ensureUtilsLoaded();
-                console.log('Utils loaded successfully!');
-            } catch (utilsError) {
-                console.error('Error loading utils:', utilsError);
-                throw new Error('Failed to load utility functions: ' + utilsError.message);
-            }
+            await ensureUtilsLoaded();
             
             try {
-                console.log('Starting API fetch to /api/gilt-data');
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for daily API calls
                 
@@ -612,41 +587,26 @@ export async function renderHomePage(request, env) {
                     signal: controller.signal
                 });
                 clearTimeout(timeoutId);
-                console.log('API response received:', response.status, response.statusText);
-
                 
                 if (!response.ok) {
                     throw new Error(\`API rate limited or unavailable\`);
                 }
                 
-                console.log('About to parse JSON response...');
                 const result = await response.json();
-                console.log('API result:', result);
-
                 
                 if (!result?.data || !Array.isArray(result.data) || result.data.length === 0) {
-                    console.error('Invalid API response:', result);
                     throw new Error('No gilt data received from API');
                 }
                 
-                console.log('Setting currentGiltData with', result.data.length, 'gilts');
                 currentGiltData = result.data;
                 
                 // Show data freshness message
-                console.log('Showing data freshness message...');
                 showDataFreshnessMessage(result);
                 
                 loadingDiv.style.display = 'none';
                 // Don't show data div yet - wait for tax calculations
-                const filterControls = document.getElementById('filterControls');
-                if (filterControls) {
-                    filterControls.style.display = 'block';
-                    console.log('Filter controls shown');
-                } else {
-                    console.error('Filter controls element not found!');
-                }
+                document.getElementById('filterControls').style.display = 'block';
                 
-                console.log('About to calculate tax efficiency...');
                 calculateTaxEfficiency();
                 
             } catch (error) {
@@ -764,16 +724,9 @@ export async function renderHomePage(request, env) {
         }
         
         async function calculateTaxEfficiency() {
-            console.log('calculateTaxEfficiency called with data length:', currentGiltData.length);
-            if (currentGiltData.length === 0) {
-                console.error('No gilt data available for tax efficiency calculation');
-                return;
-            }
-            
-            console.log('Current settings:', currentSettings);
+            if (currentGiltData.length === 0) return;
             
             try {
-                console.log('About to call calculateTaxEfficiencyLocal...');
                 // Calculate tax efficiency locally without API calls
                 const results = await calculateTaxEfficiencyLocal(
                     currentGiltData,
@@ -833,26 +786,16 @@ export async function renderHomePage(request, env) {
             
 
             
-            console.log('About to map through', giltData.length, 'gilts for tax calculations');
-            try {
-                const results = giltData.map((gilt, index) => {
-                console.log('Processing gilt', index + 1, ':', gilt.name);
+            return giltData.map(gilt => {
                 // Ensure yearsToMaturity is calculated
                 if (!gilt.yearsToMaturity || gilt.yearsToMaturity === null) {
-                    console.log('Calculating years to maturity for', gilt.name);
                     gilt.yearsToMaturity = calculateYearsToMaturity(gilt.maturityDate);
-                    console.log('Years to maturity:', gilt.yearsToMaturity);
                 }
                 
                 // Include dealing charge in units calculation (if any)
                 const dealingCharge = currentSettings.dealingCharge || 0;
-                console.log('Dealing charge:', dealingCharge);
-                console.log('Calculating effective investment amount...');
                 const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge
-                console.log('Effective investment amount:', effectiveInvestmentAmount);
-                console.log('About to calculate units owned for', gilt.name);
                 const unitsOwned = getCachedComplexCalculation('unitsOwned_' + dealingCharge + '_' + investmentAmount, calculateUnitsOwned, effectiveInvestmentAmount, gilt.dirtyPrice);
-                console.log('Units owned calculated:', unitsOwned);
                 
                 // ALWAYS regenerate coupon schedule since it depends on unitsOwned (investment amount)
                 gilt.couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
@@ -877,9 +820,8 @@ export async function renderHomePage(request, env) {
                 const savingsTotalCashReceived = getCachedComplexCalculation('savingsCash_' + investmentAmount + '_' + savingsRate, calculateTotalCashFromSavings, investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
                 const extraIncome = giltTotalCashReceived - savingsTotalCashReceived;
                 
-                console.log('Creating result object for', gilt.name);
                 // Return optimized object creation (avoid spread operator for performance)
-                const resultObject = {
+                return {
                     name: gilt.name,
                     couponRate: gilt.couponRate,
                     cleanPrice: gilt.cleanPrice,
@@ -895,16 +837,7 @@ export async function renderHomePage(request, env) {
                     extraIncome: extraIncome,
                     unitsOwned: unitsOwned
                 };
-                console.log('Completed processing for', gilt.name);
-                return resultObject;
-                });
-                
-                console.log('Map completed successfully, returning', results.length, 'results');
-                return results;
-            } catch (mapError) {
-                console.error('Error during gilt mapping:', mapError);
-                throw mapError;
-            }
+            });
         }
         
         function calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate) {
