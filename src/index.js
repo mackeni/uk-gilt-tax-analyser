@@ -224,7 +224,7 @@ export function getCachedCalculation(key, calculationFn, ...args) {
     
     return new Response(utilsContent, {
       headers: {
-        'Content-Type': 'application/javascript',
+        'Content-Type': 'application/javascript; charset=utf-8',
         'Cache-Control': 'public, max-age=31536000, immutable',
         'ETag': '"utils-v1.0"'
       }
@@ -259,7 +259,7 @@ async function handleAPIRequest(request, env, path) {
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
       status: 500,
       headers: { 
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
         'Cache-Control': 'no-cache, no-store, must-revalidate'
       }
     });
@@ -282,7 +282,7 @@ async function getGiltData(request, env) {
     
     return new Response(JSON.stringify(result), {
       headers: { 
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-store, must-revalidate'
       }
@@ -296,7 +296,7 @@ async function getGiltData(request, env) {
     }), {
       status: 500,
       headers: { 
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-store, must-revalidate'
       }
@@ -382,7 +382,7 @@ async function calculateTax(request, env) {
       
       return new Response(JSON.stringify(results), {
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'no-cache, no-store, must-revalidate'
         }
@@ -400,7 +400,7 @@ async function calculateTax(request, env) {
       
       return new Response(JSON.stringify({ afterTaxYield: result }), {
         headers: { 
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'no-cache, no-store, must-revalidate'
         }
@@ -410,7 +410,7 @@ async function calculateTax(request, env) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { 
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-store, must-revalidate'
       }
@@ -515,7 +515,7 @@ async function getCouponSchedule(request, env) {
     summary: scheduler.getScheduleSummary(afterTaxSchedule)
   }), {
     headers: { 
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
       'Access-Control-Allow-Origin': '*',
       'Cache-Control': 'no-cache, no-store, must-revalidate'
     }
