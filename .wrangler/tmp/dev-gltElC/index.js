@@ -4180,7 +4180,7 @@ async function renderHomePage(request, env) {
                                 </div>
                                 <div>
                                     <label for="durationMax">Max:</label>
-                                    <input type="number" id="durationMax" min="0" max="50" value="50" step="0.5">
+                                    <input type="number" id="durationMax" min="0" max="50" value="2" step="0.5">
                                 </div>
                             </div>
                             <div class="range-info">
@@ -4372,7 +4372,7 @@ async function renderHomePage(request, env) {
             accountChargeRate: 0.25,
             accountChargeMax: 3.50
         };
-        let durationFilter = { min: 0, max: 50 }; // Show all gilts by default
+        let durationFilter = { min: 0, max: 2 }; // Show short-term gilts by default
         
         // Initialize app - use fallback data immediately when rate limited
         function initializeApp() {
@@ -4911,7 +4911,6 @@ async function renderHomePage(request, env) {
                 // Ensure yearsToMaturity is calculated
                 if (!gilt.yearsToMaturity || gilt.yearsToMaturity === null) {
                     gilt.yearsToMaturity = calculateYearsToMaturity(gilt.maturityDate);
-                    console.log('Calculated yearsToMaturity for', gilt.name, ':', gilt.yearsToMaturity);
                 }
                 
                 // Include dealing charge in units calculation (if any)
@@ -5219,18 +5218,11 @@ async function renderHomePage(request, env) {
             const dataDiv = document.getElementById('giltData');
             const metricsDiv = document.getElementById('metrics');
             
-            console.log('displayResults called with', results.length, 'gilts');
-            console.log('Current duration filter:', durationFilter);
-            console.log('Sample gilt years to maturity:', results.slice(0, 3).map(g => ({ name: g.name, years: g.yearsToMaturity, maturity: g.maturityDate })));
-            console.log('All gilt years to maturity:', results.map(g => ({ name: g.name, years: g.yearsToMaturity })));
-            
             // Filter results by duration
             const filteredResults = results.filter(gilt => 
                 gilt.yearsToMaturity >= durationFilter.min && 
                 gilt.yearsToMaturity <= durationFilter.max
             );
-            
-            console.log('Filtered results:', filteredResults.length, 'gilts');
             
             // Sort by years to maturity (increasing duration)
             const sortedResults = filteredResults.sort((a, b) => 
