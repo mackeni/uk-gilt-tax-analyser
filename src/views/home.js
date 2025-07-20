@@ -901,7 +901,7 @@ export async function renderHomePage(request, env) {
                                 </div>
                                 <div>
                                     <label for="durationMax">Max:</label>
-                                    <input type="number" id="durationMax" min="0" max="45" value="2" step="0.5">
+                                    <input type="number" id="durationMax" min="0" max="45" value="50" step="0.5">
                                 </div>
                             </div>
                             <div class="range-info">
@@ -1093,7 +1093,7 @@ export async function renderHomePage(request, env) {
             accountChargeRate: 0.25,
             accountChargeMax: 3.50
         };
-        let durationFilter = { min: 0, max: 2 };
+        let durationFilter = { min: 0, max: 50 }; // Show all gilts by default
         
         // Initialize app - use fallback data immediately when rate limited
         function initializeApp() {

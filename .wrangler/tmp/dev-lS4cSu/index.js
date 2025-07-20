@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-4rz9sP/checked-fetch.js
+// .wrangler/tmp/bundle-kwAZeC/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-4rz9sP/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-kwAZeC/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-4rz9sP/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-kwAZeC/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-4rz9sP/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-kwAZeC/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4180,7 +4180,7 @@ async function renderHomePage(request, env) {
                                 </div>
                                 <div>
                                     <label for="durationMax">Max:</label>
-                                    <input type="number" id="durationMax" min="0" max="45" value="2" step="0.5">
+                                    <input type="number" id="durationMax" min="0" max="45" value="50" step="0.5">
                                 </div>
                             </div>
                             <div class="range-info">
@@ -4372,7 +4372,7 @@ async function renderHomePage(request, env) {
             accountChargeRate: 0.25,
             accountChargeMax: 3.50
         };
-        let durationFilter = { min: 0, max: 2 };
+        let durationFilter = { min: 0, max: 50 }; // Show all gilts by default
         
         // Initialize app - use fallback data immediately when rate limited
         function initializeApp() {
@@ -6929,7 +6929,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-4rz9sP/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-kwAZeC/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6963,7 +6963,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-4rz9sP/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-kwAZeC/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
