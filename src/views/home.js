@@ -2641,47 +2641,12 @@ export async function renderHomePage(request, env) {
                 }
             });
             
-            // Add cache management and debug buttons
-            addCacheManagementButtons();
+
             
             initializeApp();
         });
         
-        function addCacheManagementButtons() {
-            // Add debug info and cache stats buttons
-            const debugButton = document.createElement('button');
-            debugButton.textContent = '📊 Debug';
-            debugButton.className = 'cache-debug-button';
-            debugButton.style.cssText = 'margin: 2px; padding: 6px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; font-size: 12px;';
-            debugButton.onclick = () => {
-                console.log('=== DEBUG INFO ===');
-                console.log('Current gilt data:', currentGiltData?.length || 0, 'items');
-                console.log('Current results:', currentResults?.length || 0, 'items');
-                console.log('Current settings:', currentSettings);
-                console.log('Duration filter:', durationFilter);
-                const stats = getCacheStats();
-                console.log('Cache stats:', stats);
-                if (stats) {
-                    alert('Cache Stats:\\nUtils Cache: ' + (stats.utilsCache?.cacheSize || 0) + ' items\\nComplex Cache: ' + stats.complexCache.size + ' items\\nTotal Items: ' + stats.total + '\\nHit Rate: ' + (stats.utilsCache?.hitRate * 100 || 0).toFixed(1) + '%');
-                }
-                console.log('==================');
-            };
-            
-            const cacheButton = document.createElement('button');
-            cacheButton.textContent = '🗑️ Clear Cache';
-            cacheButton.className = 'cache-clear-button';
-            cacheButton.style.cssText = 'margin: 2px; padding: 6px 12px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; cursor: pointer; font-size: 12px;';
-            cacheButton.onclick = () => {
-                clearAllCaches();
-                alert('All caches cleared! Calculations will be recomputed on next update.');
-            };
-            
-            const buttonContainer = document.createElement('div');
-            buttonContainer.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 1000; display: flex; flex-direction: column;';
-            buttonContainer.appendChild(debugButton);
-            buttonContainer.appendChild(cacheButton);
-            document.body.appendChild(buttonContainer);
-        }
+
         
         // Robust event delegation for dealing charge
         document.addEventListener('input', function(e) {

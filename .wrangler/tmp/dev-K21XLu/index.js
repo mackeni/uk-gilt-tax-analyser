@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-uZt4q3/checked-fetch.js
+// .wrangler/tmp/bundle-V7QQT3/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-uZt4q3/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-V7QQT3/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-uZt4q3/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-V7QQT3/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-uZt4q3/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-V7QQT3/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5891,47 +5891,12 @@ async function renderHomePage(request, env) {
                 }
             });
             
-            // Add cache management and debug buttons
-            addCacheManagementButtons();
+
             
             initializeApp();
         });
         
-        function addCacheManagementButtons() {
-            // Add debug info and cache stats buttons
-            const debugButton = document.createElement('button');
-            debugButton.textContent = '\u{1F4CA} Debug';
-            debugButton.className = 'cache-debug-button';
-            debugButton.style.cssText = 'margin: 2px; padding: 6px 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; font-size: 12px;';
-            debugButton.onclick = () => {
-                console.log('=== DEBUG INFO ===');
-                console.log('Current gilt data:', currentGiltData?.length || 0, 'items');
-                console.log('Current results:', currentResults?.length || 0, 'items');
-                console.log('Current settings:', currentSettings);
-                console.log('Duration filter:', durationFilter);
-                const stats = getCacheStats();
-                console.log('Cache stats:', stats);
-                if (stats) {
-                    alert('Cache Stats:\\nUtils Cache: ' + (stats.utilsCache?.cacheSize || 0) + ' items\\nComplex Cache: ' + stats.complexCache.size + ' items\\nTotal Items: ' + stats.total + '\\nHit Rate: ' + (stats.utilsCache?.hitRate * 100 || 0).toFixed(1) + '%');
-                }
-                console.log('==================');
-            };
-            
-            const cacheButton = document.createElement('button');
-            cacheButton.textContent = '\u{1F5D1}\uFE0F Clear Cache';
-            cacheButton.className = 'cache-clear-button';
-            cacheButton.style.cssText = 'margin: 2px; padding: 6px 12px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; cursor: pointer; font-size: 12px;';
-            cacheButton.onclick = () => {
-                clearAllCaches();
-                alert('All caches cleared! Calculations will be recomputed on next update.');
-            };
-            
-            const buttonContainer = document.createElement('div');
-            buttonContainer.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 1000; display: flex; flex-direction: column;';
-            buttonContainer.appendChild(debugButton);
-            buttonContainer.appendChild(cacheButton);
-            document.body.appendChild(buttonContainer);
-        }
+
         
         // Robust event delegation for dealing charge
         document.addEventListener('input', function(e) {
@@ -6738,7 +6703,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-uZt4q3/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-V7QQT3/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6772,7 +6737,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-uZt4q3/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-V7QQT3/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
