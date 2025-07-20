@@ -4,12 +4,12 @@
  */
 
 import { GiltDataFetcher } from './lib/gilt-data.js';
-import { TaxCalculator } from './lib/tax-calculator';
-import { CouponScheduler } from './lib/coupon-scheduler';
-import { formatCurrency, formatPercentage, calculateYearsToMaturity } from './lib/utils';
-import { renderHomePage } from './views/home';
-import { renderAnalysisPage } from './views/analysis';
-import { renderAPIResponse } from './views/api';
+import { TaxCalculator } from './lib/tax-calculator.js';
+import { CouponScheduler } from './lib/coupon-scheduler.js';
+import { formatCurrency, formatPercentage, calculateYearsToMaturity } from './lib/utils.js';
+import { renderHomePage } from './views/home.js';
+import { renderAnalysisPage } from './views/analysis.js';
+import { renderAPIResponse } from './views/api.js';
 
 export default {
   async fetch(request, env, ctx) {

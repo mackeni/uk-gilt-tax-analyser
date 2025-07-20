@@ -178,7 +178,7 @@ export async function renderHomePage(request, env) {
         
         async function ensureUtilsLoaded() {
             if (!utilsLoaded) {
-                utils = await import('../lib/utils.js?v=1.0');
+                utils = await import('/lib/utils.js?v=1.0');
                 utilsLoaded = true;
 
             }
