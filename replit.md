@@ -585,22 +585,6 @@ This migration maintains all original functionality while dramatically improving
 - **Input Handling**: Empty or invalid inputs default to £5 (realistic broker charge)
 - **Calculation Logic**: All calculations properly handle both £0 and positive dealing charges
 
-### July 20, 2025 - CSS Inline Style Optimization and Cloudflare Deployment
-
-**Version ID**: 8bf772bb-70cb-40a7-90c7-3bbc9c1f1606
-
-**CSS Refactoring Achievement:**
-- **Inline Style Reduction**: Systematically reduced inline styles from 170 to 113 (removed 57 inline styles)
-- **CSS Class Organization**: Added comprehensive CSS classes for PSA modals, investment summaries, table elements, and modal content
-- **Code Maintainability**: Improved separation of concerns with organized CSS architecture
-- **Performance Impact**: Reduced bundle size and improved code readability without affecting functionality
-
-**Production Deployment:**
-- **Live URL**: https://uk-gilt-tax-analyser.ian-a04.workers.dev
-- **Bundle Optimization**: 240.09 KiB total (40.93 KiB gzipped)
-- **Startup Performance**: 2ms worker startup time
-- **All Features Verified**: Complete functionality including tax calculations, payment schedules, and interactive tooltips
-
 ### July 20, 2025 - Modern Security Headers with CSP Frame-Ancestors Migration
 
 **Version ID**: d93deaf2-fe3d-4f30-909e-f60376e3d199
