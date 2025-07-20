@@ -2478,7 +2478,7 @@ export async function renderHomePage(request, env) {
                                 const totalGrossCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0) : 0;
                                 const totalCouponTax = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.taxAmount, 0) : 0;
                                 const totalNetCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.afterTaxAmount, 0) : 0;
-                                const principalAmount = Math.round(unitsOwned * 100) / 100;
+                                const principalAmount = Math.round(advantageUnitsOwned * 100) / 100;
                                 const numPayments = gilt.couponSchedule ? gilt.couponSchedule.length : 0;
                                 const semiAnnualRate = gilt.couponRate / 2;
                                 const displayEffectiveInvestment = investmentAmount - (currentSettings.dealingCharge || 0);
@@ -2514,7 +2514,7 @@ export async function renderHomePage(request, env) {
                             <div style="margin-left: 20px; color: #666;">
                                 <p><small>• All coupon payments (after \${modalTaxRate}% income tax)</small></p>
                                 \${currentSettings.accountChargeEnabled ? '<p><small>• Monthly account charges: ' + (totalMonthlyCharges > 0 ? '£' + totalMonthlyCharges.toFixed(2) + ' total deducted' : 'None calculated') + '</small></p>' : ''}
-                                <p><small>• Principal repayment: £\${unitsOwned.toFixed(2)} (tax-free)</small></p>
+                                <p><small>• Principal repayment: £\${advantageUnitsOwned.toFixed(2)} (tax-free)</small></p>
                                 <p><small>• Based on actual payment schedule with exact dates</small></p>
                                 \${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: £' + giltTotalCash.toFixed(2) + '</small></p>' : ''}
                             </div>
