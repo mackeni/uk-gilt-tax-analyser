@@ -2489,7 +2489,7 @@ export async function renderHomePage(request, env) {
                                 \${currentSettings.accountChargeEnabled ? '<p><small>• Monthly account charges: ' + (totalMonthlyCharges > 0 ? '£' + totalMonthlyCharges.toFixed(2) + ' total deducted' : 'None calculated') + '</small></p>' : ''}
                                 <p><small>• Principal repayment: £\${(gilt.unitsOwned || 0).toFixed(2)} (tax-free)</small></p>
                                 <p><small>• Based on actual payment schedule with exact dates</small></p>
-                                \${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: £' + giltTotalCash.toFixed(2) + '</small></p>' : ''}
+                                \${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: £' + giltTotalCash.toFixed(2) + ' (Precision: £' + giltTotalCash.toFixed(6) + ')</small></p>' : ''}
                             </div>
                         </div>
                         
