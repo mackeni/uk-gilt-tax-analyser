@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-Yn1IZK/checked-fetch.js
+// .wrangler/tmp/bundle-vcxZtC/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-Yn1IZK/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-vcxZtC/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-Yn1IZK/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-vcxZtC/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-Yn1IZK/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-vcxZtC/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -3883,7 +3883,7 @@ async function renderHomePage(request, env) {
             }
             
             try {
-
+                console.log('Starting API fetch to /api/gilt-data');
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for daily API calls
                 
@@ -3891,29 +3891,41 @@ async function renderHomePage(request, env) {
                     signal: controller.signal
                 });
                 clearTimeout(timeoutId);
-                
+                console.log('API response received:', response.status, response.statusText);
 
                 
                 if (!response.ok) {
                     throw new Error(\`API rate limited or unavailable\`);
                 }
                 
+                console.log('About to parse JSON response...');
                 const result = await response.json();
+                console.log('API result:', result);
 
                 
                 if (!result?.data || !Array.isArray(result.data) || result.data.length === 0) {
+                    console.error('Invalid API response:', result);
                     throw new Error('No gilt data received from API');
                 }
                 
+                console.log('Setting currentGiltData with', result.data.length, 'gilts');
                 currentGiltData = result.data;
                 
                 // Show data freshness message
+                console.log('Showing data freshness message...');
                 showDataFreshnessMessage(result);
                 
                 loadingDiv.style.display = 'none';
                 // Don't show data div yet - wait for tax calculations
-                document.getElementById('filterControls').style.display = 'block';
+                const filterControls = document.getElementById('filterControls');
+                if (filterControls) {
+                    filterControls.style.display = 'block';
+                    console.log('Filter controls shown');
+                } else {
+                    console.error('Filter controls element not found!');
+                }
                 
+                console.log('About to calculate tax efficiency...');
                 calculateTaxEfficiency();
                 
             } catch (error) {
@@ -6897,7 +6909,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-Yn1IZK/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-vcxZtC/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6931,7 +6943,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-Yn1IZK/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-vcxZtC/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
