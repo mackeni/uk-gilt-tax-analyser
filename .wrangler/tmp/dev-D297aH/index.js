@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-iUEIDr/checked-fetch.js
+// .wrangler/tmp/bundle-8HYcUC/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-iUEIDr/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-8HYcUC/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-iUEIDr/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-8HYcUC/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-iUEIDr/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-8HYcUC/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -3292,807 +3292,7 @@ async function renderHomePage(request, env) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>\u{1F4B7} UK Gilt Tax Efficiency Analyser</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .header {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .header h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            color: #7f8c8d;
-            font-size: 1.1em;
-        }
-        
-        .sidebar {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        
-        .sidebar h3 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label,
-        .form-group .form-label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .form-group select,
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        
-        .form-group select:focus,
-        .form-group input:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-        
-        .tax-info {
-            background: #f1f8ff;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
-            border-left: 4px solid #3498db;
-        }
-        
-        .tax-info h4 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
-        
-        .controls-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        
-        .gilt-table {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .gilt-table h3 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #7f8c8d;
-            font-size: 1.1em;
-        }
-        
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        
-        .btn {
-            background: #3498db;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s;
-        }
-        
-        .btn:hover {
-            background: #2980b9;
-        }
-        
-        .btn:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-        }
-        
-        .metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 20px 0;
-        }
-        
-        .metric-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #3498db;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .metric-value {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .metric-label {
-            color: #7f8c8d;
-            font-size: 0.9em;
-            margin-bottom: 5px;
-        }
-        
-        .metric-subtitle {
-            color: #95a5a6;
-            font-size: 0.8em;
-            margin-top: 5px;
-        }
-        
-        .filter-controls {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        
-        .range-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .range-container input[type="number"] {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        
-        .range-container input[type="number"]:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
-        }
-        
-        .range-info {
-            margin-top: 10px;
-            color: #7f8c8d;
-        }
-        
-        .clickable-cell {
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        
-        .clickable-cell:hover {
-            background-color: #f8f9fa;
-        }
-        
-        /* Ensure table structure is preserved */
-        .table-container table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
-        
-        .table-container td, .table-container th {
-            vertical-align: middle;
-            padding: 8px 6px;
-        }
-        
-        /* Column width optimization - 7 columns with advantage column */
-        .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 25%; } /* Name */
-        .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 12%; } /* Clean Price */
-        .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 12%; } /* Dirty Price */
-        .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 12%; } /* After-Tax IRR */
-        .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 18%; } /* Equivalent Rate */
-        .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 6%; } /* Years */
-        .table-container th:nth-child(7), .table-container td:nth-child(7) { width: 15%; } /* Advantage */
-        
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 10px;
-            width: 80%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 15px;
-        }
-        
-        .modal-title {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .close:hover {
-            color: #000;
-        }
-        
-        .calculation-step {
-            margin-bottom: 15px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border-left: 4px solid #3498db;
-        }
-        
-        .calculation-formula {
-            font-family: 'Courier New', monospace;
-            background-color: #e8f4f8;
-            padding: 10px;
-            border-radius: 3px;
-            margin: 10px 0;
-        }
-        
-        /* Schedule tooltip styles */
-        .schedule-tooltip {
-            max-width: 100%;
-        }
-        
-        .schedule-summary {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            border-left: 4px solid #28a745;
-        }
-        
-        .schedule-summary p {
-            margin: 5px 0;
-            font-weight: 500;
-        }
-        
-        .payment-schedule {
-            overflow-x: auto;
-            margin: 20px 0;
-        }
-        
-        .payment-schedule table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-            background: white;
-        }
-        
-        .payment-schedule th {
-            background-color: #f8f9fa;
-            padding: 8px 6px;
-            text-align: left;
-            border: 1px solid #dee2e6;
-            font-weight: bold;
-            font-size: 11px;
-        }
-        
-        .payment-schedule td {
-            padding: 6px;
-            border: 1px solid #dee2e6;
-            text-align: right;
-        }
-        
-        .payment-schedule td:first-child {
-            text-align: left;
-        }
-        
-        .maturity-payment {
-            background-color: #fff3cd;
-            font-weight: bold;
-        }
-        
-        .schedule-notes {
-            background-color: #f1f3f4;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-        }
-        
-        .schedule-notes p {
-            margin: 2px 0;
-            font-size: 12px;
-            color: #6c757d;
-        }
-        
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .controls-section {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .sidebar {
-                padding: 15px;
-            }
-            
-            .gilt-table {
-                padding: 15px;
-            }
-            
-            /* Mobile summary layout */
-            .metric-card div[style*="grid-template-columns"] {
-                grid-template-columns: 1fr !important;
-                gap: 15px !important;
-            }
-            
-            .metric-card {
-                padding: 20px 15px !important;
-            }
-            
-            .metric-card div[style*="font-size: 1.3em"] {
-                font-size: 1.1em !important;
-            }
-            
-            .form-group {
-                margin-bottom: 15px;
-            }
-            
-            .form-group label,
-            .form-group .form-label {
-                font-size: 14px;
-                margin-bottom: 5px;
-            }
-            
-            .form-group select,
-            .form-group input {
-                font-size: 16px; /* Prevent zoom on iOS */
-                padding: 12px;
-                width: 100%;
-                box-sizing: border-box;
-            }
-            
-            .btn {
-                font-size: 16px;
-                padding: 12px 20px;
-                width: 100%;
-                margin-bottom: 10px;
-            }
-            
-            .tax-info {
-                font-size: 14px;
-                padding: 12px;
-            }
-            
-            .metrics {
-                grid-template-columns: 1fr;
-                gap: 10px;
-                margin-bottom: 20px;
-            }
-            
-            .metric-card {
-                padding: 15px;
-                text-align: center;
-            }
-            
-            .metric-label {
-                font-size: 12px;
-            }
-            
-            .metric-value {
-                font-size: 20px;
-            }
-            
-            .metric-subtitle {
-                font-size: 11px;
-            }
-            
-            .filter-controls {
-                background: #f8f9fa;
-                padding: 15px;
-                border-radius: 8px;
-                margin-bottom: 20px;
-            }
-            
-            .range-container {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .range-container input {
-                width: 70px;
-                font-size: 14px;
-            }
-            
-            .range-container label {
-                font-size: 14px;
-                margin: 0;
-            }
-            
-            .table-container {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            }
-            
-            .table-container table {
-                min-width: 750px;
-                font-size: 12px;
-            }
-            
-            .table-container th {
-                font-size: 11px;
-                padding: 6px 4px;
-                white-space: nowrap;
-            }
-            
-            .table-container td {
-                padding: 6px 4px;
-                font-size: 12px;
-            }
-            
-            .table-container td:first-child {
-                font-size: 11px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-            
-            /* Mobile column width adjustments - 7 columns */
-            .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 28%; } /* Name */
-            .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 10%; } /* Clean Price */
-            .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 10%; } /* Dirty Price */
-            .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 12%; } /* After-Tax IRR */
-            .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 16%; } /* Equivalent Rate */
-            .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 7%; } /* Years */
-            .table-container th:nth-child(7), .table-container td:nth-child(7) { width: 17%; } /* Advantage */
-            
-            .clickable-cell {
-                min-height: 44px; /* Touch target size */
-                cursor: pointer;
-                position: relative;
-            }
-            
-            .clickable-cell:hover {
-                background-color: #f8f9fa;
-            }
-            
-            /* Modal improvements for mobile */
-            .modal-content {
-                width: 95%;
-                max-width: 400px;
-                margin: 5% auto;
-                max-height: 85vh;
-                overflow-y: auto;
-            }
-            
-            .calculation-step {
-                margin-bottom: 12px;
-                padding: 12px;
-            }
-            
-            .calculation-formula {
-                font-size: 13px;
-                padding: 8px;
-                word-wrap: break-word;
-            }
-            
-            .schedule-tooltip .payment-schedule table {
-                font-size: 10px;
-            }
-            
-            .schedule-tooltip .payment-schedule th,
-            .schedule-tooltip .payment-schedule td {
-                padding: 4px 3px;
-            }
-            
-            .loading, .error {
-                font-size: 14px;
-                padding: 20px 15px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .container {
-                padding: 5px;
-            }
-            
-            h1 {
-                font-size: 22px;
-                text-align: center;
-                margin-bottom: 15px;
-            }
-            
-            h3 {
-                font-size: 18px;
-                margin-bottom: 15px;
-            }
-            
-            .metrics {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-            
-            .metric-card {
-                padding: 12px;
-            }
-            
-            .metric-value {
-                font-size: 18px;
-            }
-            
-            .range-container {
-                flex-direction: column;
-                gap: 8px;
-            }
-            
-            .range-container > div {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .table-container table {
-                min-width: 650px;
-                font-size: 11px;
-            }
-            
-            .table-container th {
-                font-size: 9px;
-                padding: 4px 3px;
-            }
-            
-            .table-container td {
-                padding: 4px 3px;
-                font-size: 10px;
-            }
-            
-            .table-container td:first-child {
-                font-size: 9px;
-            }
-            
-            /* Ultra-compact mobile column widths - 7 columns */
-            .table-container th:nth-child(1), .table-container td:nth-child(1) { width: 30%; } /* Name */
-            .table-container th:nth-child(2), .table-container td:nth-child(2) { width: 9%; } /* Clean Price */
-            .table-container th:nth-child(3), .table-container td:nth-child(3) { width: 9%; } /* Dirty Price */
-            .table-container th:nth-child(4), .table-container td:nth-child(4) { width: 12%; } /* After-Tax IRR */
-            .table-container th:nth-child(5), .table-container td:nth-child(5) { width: 15%; } /* Equivalent Rate */
-            .table-container th:nth-child(6), .table-container td:nth-child(6) { width: 6%; } /* Years */
-            .table-container th:nth-child(7), .table-container td:nth-child(7) { width: 19%; } /* Advantage */
-            
-            .modal-content {
-                width: 98%;
-                margin: 2% auto;
-                padding: 15px;
-                max-height: 90vh;
-            }
-            
-            .close {
-                font-size: 24px;
-                top: 10px;
-                right: 15px;
-            }
-        }
-            
-            .header {
-                padding: 20px;
-                margin-bottom: 20px;
-            }
-            
-            .header h1 {
-                font-size: 1.8em;
-                margin-bottom: 8px;
-            }
-            
-            .header p {
-                font-size: 1em;
-            }
-            
-            .container {
-                padding: 10px;
-            }
-            
-            .sidebar {
-                padding: 20px;
-                margin-bottom: 20px;
-            }
-            
-            .gilt-table {
-                padding: 20px;
-            }
-            
-            .metrics {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .metric-card {
-                padding: 15px;
-            }
-            
-            .metric-value {
-                font-size: 1.5em;
-            }
-            
-            .form-group select,
-            .form-group input {
-                font-size: 16px;
-                padding: 12px;
-            }
-            
-            .btn {
-                width: 100%;
-                padding: 15px;
-                font-size: 16px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .container {
-                padding: 5px;
-            }
-            
-            .header {
-                padding: 15px;
-            }
-            
-            .header h1 {
-                font-size: 1.5em;
-            }
-            
-            .sidebar,
-            .gilt-table {
-                padding: 15px;
-            }
-            
-            .sidebar h3,
-            .gilt-table h3 {
-                font-size: 1.1em;
-            }
-            
-            .metric-value {
-                font-size: 1.3em;
-            }
-            
-            .tax-info {
-                padding: 12px;
-            }
-            
-            .form-group {
-                margin-bottom: 15px;
-            }
-        }
-        
-        /* Table Responsiveness */
-        .table-container {
-            overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-        }
-        
-        @media (max-width: 768px) {
-            table {
-                font-size: 12px;
-            }
-            
-            th, td {
-                padding: 8px 4px;
-            }
-            
-            .table-container {
-                margin: 10px -5px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            table {
-                font-size: 11px;
-            }
-            
-            th, td {
-                padding: 6px 3px;
-            }
-            
-            .table-container {
-                margin: 10px -10px;
-            }
-        }
-        
-        /* Better touch targets for mobile */
-        @media (max-width: 768px) {
-            select, input, button {
-                min-height: 44px;
-            }
-            
-            .btn {
-                min-height: 48px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/styles/main.css">
 </head>
 <body>
     <div class="container">
@@ -4128,7 +3328,7 @@ async function renderHomePage(request, env) {
                     <div class="form-group">
                         <label for="dealingCharge">Dealing Charge (\xA3)</label>
                         <input type="number" id="dealingCharge" value="5" min="0" max="1000" step="1">
-                        <div class="tax-info" style="margin-top: 10px; padding: 10px; font-size: 14px;">
+                        <div class="tax-info tax-info-inline">
                             <p>\u{1F4B7} Transaction cost charged by your broker for purchasing gilts. Set to \xA30 to exclude dealing charges from calculations.</p>
                         </div>
                     </div>
@@ -4141,7 +3341,7 @@ async function renderHomePage(request, env) {
                         </select>
                     </div>
                     
-                    <div id="accountChargeSettings" style="display: none;">
+                    <div id="accountChargeSettings" class="account-charge-settings">
                         <div class="form-group">
                             <label for="accountChargeRate">Annual Charge Rate (%)</label>
                             <input type="number" id="accountChargeRate" value="0.25" min="0" max="5" step="0.05">
@@ -4152,7 +3352,7 @@ async function renderHomePage(request, env) {
                             <input type="number" id="accountChargeMax" value="3.50" min="0" max="100" step="0.25">
                         </div>
                         
-                        <div class="tax-info" style="margin-top: 10px; padding: 10px; font-size: 14px;">
+                        <div class="tax-info tax-info-inline">
                             <p>\u{1F4B7} Monthly platform fee based on gilt value at month-end. The gilt price is assumed to converge linearly to \xA3100 at maturity.</p>
                             <p><strong>Example:</strong> 0.25% annual (0.0208% monthly) capped at \xA33.50/month</p>
                         </div>
@@ -4170,9 +3370,9 @@ async function renderHomePage(request, env) {
                 
                 <div class="sidebar">
                     <h3>\u{1F527} Controls</h3>
-                    <button class="btn" id="refreshData" style="width: 100%; margin-bottom: 20px;">\u{1F504} Refresh Data</button>
+                    <button class="btn btn-full-width" id="refreshData">\u{1F504} Refresh Data</button>
                     
-                    <div id="filterControls" class="filter-controls" style="display: none;">
+                    <div id="filterControls" class="filter-controls hidden">
                         <div class="form-group">
                             <span class="form-label">Filter by Duration (Years):</span>
                             <div class="range-container">
@@ -4194,16 +3394,16 @@ async function renderHomePage(request, env) {
             </div>
             
             <!-- Summary Section - Middle -->
-            <div class="metrics" id="metrics" style="display: none;"></div>
+            <div class="metrics hidden" id="metrics"></div>
             
             <!-- Table Section - Bottom -->
             <main class="gilt-table">
                 <h3>\u{1F4CA} Available Gilts</h3>
                 
                 <div id="loading" class="loading">Loading gilt data...</div>
-                <div id="error" class="error" style="display: none;"></div>
-                <div id="giltData" style="display: none;"></div>
-                <div id="metrics" class="metrics" style="display: none;"></div>
+                <div id="error" class="error hidden"></div>
+                <div id="giltData" class="hidden"></div>
+                <div id="metrics" class="metrics hidden"></div>
             </main>
         </div>
     </div>
@@ -4559,7 +3759,7 @@ async function renderHomePage(request, env) {
                 <p><strong>Personal Savings Allowance:</strong> \xA3\${confirmedPSA.toLocaleString()}</p>
                 <p><strong>Capital Gains Tax on Gilts:</strong> 0% (exempt)</p>
                 \${confirmedPSA !== suggestedPSA ? 
-                    '<p style="color: #e67e22; font-size: 12px; margin-top: 5px;"><strong>Custom PSA:</strong> Using your specified allowance</p>' : 
+                    '<p class="custom-psa-indicator"><strong>Custom PSA:</strong> Using your specified allowance</p>' : 
                     ''
                 }
             \`;
@@ -4573,55 +3773,18 @@ async function renderHomePage(request, env) {
             return new Promise((resolve) => {
                 // Create modal HTML
                 const modalHTML = \`
-                    <div id="psaModal" style="
-                        position: fixed;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background: rgba(0,0,0,0.5);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        z-index: 10000;
-                    ">
-                        <div style="
-                            background: white;
-                            padding: 30px;
-                            border-radius: 10px;
-                            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                            max-width: 500px;
-                            width: 90%;
-                            text-align: center;
-                        ">
-                            <h3 style="margin: 0 0 20px 0; color: #2c3e50;">Personal Savings Allowance Confirmation</h3>
-                            <div style="margin: 20px 0; text-align: left; line-height: 1.5;">
+                    <div id="psaModal" class="psa-modal">
+                        <div class="psa-modal-content">
+                            <h3 class="psa-modal-title">Personal Savings Allowance Confirmation</h3>
+                            <div class="psa-modal-body">
                                 <p><strong>Tax Bracket:</strong> \${taxBracket.replace('_', ' ').toUpperCase()}</p>
                                 <p><strong>Standard PSA:</strong> \xA3\${suggestedPSA.toLocaleString()}</p>
-                                <p style="margin: 15px 0; color: #555;">\${description}</p>
+                                <p class="psa-modal-description">\${description}</p>
                             </div>
-                            <p style="margin: 20px 0; font-weight: bold;">Do you have your full Personal Savings Allowance available?</p>
-                            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
-                                <button id="psaStandard" style="
-                                    background: #27ae60;
-                                    color: white;
-                                    border: none;
-                                    padding: 12px 20px;
-                                    border-radius: 6px;
-                                    cursor: pointer;
-                                    font-size: 16px;
-                                    font-weight: bold;
-                                ">Standard Amount (\xA3\${suggestedPSA.toLocaleString()})</button>
-                                <button id="psaNil" style="
-                                    background: #e74c3c;
-                                    color: white;
-                                    border: none;
-                                    padding: 12px 20px;
-                                    border-radius: 6px;
-                                    cursor: pointer;
-                                    font-size: 16px;
-                                    font-weight: bold;
-                                ">Nil Available (\xA30)</button>
+                            <p class="psa-modal-question">Do you have your full Personal Savings Allowance available?</p>
+                            <div class="psa-modal-buttons">
+                                <button id="psaStandard" class="psa-btn-standard">Standard Amount (\xA3\${suggestedPSA.toLocaleString()})</button>
+                                <button id="psaNil" class="psa-btn-nil">Nil Available (\xA30)</button>
                             </div>
                         </div>
                     </div>
@@ -5220,7 +4383,7 @@ async function renderHomePage(request, env) {
             // Display metrics (from filtered results)
             if (sortedResults.length === 0) {
                 metricsDiv.innerHTML = '<div class="metric-card"><div class="metric-label">No gilts match your duration filter</div></div>';
-                dataDiv.innerHTML = '<p style="text-align: center; padding: 20px; color: #7f8c8d;">No gilts found within the selected duration range. Adjust the filter above.</p>';
+                dataDiv.innerHTML = '<p class="no-gilts-message">No gilts found within the selected duration range. Adjust the filter above.</p>';
                 return;
             }
             
@@ -5228,23 +4391,23 @@ async function renderHomePage(request, env) {
                 (gilt.afterTaxYield || 0) > (best.afterTaxYield || 0) ? gilt : best, sortedResults[0]);
             
             metricsDiv.innerHTML = \`
-                <div class="metric-card" style="grid-column: 1 / -1; text-align: center; padding: 30px;">
-                    <div class="metric-label" style="font-size: 1.2em; margin-bottom: 15px;">\u{1F4B7} Best Investment Summary</div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
-                        <div>
-                            <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Best Gilt</div>
-                            <div style="font-size: 1.1em; font-weight: bold; color: #2c3e50;">\${bestGilt.name}</div>
-                            <div style="font-size: 1.3em; font-weight: bold; color: #27ae60; margin-top: 5px;">\${(bestGilt.afterTaxYield || 0).toFixed(2)}%</div>
+                <div class="metric-card investment-summary">
+                    <div class="investment-summary-title">\u{1F4B7} Best Investment Summary</div>
+                    <div class="investment-summary-grid">
+                        <div class="investment-summary-item">
+                            <div class="investment-summary-label">Best Gilt</div>
+                            <div class="investment-summary-value">\${bestGilt.name}</div>
+                            <div class="investment-summary-large">\${(bestGilt.afterTaxYield || 0).toFixed(2)}%</div>
                         </div>
-                        <div>
-                            <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Equivalent Savings Rate</div>
-                            <div style="font-size: 1.3em; font-weight: bold; color: #3498db;">\${(bestGilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</div>
-                            <div style="font-size: 0.8em; color: #666; margin-top: 5px;">needed in savings account</div>
+                        <div class="investment-summary-item">
+                            <div class="investment-summary-label">Equivalent Savings Rate</div>
+                            <div class="investment-summary-blue">\${(bestGilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</div>
+                            <div class="investment-summary-small">needed in savings account</div>
                         </div>
-                        <div>
-                            <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Extra Income</div>
-                            <div style="font-size: 1.3em; font-weight: bold; color: #e67e22;">\${formatCurrency(bestGilt.extraIncome || 0)}</div>
-                            <div style="font-size: 0.8em; color: #666; margin-top: 5px;">vs. typical savings over \${Math.floor(bestGilt.yearsToMaturity)} \${Math.floor(bestGilt.yearsToMaturity) === 1 ? 'year' : 'years'} \${Math.round((bestGilt.yearsToMaturity % 1) * 365)} days</div>
+                        <div class="investment-summary-item">
+                            <div class="investment-summary-label">Extra Income</div>
+                            <div class="investment-summary-orange">\${formatCurrency(bestGilt.extraIncome || 0)}</div>
+                            <div class="investment-summary-small">vs. typical savings over \${Math.floor(bestGilt.yearsToMaturity)} \${Math.floor(bestGilt.yearsToMaturity) === 1 ? 'year' : 'years'} \${Math.round((bestGilt.yearsToMaturity % 1) * 365)} days</div>
                         </div>
                     </div>
                 </div>
@@ -5256,26 +4419,26 @@ async function renderHomePage(request, env) {
                 <div class="table-container">
                     <table>
                         <thead>
-                            <tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">
-                                <th style="padding: 12px; text-align: left; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Gilt' : 'Name'}</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Clean \xA3' : 'Clean Price'}</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Dirty \xA3' : 'Dirty Price'}</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'After-Tax' : 'After-Tax IRR'}</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Equiv Rate' : 'Equivalent Gross Savings Rate'}</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Years' : 'Years to Maturity'}</th>
-                                <th style="padding: 12px; text-align: right;">\${isMobile ? 'Advantage' : 'Extra vs Savings'}</th>
+                            <tr class="table-header-row">
+                                <th class="table-header-cell">\${isMobile ? 'Gilt' : 'Name'}</th>
+                                <th class="table-header-cell text-right">\${isMobile ? 'Clean \xA3' : 'Clean Price'}</th>
+                                <th class="table-header-cell text-right">\${isMobile ? 'Dirty \xA3' : 'Dirty Price'}</th>
+                                <th class="table-header-cell text-right">\${isMobile ? 'After-Tax' : 'After-Tax IRR'}</th>
+                                <th class="table-header-cell text-right">\${isMobile ? 'Equiv Rate' : 'Equivalent Gross Savings Rate'}</th>
+                                <th class="table-header-cell text-right">\${isMobile ? 'Years' : 'Years to Maturity'}</th>
+                                <th class="table-header-cell text-right no-border">\${isMobile ? 'Advantage' : 'Extra vs Savings'}</th>
                             </tr>
                         </thead>
                         <tbody>
                             \${sortedResults.map((gilt, index) => \`
-                                <tr style="border-bottom: 1px solid #e0e0e0;">
-                                    <td class="clickable-cell" data-type="name" data-index="\${index}" style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500; text-align: left;">\${gilt.name}</td>
-                                    <td class="clickable-cell" data-type="clean-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\xA3\${formatMoney(gilt.cleanPrice || 0)}</td>
-                                    <td class="clickable-cell" data-type="dirty-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\xA3\${formatMoney(gilt.dirtyPrice || gilt.cleanPrice || 0)}</td>
-                                    <td class="clickable-cell" data-type="after-tax" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${(gilt.afterTaxYield || 0).toFixed(2)}%</td>
-                                    <td class="clickable-cell" data-type="equivalent" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</td>
-                                    <td class="clickable-cell" data-type="years" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.yearsToMaturity || 0).toFixed(1)}</td>
-                                    <td class="clickable-cell" data-type="advantage" data-index="\${index}" style="padding: 12px; text-align: right; font-weight: bold; color: \${gilt.extraIncome >= 0 ? '#27ae60' : '#e74c3c'};">\xA3\${formatMoney(gilt.extraIncome || 0)}</td>
+                                <tr>
+                                    <td class="clickable-cell table-cell text-left font-weight-500" data-type="name" data-index="\${index}">\${gilt.name}</td>
+                                    <td class="clickable-cell table-cell text-right" data-type="clean-price" data-index="\${index}">\xA3\${formatMoney(gilt.cleanPrice || 0)}</td>
+                                    <td class="clickable-cell table-cell text-right" data-type="dirty-price" data-index="\${index}">\xA3\${formatMoney(gilt.dirtyPrice || gilt.cleanPrice || 0)}</td>
+                                    <td class="clickable-cell table-cell text-right font-weight-bold color-success" data-type="after-tax" data-index="\${index}">\${(gilt.afterTaxYield || 0).toFixed(2)}%</td>
+                                    <td class="clickable-cell table-cell text-right" data-type="equivalent" data-index="\${index}">\${(gilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</td>
+                                    <td class="clickable-cell table-cell text-right" data-type="years" data-index="\${index}">\${(gilt.yearsToMaturity || 0).toFixed(1)}</td>
+                                    <td class="clickable-cell table-cell text-right font-weight-bold no-border \${gilt.extraIncome >= 0 ? 'color-success' : 'color-danger'}" data-type="advantage" data-index="\${index}">\xA3\${formatMoney(gilt.extraIncome || 0)}</td>
                                 </tr>
                             \`).join('')}
                         </tbody>
@@ -5318,17 +4481,17 @@ async function renderHomePage(request, env) {
                                 month: 'short',
                                 year: 'numeric'
                             });
-                            paymentItems += '<div style="padding: 5px; border: 1px solid #e0e0e0; border-radius: 3px; background: white;">' +
-                                '<div style="font-weight: bold; font-size: 0.9em;">' + paymentDate + '</div>' +
+                            paymentItems += '<div class="coupon-payment-item">' +
+                                '<div class="coupon-payment-date">' + paymentDate + '</div>' +
                                 '</div>';
                         });
                         
-                        couponScheduleDisplay = '<div style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 5px;">' +
-                            '<h5 style="margin-bottom: 10px; color: #2c3e50;">\u{1F4C5} Coupon Payment Schedule</h5>' +
-                            '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 200px; overflow-y: auto;">' +
+                        couponScheduleDisplay = '<div class="coupon-schedule-container">' +
+                            '<h5 class="coupon-totals-title">\u{1F4C5} Coupon Payment Schedule</h5>' +
+                            '<div class="coupon-totals-grid coupon-scroll-container">' +
                             paymentItems +
                             '</div>' +
-                            '<div style="margin-top: 10px; font-size: 0.9em; color: #666;">' +
+                            '<div class="coupon-totals-small coupon-totals-margin-top">' +
                             '<strong>Total Payments:</strong> ' + gilt.couponSchedule.length + ' semi-annual coupons' +
                             '</div>' +
                             '</div>';
@@ -5350,7 +4513,7 @@ async function renderHomePage(request, env) {
                     // Build next coupon section
                     let nextCouponSection = '';
                     if (nextCouponInfo) {
-                        nextCouponSection = '<p style="margin: 2px 0;"><strong>Date:</strong> ' + new Date(nextCouponInfo.date).toLocaleDateString('en-GB') + '</p>';
+                        nextCouponSection = '<p class="modal-section-item"><strong>Date:</strong> ' + new Date(nextCouponInfo.date).toLocaleDateString('en-GB') + '</p>';
                     } else {
                         nextCouponSection = '<p>No coupon data available</p>';
                     }
@@ -5358,25 +4521,25 @@ async function renderHomePage(request, env) {
                     // Build last coupon section
                     let lastCouponSection = '';
                     if (lastCouponInfo) {
-                        lastCouponSection = '<p style="margin: 2px 0;"><strong>Last Coupon Date:</strong> ' + new Date(lastCouponInfo.date).toLocaleDateString('en-GB') + '</p>';
+                        lastCouponSection = '<p class="modal-section-item"><strong>Last Coupon Date:</strong> ' + new Date(lastCouponInfo.date).toLocaleDateString('en-GB') + '</p>';
                     }
                     
                     contentHTML = '<div class="calculation-step">' +
                         '<h4>UK Government Bond Information</h4>' +
-                        '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">' +
+                        '<div class="modal-grid">' +
                         '<div>' +
-                        '<h5 style="color: #2c3e50; margin-bottom: 8px;">\u{1F4CA} Bond Basics</h5>' +
-                        '<p style="margin: 3px 0;"><strong>Full Name:</strong> ' + gilt.name + '</p>' +
-                        '<p style="margin: 3px 0;"><strong>Coupon Rate:</strong> ' + formatCouponRate(gilt.couponRate) + '</p>' +
-                        '<p style="margin: 3px 0;"><strong>Maturity Date:</strong> ' + formattedMaturityDate + '</p>' +
-                        '<p style="margin: 3px 0;"><strong>Years to Maturity:</strong> ' + gilt.yearsToMaturity.toFixed(2) + ' years</p>' +
+                        '<h5 class="modal-section-title">\u{1F4CA} Bond Basics</h5>' +
+                        '<p class="modal-info-item"><strong>Full Name:</strong> ' + gilt.name + '</p>' +
+                        '<p class="modal-info-item"><strong>Coupon Rate:</strong> ' + formatCouponRate(gilt.couponRate) + '</p>' +
+                        '<p class="modal-info-item"><strong>Maturity Date:</strong> ' + formattedMaturityDate + '</p>' +
+                        '<p class="modal-info-item"><strong>Years to Maturity:</strong> ' + gilt.yearsToMaturity.toFixed(2) + ' years</p>' +
                         '</div>' +
                         '<div>' +
-                        '<h5 style="color: #2c3e50; margin-bottom: 8px;">\u{1F4B7} Current Pricing</h5>' +
-                        '<p style="margin: 3px 0;"><strong>Clean Price:</strong> \xA3' + formatMoney(gilt.cleanPrice) + '</p>' +
-                        '<p style="margin: 3px 0;"><strong>Dirty Price:</strong> \xA3' + formatMoney(gilt.dirtyPrice) + '</p>' +
-                        '<p style="margin: 3px 0;"><strong>Accrued Interest:</strong> \xA3' + formatMoney(gilt.dirtyPrice - gilt.cleanPrice) + '</p>' +
-                        '<p style="margin: 3px 0;"><strong>Current Yield:</strong> ' + gilt.currentYield.toFixed(2) + '%</p>' +
+                        '<h5 class="modal-section-title">\u{1F4B7} Current Pricing</h5>' +
+                        '<p class="modal-info-item"><strong>Clean Price:</strong> \xA3' + formatMoney(gilt.cleanPrice) + '</p>' +
+                        '<p class="modal-info-item"><strong>Dirty Price:</strong> \xA3' + formatMoney(gilt.dirtyPrice) + '</p>' +
+                        '<p class="modal-info-item"><strong>Accrued Interest:</strong> \xA3' + formatMoney(gilt.dirtyPrice - gilt.cleanPrice) + '</p>' +
+                        '<p class="modal-info-item"><strong>Current Yield:</strong> ' + gilt.currentYield.toFixed(2) + '%</p>' +
                         '</div>' +
                         '</div>' +
                         '</div>' +
@@ -6441,6 +5604,9 @@ var src_default = {
     if (path.startsWith("/lib/")) {
       return await handleLibFile(request, env, path);
     }
+    if (path.startsWith("/styles/")) {
+      return await handleStyleFile(request, env, path);
+    }
     if (path.startsWith("/static/")) {
       return await handleStaticFile(request, env);
     }
@@ -6990,6 +6156,673 @@ async function getCouponSchedule(request, env) {
   });
 }
 __name(getCouponSchedule, "getCouponSchedule");
+async function handleStyleFile(request, env, path) {
+  let cssContent = "";
+  if (path === "/styles/main.css") {
+    cssContent = `/* Main CSS for UK Gilt Tax Efficiency Analyser */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.header h1 {
+    color: #2c3e50;
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.header p {
+    color: #7f8c8d;
+    font-size: 1.1em;
+}
+
+.sidebar {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.sidebar h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label,
+.form-group .form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+.tax-info {
+    background: #f1f8ff;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    border-left: 4px solid #3498db;
+}
+
+.tax-info h4 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.tax-info-inline {
+    margin-top: 10px;
+    padding: 10px;
+    font-size: 14px;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.controls-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.gilt-table {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow-x: auto;
+    min-width: 100%;
+}
+
+.gilt-table h3 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.4em;
+}
+
+.table-container {
+    overflow-x: auto;
+    min-width: 800px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #2c3e50;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+tr:hover {
+    background-color: #f8f9fa;
+}
+
+td:hover {
+    background-color: #e8f4fd;
+}
+
+.btn {
+    background: #3498db;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    min-height: 44px;
+}
+
+.btn:hover {
+    background: #2980b9;
+}
+
+.btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.btn-full-width {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.metrics.hidden {
+    display: none;
+}
+
+.metric-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    text-align: center;
+    border-left: 4px solid #3498db;
+}
+
+.metric-value {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.metric-label {
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+.error {
+    background: #ffebee;
+    color: #c62828;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #f44336;
+    margin: 20px 0;
+}
+
+.error.hidden {
+    display: none;
+}
+
+.success {
+    background: #e8f5e8;
+    color: #2e7d32;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #4caf50;
+    margin: 20px 0;
+}
+
+.data-source {
+    background: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.data-source.live {
+    background: #e8f5e8;
+    color: #2e7d32;
+    border-left: 4px solid #4caf50;
+}
+
+.data-source.cached {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-left: 4px solid #2196f3;
+}
+
+.data-source.static {
+    background: #fff3e0;
+    color: #e65100;
+    border-left: 4px solid #ff9800;
+}
+
+.filter-controls {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.filter-controls.hidden {
+    display: none;
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: auto auto auto auto 1fr;
+    gap: 15px;
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 14px;
+}
+
+.filter-group input {
+    padding: 8px;
+    border: 2px solid #e0e0e0;
+    border-radius: 5px;
+    width: 80px;
+    font-size: 16px;
+}
+
+.filter-info {
+    color: #7f8c8d;
+    font-size: 14px;
+    text-align: right;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.account-charge-settings {
+    display: none;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: white;
+    border-radius: 10px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #f8f9fa;
+    border-radius: 10px 10px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 1001;
+}
+
+.modal-title {
+    font-size: 1.3em;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #7f8c8d;
+    padding: 5px;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: #2c3e50;
+}
+
+.modal-content {
+    padding: 30px;
+}
+
+.explanation-section {
+    margin-bottom: 25px;
+}
+
+.explanation-section h4 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.formula {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    border-left: 4px solid #3498db;
+    margin: 10px 0;
+    overflow-x: auto;
+}
+
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.schedule-table th,
+.schedule-table td {
+    padding: 8px 12px;
+    text-align: right;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+}
+
+.schedule-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #2c3e50;
+    position: sticky;
+    top: 0;
+}
+
+.schedule-table th:first-child,
+.schedule-table td:first-child {
+    text-align: left;
+}
+
+.coupon-payment {
+    background: #e8f5e8 !important;
+}
+
+.account-charge {
+    background: #fff8e1 !important;
+}
+
+.charge-max {
+    font-weight: bold;
+    color: #f57c00;
+}
+
+.schedule-section {
+    margin-bottom: 30px;
+}
+
+.schedule-section h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.schedule-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.summary-item {
+    text-align: center;
+}
+
+.summary-value {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #2c3e50;
+    display: block;
+}
+
+.summary-label {
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+.custom-psa-indicator {
+    color: #e67e22;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.custom-psa-indicator strong {
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header {
+        padding: 20px;
+    }
+    
+    .header h1 {
+        font-size: 1.8em;
+    }
+    
+    .controls-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .metrics {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .filter-group input {
+        width: 100%;
+    }
+    
+    th, td {
+        padding: 8px;
+        font-size: 14px;
+    }
+    
+    .modal {
+        max-width: 95%;
+        max-height: 95%;
+    }
+    
+    .modal-content {
+        padding: 20px;
+    }
+    
+    .schedule-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.5em;
+    }
+    
+    .btn {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+    
+    th, td {
+        padding: 6px;
+        font-size: 12px;
+    }
+    
+    .table-container {
+        min-width: 600px;
+    }
+}`;
+  } else if (path === "/styles/analysis.css") {
+    cssContent = `/* Analysis Page Specific Styles */
+
+.analysis-section {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.coupon-schedule {
+    overflow-x: auto;
+}
+
+.coupon-schedule table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.coupon-schedule th,
+.coupon-schedule td {
+    padding: 12px;
+    text-align: right;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.coupon-schedule th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.coupon-schedule th:first-child,
+.coupon-schedule td:first-child {
+    text-align: left;
+}
+
+.schedule-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.summary-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+}
+
+.back-button {
+    background: #95a5a6;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.back-button:hover {
+    background: #7f8c8d;
+}`;
+  } else {
+    return new Response("CSS file not found", {
+      status: 404,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Cross-Origin-Resource-Policy": "same-origin",
+        "Origin-Agent-Cluster": "?1",
+        "X-Permitted-Cross-Domain-Policies": "none"
+      }
+    });
+  }
+  return new Response(cssContent, {
+    headers: {
+      "Content-Type": "text/css; charset=utf-8",
+      "Cache-Control": "public, max-age=31536000, immutable",
+      "ETag": '"css-v1.0"',
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+      "Cross-Origin-Resource-Policy": "cross-origin",
+      "Origin-Agent-Cluster": "?1",
+      "X-Permitted-Cross-Domain-Policies": "none"
+    }
+  });
+}
+__name(handleStyleFile, "handleStyleFile");
 
 // node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
 init_checked_fetch();
@@ -7036,7 +6869,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-iUEIDr/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-8HYcUC/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -7070,7 +6903,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-iUEIDr/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-8HYcUC/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
