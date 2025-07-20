@@ -2510,7 +2510,7 @@ export async function renderHomePage(request, env) {
                                 const remainingDays = totalDays % 365;
                                 return years + ' years + ' + remainingDays + ' days (' + totalDays + ' total days)';
                             })()} </p>
-                            <p><strong>Total Cash Received:</strong> £\${savingsTotalCash.toFixed(2)}</p>
+                            <p><strong>Total Cash Received:</strong> £\${savingsTotalCash.toFixed(2)} (Precision: £\${savingsTotalCash.toFixed(6)})</p>
                             
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
                                 <h5 style="margin-top: 0;">Detailed Interest Calculation:</h5>
@@ -2533,7 +2533,8 @@ export async function renderHomePage(request, env) {
                                 </div>
                                 
                                 <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
-                                    <strong>Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit over \${(gilt.yearsToMaturity || 0).toFixed(2)} years
+                                    <strong>Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit over \${(gilt.yearsToMaturity || 0).toFixed(2)} years<br>
+                                    <strong>Return Precision:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(6)} profit
                                 </p>
                             </div>
                         </div>
@@ -2545,11 +2546,12 @@ export async function renderHomePage(request, env) {
                                 Extra Income = Total Cash from Gilt - Total Cash from Savings<br><br>
                                 <strong>Calculation:</strong><br>
                                 £\${giltTotalCash.toFixed(2)} - £\${savingsTotalCash.toFixed(2)}<br>
-                                = <strong>£\${extraIncomeTotal.toFixed(2)}</strong>
+                                = <strong>£\${extraIncomeTotal.toFixed(2)}</strong><br>
+                                <small style="color: #666;">Precision: £\${giltTotalCash.toFixed(6)} - £\${savingsTotalCash.toFixed(6)} = £\${extraIncomeTotal.toFixed(6)}</small>
                             </div>
-                            <p><strong>Gilt Total Return:</strong> £\${(giltTotalCash - investmentAmount).toFixed(2)} profit</p>
-                            <p><strong>Savings Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit</p>
-                            <p><strong>Total Advantage:</strong> £\${extraIncomeTotal.toFixed(2)} over \${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
+                            <p><strong>Gilt Total Return:</strong> £\${(giltTotalCash - investmentAmount).toFixed(2)} profit (Precision: £\${(giltTotalCash - investmentAmount).toFixed(6)})</p>
+                            <p><strong>Savings Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit (Precision: £\${(savingsTotalCash - investmentAmount).toFixed(6)})</p>
+                            <p><strong>Total Advantage:</strong> £\${extraIncomeTotal.toFixed(2)} over \${(gilt.yearsToMaturity || 0).toFixed(2)} years (Precision: £\${extraIncomeTotal.toFixed(6)})</p>
                             <p style="margin-top: 15px; font-weight: bold; color: \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'};">
                                 \${advantagePercent >= 0 ? 
                                     \`This gilt will earn you £\${Math.abs(extraIncomeTotal).toFixed(2)} MORE than a savings account.\` : 
