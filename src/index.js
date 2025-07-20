@@ -233,7 +233,10 @@ export function getCachedCalculation(key, calculationFn, ...args) {
         'Content-Type': 'application/javascript; charset=utf-8',
         'Cache-Control': 'public, max-age=31536000, immutable',
         'ETag': '"utils-v1.0"',
-        'X-Content-Type-Options': 'nosniff'
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
       }
     });
   }
@@ -242,7 +245,10 @@ export function getCachedCalculation(key, calculationFn, ...args) {
     status: 404,
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
-      'X-Content-Type-Options': 'nosniff'
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
     }
   });
 }
@@ -254,7 +260,10 @@ async function handleStaticFile(request, env) {
     status: 404,
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
-      'X-Content-Type-Options': 'nosniff'
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
     }
   });
 }
@@ -286,7 +295,10 @@ async function handleAPIRequest(request, env, path) {
       headers: { 
         'Content-Type': 'application/json; charset=utf-8',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'X-Content-Type-Options': 'nosniff'
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
       }
     });
   }
@@ -311,7 +323,10 @@ async function getGiltData(request, env) {
         'Content-Type': 'application/json; charset=utf-8',
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'X-Content-Type-Options': 'nosniff'
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
       }
     });
   } catch (error) {
@@ -326,7 +341,10 @@ async function getGiltData(request, env) {
         'Content-Type': 'application/json; charset=utf-8',
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'X-Content-Type-Options': 'nosniff'
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
       }
     });
   }
@@ -419,7 +437,10 @@ async function calculateTax(request, env) {
           'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'X-Content-Type-Options': 'nosniff'
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
         }
       });
     } else {
@@ -438,7 +459,10 @@ async function calculateTax(request, env) {
           'Content-Type': 'application/json; charset=utf-8',
           'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'X-Content-Type-Options': 'nosniff'
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
         }
       });
     }
@@ -449,7 +473,10 @@ async function calculateTax(request, env) {
         'Content-Type': 'application/json; charset=utf-8',
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'X-Content-Type-Options': 'nosniff'
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
       }
     });
   }

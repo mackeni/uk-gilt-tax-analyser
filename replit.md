@@ -585,9 +585,30 @@ This migration maintains all original functionality while dramatically improving
 - **Input Handling**: Empty or invalid inputs default to £5 (realistic broker charge)
 - **Calculation Logic**: All calculations properly handle both £0 and positive dealing charges
 
+### July 20, 2025 - Comprehensive Security Headers Implementation
+
+**Version ID**: 3ecd3f87-12cb-4dba-9058-ee6bfd483db4
+
+**Complete Security Headers Implementation:**
+- **Content Security Policy**: Implemented strict CSP preventing XSS attacks with 'self' directives and minimal inline allowances
+- **HTTP Strict Transport Security**: Added HSTS with 1-year max-age, includeSubDomains, and preload directives
+- **Frame Protection**: X-Frame-Options set to DENY preventing clickjacking attacks
+- **XSS Protection**: X-XSS-Protection header with mode=block for legacy browser protection
+- **Content Type Protection**: X-Content-Type-Options nosniff preventing MIME-type confusion attacks
+- **Referrer Policy**: Strict-origin-when-cross-origin for privacy-conscious referrer handling
+- **Permissions Policy**: Comprehensive restriction of device APIs (geolocation, microphone, camera, payment, USB, sensors)
+- **Applied Across All Endpoints**: HTML, JSON API, JavaScript modules, and error responses all include security headers
+
+**Security Best Practices Achieved:**
+- **Complete Attack Surface Protection**: XSS, clickjacking, MIME sniffing, and protocol downgrade protection
+- **Device Permission Lockdown**: All sensitive device APIs disabled except fullscreen for legitimate use
+- **Transport Security**: Enforced HTTPS with HSTS preload eligibility
+- **Content Isolation**: Strict CSP allowing only necessary sources and functionality
+- **Privacy Protection**: Minimized referrer information leakage across origins
+
 ### July 20, 2025 - Duration Filter Bug Fix and UI Optimization
 
-**Version ID**: [Latest Deployment]
+**Previous Version**
 
 **Critical Bug Fix:**
 - **Fixed Duration Filter Issue**: Resolved bug where yearsToMaturity was null for all gilts, causing complete filtering failure
