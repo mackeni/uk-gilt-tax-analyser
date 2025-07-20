@@ -2360,8 +2360,13 @@ export async function renderHomePage(request, env) {
                     const modalTaxRate = getCurrentTaxRate();
                     const investmentAmount = currentSettings.investmentAmount || 10000;
                     
+                    // Calculate units owned using same method as IRR tooltip
+                    const dealingCharge = currentSettings.dealingCharge || 0;
+                    const effectiveInvestment = investmentAmount - dealingCharge;
+                    const unitsOwned = effectiveInvestment / gilt.dirtyPrice * 100;
+                    
                     // Calculate precise total cash flows - ensure we use the function that includes charges
-                    const giltTotalCash = calculateTotalCashFromGilt(gilt, gilt.unitsOwned, modalTaxRate / 100);
+                    const giltTotalCash = calculateTotalCashFromGilt(gilt, unitsOwned, modalTaxRate / 100);
                     const savingsTotalCash = calculateTotalCashFromSavings(investmentAmount, savingsRate, modalTaxRate / 100, psaAmount, gilt.yearsToMaturity);
                     
                     // Calculate total monthly charges using the SAME function as IRR calculation
@@ -2412,7 +2417,7 @@ export async function renderHomePage(request, env) {
                                 const totalGrossCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0) : 0;
                                 const totalCouponTax = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.taxAmount, 0) : 0;
                                 const totalNetCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.afterTaxAmount, 0) : 0;
-                                const principalAmount = gilt.unitsOwned || 0;
+                                const principalAmount = unitsOwned;
                                 const numPayments = gilt.couponSchedule ? gilt.couponSchedule.length : 0;
                                 const semiAnnualRate = gilt.couponRate / 2;
                                 const effectiveInvestment = investmentAmount - (currentSettings.dealingCharge || 0);
@@ -2487,7 +2492,7 @@ export async function renderHomePage(request, env) {
                             <div style="margin-left: 20px; color: #666;">
                                 <p><small>• All coupon payments (after \${modalTaxRate}% income tax)</small></p>
                                 \${currentSettings.accountChargeEnabled ? '<p><small>• Monthly account charges: ' + (totalMonthlyCharges > 0 ? '£' + totalMonthlyCharges.toFixed(2) + ' total deducted' : 'None calculated') + '</small></p>' : ''}
-                                <p><small>• Principal repayment: £\${(gilt.unitsOwned || 0).toFixed(2)} (tax-free)</small></p>
+                                <p><small>• Principal repayment: £\${unitsOwned.toFixed(2)} (tax-free)</small></p>
                                 <p><small>• Based on actual payment schedule with exact dates</small></p>
                                 \${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: £' + giltTotalCash.toFixed(2) + ' (Precision: £' + giltTotalCash.toFixed(6) + ')</small></p>' : ''}
                             </div>
