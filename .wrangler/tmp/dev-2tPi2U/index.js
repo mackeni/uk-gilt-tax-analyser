@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-zwhPk5/checked-fetch.js
+// .wrangler/tmp/bundle-wo8WeG/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-zwhPk5/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-wo8WeG/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-zwhPk5/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-wo8WeG/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-zwhPk5/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-wo8WeG/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4113,7 +4113,8 @@ async function renderHomePage(request, env) {
 
             
             console.log('About to map through', giltData.length, 'gilts for tax calculations');
-            return giltData.map((gilt, index) => {
+            try {
+                const results = giltData.map((gilt, index) => {
                 console.log('Processing gilt', index + 1, ':', gilt.name);
                 // Ensure yearsToMaturity is calculated
                 if (!gilt.yearsToMaturity || gilt.yearsToMaturity === null) {
@@ -4125,8 +4126,12 @@ async function renderHomePage(request, env) {
                 // Include dealing charge in units calculation (if any)
                 const dealingCharge = currentSettings.dealingCharge || 0;
                 console.log('Dealing charge:', dealingCharge);
+                console.log('Calculating effective investment amount...');
                 const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge
+                console.log('Effective investment amount:', effectiveInvestmentAmount);
+                console.log('About to calculate units owned for', gilt.name);
                 const unitsOwned = getCachedComplexCalculation('unitsOwned_' + dealingCharge + '_' + investmentAmount, calculateUnitsOwned, effectiveInvestmentAmount, gilt.dirtyPrice);
+                console.log('Units owned calculated:', unitsOwned);
                 
                 // ALWAYS regenerate coupon schedule since it depends on unitsOwned (investment amount)
                 gilt.couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
@@ -4151,8 +4156,9 @@ async function renderHomePage(request, env) {
                 const savingsTotalCashReceived = getCachedComplexCalculation('savingsCash_' + investmentAmount + '_' + savingsRate, calculateTotalCashFromSavings, investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
                 const extraIncome = giltTotalCashReceived - savingsTotalCashReceived;
                 
+                console.log('Creating result object for', gilt.name);
                 // Return optimized object creation (avoid spread operator for performance)
-                return {
+                const resultObject = {
                     name: gilt.name,
                     couponRate: gilt.couponRate,
                     cleanPrice: gilt.cleanPrice,
@@ -4168,7 +4174,16 @@ async function renderHomePage(request, env) {
                     extraIncome: extraIncome,
                     unitsOwned: unitsOwned
                 };
-            });
+                console.log('Completed processing for', gilt.name);
+                return resultObject;
+                });
+                
+                console.log('Map completed successfully, returning', results.length, 'results');
+                return results;
+            } catch (mapError) {
+                console.error('Error during gilt mapping:', mapError);
+                throw mapError;
+            }
         }
         
         function calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate) {
@@ -6932,7 +6947,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-zwhPk5/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-wo8WeG/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6966,7 +6981,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-zwhPk5/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-wo8WeG/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

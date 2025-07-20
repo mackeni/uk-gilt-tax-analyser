@@ -834,7 +834,8 @@ export async function renderHomePage(request, env) {
 
             
             console.log('About to map through', giltData.length, 'gilts for tax calculations');
-            return giltData.map((gilt, index) => {
+            try {
+                const results = giltData.map((gilt, index) => {
                 console.log('Processing gilt', index + 1, ':', gilt.name);
                 // Ensure yearsToMaturity is calculated
                 if (!gilt.yearsToMaturity || gilt.yearsToMaturity === null) {
@@ -846,8 +847,12 @@ export async function renderHomePage(request, env) {
                 // Include dealing charge in units calculation (if any)
                 const dealingCharge = currentSettings.dealingCharge || 0;
                 console.log('Dealing charge:', dealingCharge);
+                console.log('Calculating effective investment amount...');
                 const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge
+                console.log('Effective investment amount:', effectiveInvestmentAmount);
+                console.log('About to calculate units owned for', gilt.name);
                 const unitsOwned = getCachedComplexCalculation('unitsOwned_' + dealingCharge + '_' + investmentAmount, calculateUnitsOwned, effectiveInvestmentAmount, gilt.dirtyPrice);
+                console.log('Units owned calculated:', unitsOwned);
                 
                 // ALWAYS regenerate coupon schedule since it depends on unitsOwned (investment amount)
                 gilt.couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
@@ -872,8 +877,9 @@ export async function renderHomePage(request, env) {
                 const savingsTotalCashReceived = getCachedComplexCalculation('savingsCash_' + investmentAmount + '_' + savingsRate, calculateTotalCashFromSavings, investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
                 const extraIncome = giltTotalCashReceived - savingsTotalCashReceived;
                 
+                console.log('Creating result object for', gilt.name);
                 // Return optimized object creation (avoid spread operator for performance)
-                return {
+                const resultObject = {
                     name: gilt.name,
                     couponRate: gilt.couponRate,
                     cleanPrice: gilt.cleanPrice,
@@ -889,7 +895,16 @@ export async function renderHomePage(request, env) {
                     extraIncome: extraIncome,
                     unitsOwned: unitsOwned
                 };
-            });
+                console.log('Completed processing for', gilt.name);
+                return resultObject;
+                });
+                
+                console.log('Map completed successfully, returning', results.length, 'results');
+                return results;
+            } catch (mapError) {
+                console.error('Error during gilt mapping:', mapError);
+                throw mapError;
+            }
         }
         
         function calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate) {
