@@ -934,8 +934,16 @@ export async function renderHomePage(request, env) {
                 return 'N/A';
             }
             
-            // Always show full amount with exactly 2 decimal places
+            // Always show full amount with exactly 2 decimal places and comma separators
             return currency + amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        
+        // Helper function to format any monetary amount with commas
+        function formatMoney(amount) {
+            if (isNaN(amount) || amount === null || amount === undefined) {
+                return '0.00';
+            }
+            return amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function formatPercentage(percentage, decimalPlaces = 2) {
@@ -1971,12 +1979,12 @@ export async function renderHomePage(request, env) {
                             \${sortedResults.map((gilt, index) => \`
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
                                     <td class="clickable-cell" data-type="name" data-index="\${index}" style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500; text-align: left;">\${gilt.name}</td>
-                                    <td class="clickable-cell" data-type="clean-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.cleanPrice || 0).toFixed(2)}</td>
-                                    <td class="clickable-cell" data-type="dirty-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${(gilt.dirtyPrice || gilt.cleanPrice || 0).toFixed(2)}</td>
+                                    <td class="clickable-cell" data-type="clean-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${formatMoney(gilt.cleanPrice || 0)}</td>
+                                    <td class="clickable-cell" data-type="dirty-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${formatMoney(gilt.dirtyPrice || gilt.cleanPrice || 0)}</td>
                                     <td class="clickable-cell" data-type="after-tax" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${(gilt.afterTaxYield || 0).toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="equivalent" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</td>
                                     <td class="clickable-cell" data-type="years" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.yearsToMaturity || 0).toFixed(1)}</td>
-                                    <td class="clickable-cell" data-type="advantage" data-index="\${index}" style="padding: 12px; text-align: right; font-weight: bold; color: \${gilt.extraIncome >= 0 ? '#27ae60' : '#e74c3c'};">\${formatCurrency(gilt.extraIncome || 0)}</td>
+                                    <td class="clickable-cell" data-type="advantage" data-index="\${index}" style="padding: 12px; text-align: right; font-weight: bold; color: \${gilt.extraIncome >= 0 ? '#27ae60' : '#e74c3c'};">£\${formatMoney(gilt.extraIncome || 0)}</td>
                                 </tr>
                             \`).join('')}
                         </tbody>
@@ -2191,9 +2199,9 @@ export async function renderHomePage(request, env) {
                             scheduleHTML += \`
                                 <tr>
                                     <td style="border: 1px solid #ddd; padding: 8px;">\${paymentDate}</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${payment.grossAmount.toFixed(2)}</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${roundedTaxAmount.toFixed(2)}</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${roundedAfterTaxAmount.toFixed(2)}</strong></td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${formatMoney(payment.grossAmount)}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${formatMoney(roundedTaxAmount)}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${formatMoney(roundedAfterTaxAmount)}</strong></td>
                                 </tr>
                             \`;
                         });
@@ -2207,7 +2215,7 @@ export async function renderHomePage(request, env) {
                             <tr style="background: #e8f5e8;">
                                 <td style="border: 1px solid #ddd; padding: 8px;"><strong>\${maturityDate}</strong></td>
                                 <td style="border: 1px solid #ddd; padding: 8px; text-align: right;" colspan="2"><strong>Principal Repayment (Tax-Free)</strong></td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${principalAmount.toFixed(2)}</strong></td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${formatMoney(principalAmount)}</strong></td>
                             </tr>
                         \`;
                         
@@ -2225,9 +2233,9 @@ export async function renderHomePage(request, env) {
                         scheduleHTML += \`
                             <tr style="background: #e8f5e8; font-weight: bold; border-top: 1px solid #6c757d;">
                                 <td style="border: 1px solid #6c757d; padding: 8px;"><strong>Coupon Totals</strong></td>
-                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${totalGrossCoupons.toFixed(2)}</strong></td>
-                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${totalCouponTax.toFixed(2)}</strong></td>
-                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${totalNetCoupons.toFixed(2)}</strong></td>
+                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${formatMoney(totalGrossCoupons)}</strong></td>
+                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${formatMoney(totalCouponTax)}</strong></td>
+                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${formatMoney(totalNetCoupons)}</strong></td>
                             </tr>
                         \`;
                         
@@ -2246,16 +2254,16 @@ export async function renderHomePage(request, env) {
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
                                     <div>
                                         <h5 style="margin-bottom: 8px;">Income & Costs:</h5>
-                                        <p style="margin: 3px 0;"><strong>Total Coupon Income:</strong> £\${totalGrossCoupons.toFixed(2)}</p>
-                                        <p style="margin: 3px 0;"><strong>Income Tax:</strong> £\${totalCouponTax.toFixed(2)}</p>
-                                        \${monthlyChargeSchedule.length > 0 ? '<p style="margin: 3px 0;"><strong>Account Charges:</strong> £' + totalAccountCharges.toFixed(2) + '</p>' : ''}
-                                        <p style="margin: 3px 0;"><strong>Principal Repayment:</strong> £\${principalAmount.toFixed(2)} (tax-free)</p>
+                                        <p style="margin: 3px 0;"><strong>Total Coupon Income:</strong> £\${formatMoney(totalGrossCoupons)}</p>
+                                        <p style="margin: 3px 0;"><strong>Income Tax:</strong> £\${formatMoney(totalCouponTax)}</p>
+                                        \${monthlyChargeSchedule.length > 0 ? '<p style="margin: 3px 0;"><strong>Account Charges:</strong> £' + formatMoney(totalAccountCharges) + '</p>' : ''}
+                                        <p style="margin: 3px 0;"><strong>Principal Repayment:</strong> £\${formatMoney(principalAmount)} (tax-free)</p>
                                     </div>
                                     <div>
                                         <h5 style="margin-bottom: 8px;">Net Returns:</h5>
-                                        <p style="margin: 3px 0;"><strong>Total Cash Received:</strong> £\${grandTotalGross.toFixed(2)}</p>
-                                        <p style="margin: 3px 0;"><strong>Total Costs:</strong> £\${grandTotalCosts.toFixed(2)} (Tax: £\${totalCouponTax.toFixed(2)} + Charges: £\${totalAccountCharges.toFixed(2)})</p>
-                                        <p style="margin: 3px 0; font-size: 16px;"><strong style="color: #007bff;">Net After-Tax Return:</strong> £\${grandTotalNet.toFixed(2)}</p>
+                                        <p style="margin: 3px 0;"><strong>Total Cash Received:</strong> £\${formatMoney(grandTotalGross)}</p>
+                                        <p style="margin: 3px 0;"><strong>Total Costs:</strong> £\${formatMoney(grandTotalCosts)} (Tax: £\${formatMoney(totalCouponTax)} + Charges: £\${formatMoney(totalAccountCharges)})</p>
+                                        <p style="margin: 3px 0; font-size: 16px;"><strong style="color: #007bff;">Net After-Tax Return:</strong> £\${formatMoney(grandTotalNet)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -2456,7 +2464,7 @@ export async function renderHomePage(request, env) {
                         
                         <div class="calculation-step">
                             <h4>Your Current Settings</h4>
-                            <p><strong>Investment Amount:</strong> £\${investmentAmount.toFixed(2)}</p>
+                            <p><strong>Investment Amount:</strong> \${formatCurrency(investmentAmount)}</p>
                             <p><strong>Your Tax Bracket:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ').toUpperCase()} (\${modalTaxRate}%)</p>
                             <p><strong>Personal Savings Allowance:</strong> \${formatCurrency(psaAmount)}</p>
                             <p><strong>Savings Account Rate:</strong> \${savingsRate.toFixed(2)}%</p>
@@ -2488,11 +2496,11 @@ export async function renderHomePage(request, env) {
                                     <h5 style="margin: 0 0 8px 0; color: #007bff;">Coupon Payment Totals:</h5>
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
                                         <div>
-                                            <p style="margin: 2px 0;"><strong>Total Gross Coupons:</strong> £\${totalGrossCoupons.toFixed(2)}</p>
+                                            <p style="margin: 2px 0;"><strong>Total Gross Coupons:</strong> £\${formatMoney(totalGrossCoupons)}</p>
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">(\${numPayments} payments)</p>
-                                            <p style="margin: 2px 0;"><strong>Income Tax:</strong> £\${totalCouponTax.toFixed(2)}</p>
+                                            <p style="margin: 2px 0;"><strong>Income Tax:</strong> £\${formatMoney(totalCouponTax)}</p>
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">(Each payment taxed at \${modalTaxRate}%)</p>
-                                            <p style="margin: 2px 0;"><strong>Net Coupon Income:</strong> £\${totalNetCoupons.toFixed(2)}</p>
+                                            <p style="margin: 2px 0;"><strong>Net Coupon Income:</strong> £\${formatMoney(totalNetCoupons)}</p>
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">(Gross - Tax, rounded per payment)</p>
                                         </div>
                                         <div>
