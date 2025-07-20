@@ -2203,7 +2203,6 @@ export async function renderHomePage(request, env) {
                         // Add principal repayment row
                         const maturityDate = new Date(gilt.maturityDate).toLocaleDateString('en-GB');
                         // Use effective investment amount after dealing charge for units calculation (if any)
-                        const dealingCharge = currentSettings.dealingCharge || 0;
                         const effectiveInvestmentAmount = (currentSettings.investmentAmount || 10000) - dealingCharge;
                         const principalAmount = Math.round((effectiveInvestmentAmount / gilt.dirtyPrice * 100) * 100) / 100;
                         scheduleHTML += \`
