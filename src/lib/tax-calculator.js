@@ -48,14 +48,14 @@ export class TaxCalculator {
     // Get tax rate
     const incomeTaxRate = this.taxRates[taxpayerType] || this.taxRates['additional_rate'];
     
-    // Calculate units owned
+    // Calculate units owned with 2-decimal rounding
     const dirtyPrice = gilt.dirtyPrice || gilt.cleanPrice;
-    const unitsOwned = investmentAmount / dirtyPrice;
+    const unitsOwned = Math.round((investmentAmount / dirtyPrice) * 100) / 100;
     
     // Calculate after-tax cash flows for actual schedule
     const afterTaxSchedule = couponSchedule.map(payment => {
       const scaledCouponAmount = payment.couponAmount * unitsOwned;
-      const scaledPrincipalAmount = payment.principalAmount * unitsOwned;
+      const scaledPrincipalAmount = Math.round(payment.principalAmount * unitsOwned * 100) / 100;
       const couponTax = Math.round(scaledCouponAmount * incomeTaxRate * 100) / 100;
       const afterTaxCoupon = scaledCouponAmount - couponTax;
       

@@ -2140,7 +2140,7 @@ export async function renderHomePage(request, env) {
                         // Use effective investment amount after dealing charge for units calculation (if any)
                         const dealingCharge = currentSettings.dealingCharge || 0;
                         const effectiveInvestmentAmount = (currentSettings.investmentAmount || 10000) - dealingCharge;
-                        const principalAmount = effectiveInvestmentAmount / gilt.dirtyPrice * 100;
+                        const principalAmount = Math.round((effectiveInvestmentAmount / gilt.dirtyPrice * 100) * 100) / 100;
                         scheduleHTML += \`
                             <tr style="background: #e8f5e8;">
                                 <td style="border: 1px solid #ddd; padding: 8px;"><strong>\${maturityDate}</strong></td>
@@ -2363,7 +2363,7 @@ export async function renderHomePage(request, env) {
                     // Calculate units owned using same method as IRR tooltip
                     const dealingCharge = currentSettings.dealingCharge || 0;
                     const effectiveInvestment = investmentAmount - dealingCharge;
-                    const unitsOwned = effectiveInvestment / gilt.dirtyPrice * 100;
+                    const unitsOwned = Math.round((effectiveInvestment / gilt.dirtyPrice * 100) * 100) / 100;
                     
                     // Calculate precise total cash flows - ensure we use the function that includes charges
                     const giltTotalCash = calculateTotalCashFromGilt(gilt, unitsOwned, modalTaxRate / 100);
@@ -2417,7 +2417,7 @@ export async function renderHomePage(request, env) {
                                 const totalGrossCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0) : 0;
                                 const totalCouponTax = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.taxAmount, 0) : 0;
                                 const totalNetCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.afterTaxAmount, 0) : 0;
-                                const principalAmount = unitsOwned;
+                                const principalAmount = Math.round(unitsOwned * 100) / 100;
                                 const numPayments = gilt.couponSchedule ? gilt.couponSchedule.length : 0;
                                 const semiAnnualRate = gilt.couponRate / 2;
                                 const effectiveInvestment = investmentAmount - (currentSettings.dealingCharge || 0);

@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-fCsi7X/checked-fetch.js
+// .wrangler/tmp/bundle-O8XJtQ/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-fCsi7X/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-O8XJtQ/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2570,7 +2570,7 @@ function calculateUnitsOwned(investmentAmount, dirtyPrice) {
   if (isNaN(investmentAmount) || isNaN(dirtyPrice) || dirtyPrice === 0) {
     return 0;
   }
-  return investmentAmount / dirtyPrice * 100;
+  return Math.round(investmentAmount / dirtyPrice * 100 * 100) / 100;
 }
 function calculateCouponPaymentDates(maturityDate, numPayments = 20) {
   const maturity = new Date(maturityDate);
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-fCsi7X/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-O8XJtQ/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-fCsi7X/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-O8XJtQ/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -3063,10 +3063,10 @@ var TaxCalculator = class {
     }
     const incomeTaxRate = this.taxRates[taxpayerType] || this.taxRates["additional_rate"];
     const dirtyPrice = gilt.dirtyPrice || gilt.cleanPrice;
-    const unitsOwned = investmentAmount / dirtyPrice;
+    const unitsOwned = Math.round(investmentAmount / dirtyPrice * 100) / 100;
     const afterTaxSchedule = couponSchedule.map((payment) => {
       const scaledCouponAmount = payment.couponAmount * unitsOwned;
-      const scaledPrincipalAmount = payment.principalAmount * unitsOwned;
+      const scaledPrincipalAmount = Math.round(payment.principalAmount * unitsOwned * 100) / 100;
       const couponTax = Math.round(scaledCouponAmount * incomeTaxRate * 100) / 100;
       const afterTaxCoupon = scaledCouponAmount - couponTax;
       return {
@@ -5390,7 +5390,7 @@ async function renderHomePage(request, env) {
                         // Use effective investment amount after dealing charge for units calculation (if any)
                         const dealingCharge = currentSettings.dealingCharge || 0;
                         const effectiveInvestmentAmount = (currentSettings.investmentAmount || 10000) - dealingCharge;
-                        const principalAmount = effectiveInvestmentAmount / gilt.dirtyPrice * 100;
+                        const principalAmount = Math.round((effectiveInvestmentAmount / gilt.dirtyPrice * 100) * 100) / 100;
                         scheduleHTML += \`
                             <tr style="background: #e8f5e8;">
                                 <td style="border: 1px solid #ddd; padding: 8px;"><strong>\${maturityDate}</strong></td>
@@ -5613,7 +5613,7 @@ async function renderHomePage(request, env) {
                     // Calculate units owned using same method as IRR tooltip
                     const dealingCharge = currentSettings.dealingCharge || 0;
                     const effectiveInvestment = investmentAmount - dealingCharge;
-                    const unitsOwned = effectiveInvestment / gilt.dirtyPrice * 100;
+                    const unitsOwned = Math.round((effectiveInvestment / gilt.dirtyPrice * 100) * 100) / 100;
                     
                     // Calculate precise total cash flows - ensure we use the function that includes charges
                     const giltTotalCash = calculateTotalCashFromGilt(gilt, unitsOwned, modalTaxRate / 100);
@@ -5667,7 +5667,7 @@ async function renderHomePage(request, env) {
                                 const totalGrossCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0) : 0;
                                 const totalCouponTax = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.taxAmount, 0) : 0;
                                 const totalNetCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.afterTaxAmount, 0) : 0;
-                                const principalAmount = unitsOwned;
+                                const principalAmount = Math.round(unitsOwned * 100) / 100;
                                 const numPayments = gilt.couponSchedule ? gilt.couponSchedule.length : 0;
                                 const semiAnnualRate = gilt.couponRate / 2;
                                 const effectiveInvestment = investmentAmount - (currentSettings.dealingCharge || 0);
@@ -6774,7 +6774,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-fCsi7X/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-O8XJtQ/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6808,7 +6808,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-fCsi7X/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-O8XJtQ/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

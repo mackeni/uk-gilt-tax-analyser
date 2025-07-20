@@ -62,7 +62,8 @@ export function calculateUnitsOwned(investmentAmount, dirtyPrice) {
   if (isNaN(investmentAmount) || isNaN(dirtyPrice) || dirtyPrice === 0) {
     return 0;
   }
-  return (investmentAmount / dirtyPrice) * 100;
+  // Round to 2 decimal places for consistent principal calculations
+  return Math.round(((investmentAmount / dirtyPrice) * 100) * 100) / 100;
 }
 
 export function calculateCouponPaymentDates(maturityDate, numPayments = 20) {
