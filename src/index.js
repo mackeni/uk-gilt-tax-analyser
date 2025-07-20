@@ -42,7 +42,14 @@ export default {
           status: 404,
           headers: {
             'Content-Type': 'text/plain; charset=utf-8',
-            'X-Content-Type-Options': 'nosniff'
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'X-Content-Type-Options': 'nosniff',
+            'X-Frame-Options': 'DENY',
+            'Referrer-Policy': 'strict-origin-when-cross-origin',
+            'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+            'Cross-Origin-Resource-Policy': 'same-origin',
+            'Origin-Agent-Cluster': '?1',
+            'X-Permitted-Cross-Domain-Policies': 'none'
           }
         });
     }

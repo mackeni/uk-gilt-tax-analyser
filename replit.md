@@ -585,9 +585,9 @@ This migration maintains all original functionality while dramatically improving
 - **Input Handling**: Empty or invalid inputs default to £5 (realistic broker charge)
 - **Calculation Logic**: All calculations properly handle both £0 and positive dealing charges
 
-### July 20, 2025 - Comprehensive Security Headers with Upcoming Standards
+### July 20, 2025 - Complete Security Headers Implementation with Cache Control Fix
 
-**Version ID**: 3c206815-36b6-4a92-90b3-a478407a3bce
+**Version ID**: 84e78e2f-9b25-4efe-949e-35b024f5c45c
 
 **Complete Security Headers Implementation (Traditional + Modern):**
 - **Content Security Policy**: Implemented strict CSP preventing XSS attacks with 'self' directives and minimal inline allowances
@@ -618,6 +618,8 @@ This migration maintains all original functionality while dramatically improving
 - **Cross-Origin Isolation**: Advanced protection against timing and speculative execution attacks
 - **Process-Level Security**: Enhanced browser process isolation through origin clustering
 - **Data Privacy**: Automatic clearing of sensitive data and minimal cross-origin information leakage
+- **Complete Cache Control**: All endpoints (HTML, API, JavaScript, 404 errors) include proper cache-control headers
+- **Universal Header Coverage**: Every possible response includes comprehensive security and caching policies
 
 ### July 20, 2025 - Duration Filter Bug Fix and UI Optimization
 
