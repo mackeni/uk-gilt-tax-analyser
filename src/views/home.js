@@ -1221,6 +1221,9 @@ export async function renderHomePage(request, env) {
                 settingsDiv.style.display = enabled ? 'block' : 'none';
             }
             
+            // Clear cache since account charge settings affect calculations
+            clearAllCaches();
+            
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
             }
@@ -1232,6 +1235,9 @@ export async function renderHomePage(request, env) {
             
             currentSettings.accountChargeRate = rate;
             currentSettings.accountChargeMax = max;
+            
+            // Clear cache since account charge rate/max settings affect calculations
+            clearAllCaches();
             
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
@@ -1607,14 +1613,18 @@ export async function renderHomePage(request, env) {
                     gilt.accountCharges = calculateAccountCharges(gilt, unitsOwned);
                 }
                 
-                // Calculate after-tax yield using IRR method with caching (includes dealing charge)
-                const afterTaxYield = getCachedComplexCalculation('afterTaxIRR_' + dealingCharge + '_' + gilt.name, calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
+                // Create cache key suffix that includes all relevant settings
+                const accountChargeKey = currentSettings.accountChargeEnabled ? 
+                    '_ac' + currentSettings.accountChargeRate + '_' + currentSettings.accountChargeMax : '_noac';
+                
+                // Calculate after-tax yield using IRR method with caching (includes dealing charge and account charges)
+                const afterTaxYield = getCachedComplexCalculation('afterTaxIRR_' + dealingCharge + '_' + gilt.name + accountChargeKey, calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
                 
                 // Use cached equivalent rate calculation
                 const equivalentGrossSavingsRate = getCachedComplexCalculation('equivalentRate_' + afterTaxYield, calculateEquivalentGrossSavingsRate, afterTaxYield, incomeTaxRate);
                 
                 // Calculate precise advantage using actual coupon schedule with caching
-                const giltTotalCashReceived = getCachedComplexCalculation('giltCash_' + dealingCharge + '_' + gilt.name, calculateTotalCashFromGilt, gilt, unitsOwned, incomeTaxRate);
+                const giltTotalCashReceived = getCachedComplexCalculation('giltCash_' + dealingCharge + '_' + gilt.name + accountChargeKey, calculateTotalCashFromGilt, gilt, unitsOwned, incomeTaxRate);
                 const savingsTotalCashReceived = getCachedComplexCalculation('savingsCash_' + investmentAmount + '_' + savingsRate, calculateTotalCashFromSavings, investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
                 const extraIncome = giltTotalCashReceived - savingsTotalCashReceived;
                 

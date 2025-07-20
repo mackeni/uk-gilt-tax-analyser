@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-Rj4CUw/checked-fetch.js
+// .wrangler/tmp/bundle-hHIkzg/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-Rj4CUw/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-hHIkzg/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-Rj4CUw/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-hHIkzg/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-Rj4CUw/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-hHIkzg/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4471,6 +4471,9 @@ async function renderHomePage(request, env) {
                 settingsDiv.style.display = enabled ? 'block' : 'none';
             }
             
+            // Clear cache since account charge settings affect calculations
+            clearAllCaches();
+            
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
             }
@@ -4482,6 +4485,9 @@ async function renderHomePage(request, env) {
             
             currentSettings.accountChargeRate = rate;
             currentSettings.accountChargeMax = max;
+            
+            // Clear cache since account charge rate/max settings affect calculations
+            clearAllCaches();
             
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
@@ -4857,14 +4863,18 @@ async function renderHomePage(request, env) {
                     gilt.accountCharges = calculateAccountCharges(gilt, unitsOwned);
                 }
                 
-                // Calculate after-tax yield using IRR method with caching (includes dealing charge)
-                const afterTaxYield = getCachedComplexCalculation('afterTaxIRR_' + dealingCharge + '_' + gilt.name, calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
+                // Create cache key suffix that includes all relevant settings
+                const accountChargeKey = currentSettings.accountChargeEnabled ? 
+                    '_ac' + currentSettings.accountChargeRate + '_' + currentSettings.accountChargeMax : '_noac';
+                
+                // Calculate after-tax yield using IRR method with caching (includes dealing charge and account charges)
+                const afterTaxYield = getCachedComplexCalculation('afterTaxIRR_' + dealingCharge + '_' + gilt.name + accountChargeKey, calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
                 
                 // Use cached equivalent rate calculation
                 const equivalentGrossSavingsRate = getCachedComplexCalculation('equivalentRate_' + afterTaxYield, calculateEquivalentGrossSavingsRate, afterTaxYield, incomeTaxRate);
                 
                 // Calculate precise advantage using actual coupon schedule with caching
-                const giltTotalCashReceived = getCachedComplexCalculation('giltCash_' + dealingCharge + '_' + gilt.name, calculateTotalCashFromGilt, gilt, unitsOwned, incomeTaxRate);
+                const giltTotalCashReceived = getCachedComplexCalculation('giltCash_' + dealingCharge + '_' + gilt.name + accountChargeKey, calculateTotalCashFromGilt, gilt, unitsOwned, incomeTaxRate);
                 const savingsTotalCashReceived = getCachedComplexCalculation('savingsCash_' + investmentAmount + '_' + savingsRate, calculateTotalCashFromSavings, investmentAmount, savingsRate, incomeTaxRate, psaAmount, gilt.yearsToMaturity);
                 const extraIncome = giltTotalCashReceived - savingsTotalCashReceived;
                 
@@ -6712,7 +6722,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-Rj4CUw/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-hHIkzg/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6746,7 +6756,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-Rj4CUw/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-hHIkzg/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
