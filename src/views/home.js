@@ -2193,6 +2193,7 @@ export async function renderHomePage(request, env) {
                                         <h5 style="margin-bottom: 8px;">Net Returns:</h5>
                                         <p style="margin: 3px 0;"><strong>Total Cash Received:</strong> £\${grandTotalGross.toFixed(2)}</p>
                                         <p style="margin: 3px 0;"><strong>Total Costs:</strong> £\${grandTotalCosts.toFixed(2)} (Tax: £\${totalCouponTax.toFixed(2)} + Charges: £\${totalAccountCharges.toFixed(2)})</p>
+                                        \${monthlyChargeSchedule.length > 0 ? '<p style="margin: 1px 0; color: #666; font-size: 10px;">IRR Debug: £' + totalAccountCharges.toFixed(6) + ' (' + monthlyChargeSchedule.length + ' charges)</p>' : ''}
                                         <p style="margin: 3px 0; font-size: 16px;"><strong style="color: #007bff;">Net After-Tax Return:</strong> £\${grandTotalNet.toFixed(2)}</p>
                                     </div>
                                 </div>
@@ -2457,8 +2458,9 @@ export async function renderHomePage(request, env) {
                                             \${(() => {
                                                 // Debug account charges discrepancy
                                                 const storedCharges = gilt.accountCharges ? gilt.accountCharges.reduce((sum, charge) => sum + charge.amount, 0) : 0;
+                                                const chargeCount = gilt.accountCharges ? gilt.accountCharges.length : 0;
                                                 return currentSettings.accountChargeEnabled ? 
-                                                    '<p style="margin: 1px 0; color: #666; font-size: 9px;">Debug: Manual charges £' + totalMonthlyCharges.toFixed(6) + ' vs Stored charges £' + storedCharges.toFixed(6) + '</p>' : '';
+                                                    '<p style="margin: 1px 0; color: #666; font-size: 9px;">Debug: Advantage charges £' + totalMonthlyCharges.toFixed(6) + ' (' + chargeCount + ' charges) vs Function charges £' + storedCharges.toFixed(6) + '</p>' : '';
                                             })()}
                                             <p style="margin: 1px 0; color: #666;">Rounded Display: £\${giltTotalCash.toFixed(2)}</p>
                                             \${(() => {
