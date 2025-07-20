@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-pDJlU4/checked-fetch.js
+// .wrangler/tmp/bundle-2YnIEW/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-pDJlU4/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-2YnIEW/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-pDJlU4/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-2YnIEW/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-pDJlU4/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-2YnIEW/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5364,7 +5364,7 @@ async function renderHomePage(request, env) {
                     // Add precision details and methodology section
                     const dealingCharge = currentSettings.dealingCharge || 0;
                     const effectiveInvestment = (currentSettings.investmentAmount || 10000) - dealingCharge;
-                    const unitsOwned = effectiveInvestment / gilt.dirtyPrice * 100;
+                    const afterTaxUnitsOwned = effectiveInvestment / gilt.dirtyPrice * 100;
                     const precisionDetails = \`
                         <div class="calculation-step" style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin: 15px 0;">
                             <h4 style="color: #856404;">IRR Calculation Methodology & Precision</h4>
@@ -5384,7 +5384,7 @@ async function renderHomePage(request, env) {
                                     <p style="margin: 2px 0;"><strong>Dealing Charge:</strong> \${dealingCharge > 0 ? '\xA3' + dealingCharge.toFixed(2) : 'None'}</p>
                                     <p style="margin: 2px 0;"><strong>Effective Investment:</strong> \xA3\${effectiveInvestment.toFixed(2)}</p>
                                     <p style="margin: 2px 0;"><strong>Dirty Price:</strong> \xA3\${gilt.dirtyPrice.toFixed(6)} per \xA3100</p>
-                                    <p style="margin: 2px 0;"><strong>Units Owned:</strong> \${unitsOwned.toFixed(6)} (per \xA3100 nominal)</p>
+                                    <p style="margin: 2px 0;"><strong>Units Owned:</strong> \${afterTaxUnitsOwned.toFixed(6)} (per \xA3100 nominal)</p>
                                 </div>
                                 <div>
                                     <h5>Calculation Precision:</h5>
@@ -5676,10 +5676,10 @@ async function renderHomePage(request, env) {
                     // Calculate units owned using same method as IRR tooltip
                     const advantageDealingCharge = currentSettings.dealingCharge || 0;
                     const advantageEffectiveInvestment = investmentAmount - advantageDealingCharge;
-                    const unitsOwned = Math.round((advantageEffectiveInvestment / gilt.dirtyPrice * 100) * 100) / 100;
+                    const advantageUnitsOwned = Math.round((advantageEffectiveInvestment / gilt.dirtyPrice * 100) * 100) / 100;
                     
                     // Calculate precise total cash flows - ensure we use the function that includes charges
-                    const giltTotalCash = calculateTotalCashFromGilt(gilt, unitsOwned, modalTaxRate / 100);
+                    const giltTotalCash = calculateTotalCashFromGilt(gilt, advantageUnitsOwned, modalTaxRate / 100);
                     const savingsTotalCash = calculateTotalCashFromSavings(investmentAmount, savingsRate, modalTaxRate / 100, psaAmount, gilt.yearsToMaturity);
                     
                     // Calculate total monthly charges using the SAME function as IRR calculation
@@ -6765,7 +6765,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-pDJlU4/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-2YnIEW/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6799,7 +6799,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-pDJlU4/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-2YnIEW/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

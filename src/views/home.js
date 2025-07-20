@@ -2114,7 +2114,7 @@ export async function renderHomePage(request, env) {
                     // Add precision details and methodology section
                     const dealingCharge = currentSettings.dealingCharge || 0;
                     const effectiveInvestment = (currentSettings.investmentAmount || 10000) - dealingCharge;
-                    const unitsOwned = effectiveInvestment / gilt.dirtyPrice * 100;
+                    const afterTaxUnitsOwned = effectiveInvestment / gilt.dirtyPrice * 100;
                     const precisionDetails = \`
                         <div class="calculation-step" style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin: 15px 0;">
                             <h4 style="color: #856404;">IRR Calculation Methodology & Precision</h4>
@@ -2134,7 +2134,7 @@ export async function renderHomePage(request, env) {
                                     <p style="margin: 2px 0;"><strong>Dealing Charge:</strong> \${dealingCharge > 0 ? '£' + dealingCharge.toFixed(2) : 'None'}</p>
                                     <p style="margin: 2px 0;"><strong>Effective Investment:</strong> £\${effectiveInvestment.toFixed(2)}</p>
                                     <p style="margin: 2px 0;"><strong>Dirty Price:</strong> £\${gilt.dirtyPrice.toFixed(6)} per £100</p>
-                                    <p style="margin: 2px 0;"><strong>Units Owned:</strong> \${unitsOwned.toFixed(6)} (per £100 nominal)</p>
+                                    <p style="margin: 2px 0;"><strong>Units Owned:</strong> \${afterTaxUnitsOwned.toFixed(6)} (per £100 nominal)</p>
                                 </div>
                                 <div>
                                     <h5>Calculation Precision:</h5>
@@ -2426,10 +2426,10 @@ export async function renderHomePage(request, env) {
                     // Calculate units owned using same method as IRR tooltip
                     const advantageDealingCharge = currentSettings.dealingCharge || 0;
                     const advantageEffectiveInvestment = investmentAmount - advantageDealingCharge;
-                    const unitsOwned = Math.round((advantageEffectiveInvestment / gilt.dirtyPrice * 100) * 100) / 100;
+                    const advantageUnitsOwned = Math.round((advantageEffectiveInvestment / gilt.dirtyPrice * 100) * 100) / 100;
                     
                     // Calculate precise total cash flows - ensure we use the function that includes charges
-                    const giltTotalCash = calculateTotalCashFromGilt(gilt, unitsOwned, modalTaxRate / 100);
+                    const giltTotalCash = calculateTotalCashFromGilt(gilt, advantageUnitsOwned, modalTaxRate / 100);
                     const savingsTotalCash = calculateTotalCashFromSavings(investmentAmount, savingsRate, modalTaxRate / 100, psaAmount, gilt.yearsToMaturity);
                     
                     // Calculate total monthly charges using the SAME function as IRR calculation
