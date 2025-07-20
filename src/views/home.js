@@ -2788,76 +2788,73 @@ export async function renderHomePage(request, env) {
             modal.style.display = 'block';
         }
         
-        // Add modal HTML and event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Create modal HTML
-            const modalHTML = \`
-                <div id="calculationModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <span id="modalTitle" class="modal-title"></span>
-                            <span class="close">&times;</span>
+        // Initialize app and set up event listeners
+        function setupApplication() {
+            // Create modal HTML if it doesn't exist
+            if (!document.getElementById('calculationModal')) {
+                const modalHTML = \`
+                    <div id="calculationModal" class="modal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <span id="modalTitle" class="modal-title"></span>
+                                <span class="close">&times;</span>
+                            </div>
+                            <div id="modalContent"></div>
                         </div>
-                        <div id="modalContent"></div>
                     </div>
-                </div>
-            \`;
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
-            
-            // Close modal functionality
-            const modal = document.getElementById('calculationModal');
-            const closeBtn = document.querySelector('.close');
-            
-            closeBtn.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-            
-            window.addEventListener('click', function(event) {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-            
-
-            
-            initializeApp();
-        });
-        
-
-        
-        // Robust event delegation for dealing charge
-        document.addEventListener('input', function(e) {
-            if (e.target && e.target.id === 'dealingCharge') {
-                // Handle empty string and convert properly, allow £0 to disable dealing charges
-                let dealingCharge;
-                if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
-                    dealingCharge = 5; // Default to £5 when empty
-                } else {
-                    dealingCharge = parseFloat(e.target.value);
-                    if (isNaN(dealingCharge) || dealingCharge < 0) {
-                        dealingCharge = 5; // Default to £5 when invalid or negative
-                    }
-                }
+                \`;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
                 
-                // Only update if the value actually changed
-                if (currentSettings.dealingCharge !== dealingCharge) {
-                    currentSettings.dealingCharge = dealingCharge;
-                    
-                    // Clear cache since dealing charge affects calculations
-                    clearAllCaches();
-                    
-                    if (currentGiltData.length > 0) {
-                        calculateTaxEfficiency();
+                // Close modal functionality
+                const modal = document.getElementById('calculationModal');
+                const closeBtn = document.querySelector('.close');
+                
+                closeBtn.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+                
+                window.addEventListener('click', function(event) {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
                     }
-                }
+                });
             }
-        });
-        
-        // Also initialize app when document is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApp);
-        } else {
+            
+            // Set up dealing charge event listener if not already set
+            if (!window.dealingChargeListenerSet) {
+                document.addEventListener('input', function(e) {
+                    if (e.target && e.target.id === 'dealingCharge') {
+                        let dealingCharge;
+                        if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+                            dealingCharge = 5;
+                        } else {
+                            dealingCharge = parseFloat(e.target.value);
+                            if (isNaN(dealingCharge) || dealingCharge < 0) {
+                                dealingCharge = 5;
+                            }
+                        }
+                        
+                        if (currentSettings.dealingCharge !== dealingCharge) {
+                            currentSettings.dealingCharge = dealingCharge;
+                            clearAllCaches();
+                            
+                            if (currentGiltData.length > 0) {
+                                calculateTaxEfficiency();
+                            }
+                        }
+                    }
+                });
+                window.dealingChargeListenerSet = true;
+            }
+            
             initializeApp();
+        }
+        
+        // Initialize app when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupApplication);
+        } else {
+            setupApplication();
         }
     </script>
 </body>

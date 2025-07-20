@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-WceB6g/checked-fetch.js
+// .wrangler/tmp/bundle-Kz8ygP/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-WceB6g/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-Kz8ygP/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-WceB6g/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-Kz8ygP/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-WceB6g/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-Kz8ygP/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -6067,76 +6067,73 @@ async function renderHomePage(request, env) {
             modal.style.display = 'block';
         }
         
-        // Add modal HTML and event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Create modal HTML
-            const modalHTML = \`
-                <div id="calculationModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <span id="modalTitle" class="modal-title"></span>
-                            <span class="close">&times;</span>
+        // Initialize app and set up event listeners
+        function setupApplication() {
+            // Create modal HTML if it doesn't exist
+            if (!document.getElementById('calculationModal')) {
+                const modalHTML = \`
+                    <div id="calculationModal" class="modal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <span id="modalTitle" class="modal-title"></span>
+                                <span class="close">&times;</span>
+                            </div>
+                            <div id="modalContent"></div>
                         </div>
-                        <div id="modalContent"></div>
                     </div>
-                </div>
-            \`;
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
-            
-            // Close modal functionality
-            const modal = document.getElementById('calculationModal');
-            const closeBtn = document.querySelector('.close');
-            
-            closeBtn.addEventListener('click', function() {
-                modal.style.display = 'none';
-            });
-            
-            window.addEventListener('click', function(event) {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-            
-
-            
-            initializeApp();
-        });
-        
-
-        
-        // Robust event delegation for dealing charge
-        document.addEventListener('input', function(e) {
-            if (e.target && e.target.id === 'dealingCharge') {
-                // Handle empty string and convert properly, allow \xA30 to disable dealing charges
-                let dealingCharge;
-                if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
-                    dealingCharge = 5; // Default to \xA35 when empty
-                } else {
-                    dealingCharge = parseFloat(e.target.value);
-                    if (isNaN(dealingCharge) || dealingCharge < 0) {
-                        dealingCharge = 5; // Default to \xA35 when invalid or negative
-                    }
-                }
+                \`;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
                 
-                // Only update if the value actually changed
-                if (currentSettings.dealingCharge !== dealingCharge) {
-                    currentSettings.dealingCharge = dealingCharge;
-                    
-                    // Clear cache since dealing charge affects calculations
-                    clearAllCaches();
-                    
-                    if (currentGiltData.length > 0) {
-                        calculateTaxEfficiency();
+                // Close modal functionality
+                const modal = document.getElementById('calculationModal');
+                const closeBtn = document.querySelector('.close');
+                
+                closeBtn.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+                
+                window.addEventListener('click', function(event) {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
                     }
-                }
+                });
             }
-        });
-        
-        // Also initialize app when document is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApp);
-        } else {
+            
+            // Set up dealing charge event listener if not already set
+            if (!window.dealingChargeListenerSet) {
+                document.addEventListener('input', function(e) {
+                    if (e.target && e.target.id === 'dealingCharge') {
+                        let dealingCharge;
+                        if (e.target.value === '' || e.target.value === null || e.target.value === undefined) {
+                            dealingCharge = 5;
+                        } else {
+                            dealingCharge = parseFloat(e.target.value);
+                            if (isNaN(dealingCharge) || dealingCharge < 0) {
+                                dealingCharge = 5;
+                            }
+                        }
+                        
+                        if (currentSettings.dealingCharge !== dealingCharge) {
+                            currentSettings.dealingCharge = dealingCharge;
+                            clearAllCaches();
+                            
+                            if (currentGiltData.length > 0) {
+                                calculateTaxEfficiency();
+                            }
+                        }
+                    }
+                });
+                window.dealingChargeListenerSet = true;
+            }
+            
             initializeApp();
+        }
+        
+        // Initialize app when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupApplication);
+        } else {
+            setupApplication();
         }
     <\/script>
 </body>
@@ -6972,7 +6969,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-WceB6g/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-Kz8ygP/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -7006,7 +7003,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-WceB6g/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-Kz8ygP/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
