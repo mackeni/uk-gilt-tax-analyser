@@ -585,6 +585,18 @@ This migration maintains all original functionality while dramatically improving
 - **Input Handling**: Empty or invalid inputs default to £5 (realistic broker charge)
 - **Calculation Logic**: All calculations properly handle both £0 and positive dealing charges
 
+### July 20, 2025 - Complete Fallback System Upgrade with 37 UK Government Bonds
+
+**Version ID**: aaefb423-ab3f-41b1-90aa-5baa2cdee95e
+
+**Enhanced Fallback Data Coverage:**
+- **Complete 37-Gilt Dataset**: Fallback system now uses all 37 UK government bonds instead of just 20
+- **Comprehensive Market Coverage**: Includes short-term (0-5 years), medium-term (5-15 years), and long-term (15+ years) conventional gilts plus Green Gilts
+- **API Trading Date Extraction**: Enhanced live data fetcher to extract actual trading dates from DividendData HTML response
+- **Intelligent Date Fallback**: When API is blocked (403 Forbidden), system calculates correct last trading date (Friday 18/07/2025 vs Sunday 20/07/2025)
+- **Authentic Price Data**: All 37 gilts use real market prices from July 18, 2025 close-of-business data
+- **Daily Refresh Ready**: Architecture supports daily data refresh when API access is restored
+
 ### July 20, 2025 - Daily Caching System Implementation
 
 **Version ID**: c22303b3-9b5b-4f9e-bd22-951ee3091d03
