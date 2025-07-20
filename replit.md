@@ -585,7 +585,32 @@ This migration maintains all original functionality while dramatically improving
 - **Input Handling**: Empty or invalid inputs default to £5 (realistic broker charge)
 - **Calculation Logic**: All calculations properly handle both £0 and positive dealing charges
 
-### July 20, 2025 - Comprehensive Code Efficiency Optimization
+### July 20, 2025 - Daily Caching System Implementation
+
+**Version ID**: c22303b3-9b5b-4f9e-bd22-951ee3091d03
+
+**Complete Daily Data Refresh System:**
+- **Once Daily Live API**: Fetches all 37 UK government bonds from DividendData once per day
+- **Browser Storage Caching**: Stores comprehensive gilt dataset in localStorage with 24-hour expiry
+- **Intelligent Data Source Selection**: Live data → Today's cache → Static fallback progression
+- **Enhanced Data Coverage**: Upgraded from 20 to 37 UK government bonds including Green Gilts
+- **Extended API Timeout**: Increased from 2 to 10 seconds for comprehensive daily data fetches
+
+**Data Freshness Messaging System:**
+- **Live Data Indicator**: Green "📊 Live market data - Prices as of [date]" when using real-time API
+- **Cached Data Indicator**: Blue "💾 Today's cached data - Prices from [date]" when using browser cache
+- **Fallback Data Indicator**: Yellow "⚠️ Static data - Prices from [date]" when using static backup
+- **Bond Count Display**: Shows exact number of government bonds available for analysis
+- **Date Transparency**: Clear indication of price date regardless of data source
+
+**System Architecture Benefits:**
+- **Performance Optimization**: Fast loading after initial daily fetch (cached data)
+- **API Efficiency**: Reduces API calls while maintaining data freshness
+- **Enhanced Reliability**: Graceful fallback chain ensures application always works
+- **User Transparency**: Clear indication of data source and freshness for informed decisions
+- **Comprehensive Coverage**: All major UK government bonds including conventional, index-linked, and green gilts
+
+### July 20, 2025 - Previous: Comprehensive Code Efficiency Optimization
 
 **Version ID**: 4eaefc6e-6cdf-4e0e-bbb7-8b64b5182e9f
 
