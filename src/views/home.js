@@ -820,23 +820,32 @@ export async function renderHomePage(request, env) {
             await ensureUtilsLoaded();
             console.log('Utils loaded successfully for tax calculations');
             
+            console.log('Getting tax rate info for bracket:', taxBracket);
             // Use consolidated tax rate function
             const taxInfo = getTaxRateInfo(taxBracket);
+            console.log('Tax info retrieved:', taxInfo);
             const incomeTaxRate = taxInfo.income / 100;
+            console.log('Income tax rate calculated:', incomeTaxRate);
             
             // Use confirmed PSA amount if available, otherwise use standard
             const psaAmount = currentSettings.psaAmount !== undefined ? currentSettings.psaAmount : taxInfo.psa;
+            console.log('PSA amount determined:', psaAmount);
             
 
             
-            return giltData.map(gilt => {
+            console.log('About to map through', giltData.length, 'gilts for tax calculations');
+            return giltData.map((gilt, index) => {
+                console.log('Processing gilt', index + 1, ':', gilt.name);
                 // Ensure yearsToMaturity is calculated
                 if (!gilt.yearsToMaturity || gilt.yearsToMaturity === null) {
+                    console.log('Calculating years to maturity for', gilt.name);
                     gilt.yearsToMaturity = calculateYearsToMaturity(gilt.maturityDate);
+                    console.log('Years to maturity:', gilt.yearsToMaturity);
                 }
                 
                 // Include dealing charge in units calculation (if any)
                 const dealingCharge = currentSettings.dealingCharge || 0;
+                console.log('Dealing charge:', dealingCharge);
                 const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge
                 const unitsOwned = getCachedComplexCalculation('unitsOwned_' + dealingCharge + '_' + investmentAmount, calculateUnitsOwned, effectiveInvestmentAmount, gilt.dirtyPrice);
                 
