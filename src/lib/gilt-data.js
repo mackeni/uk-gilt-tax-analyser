@@ -28,22 +28,22 @@ export class GiltDataFetcher {
         console.log('Fetching live data and updating daily cache...');
         try {
           // Try to fetch live data from DividendData
-          let liveData = await this.fetchFromDividendData();
-          console.log('Live DividendData returned:', liveData ? `${liveData.length} items` : 'null');
+          let result = await this.fetchFromDividendData();
+          console.log('Live DividendData returned:', result?.data ? `${result.data.length} items` : 'null');
           
-          if (liveData && liveData.length > 0) {
-            console.log(`Processing ${liveData.length} live gilt prices from DividendData`);
-            const processedData = await this.addCouponPaymentDates(liveData);
+          if (result?.data && result.data.length > 0) {
+            console.log(`Processing ${result.data.length} live gilt prices from DividendData`);
+            const processedData = await this.addCouponPaymentDates(result.data);
             
-            // Update the daily cache with live data
-            await this.updateDailyCache(processedData);
+            // Update the daily cache with live data and trading date
+            await this.updateDailyCache(processedData, result.tradingDate);
             console.log(`Updated daily cache with ${processedData.length} live gilt prices`);
             
             return {
               data: processedData,
               dataSource: 'live',
               lastUpdated: new Date().toISOString(),
-              priceDate: this.getLastTradingDate()
+              priceDate: result.tradingDate || this.getLastTradingDate()
             };
           }
         } catch (liveError) {
@@ -74,12 +74,12 @@ export class GiltDataFetcher {
     return false; // Use cached data for rest of day
   }
   
-  async updateDailyCache(liveData) {
+  async updateDailyCache(liveData, tradingDate) {
     const today = new Date().toDateString();
     const cacheData = {
       data: liveData,
       fetchDate: today,
-      priceDate: this.getLastTradingDate(),
+      priceDate: tradingDate || this.getLastTradingDate(),
       lastUpdated: new Date().toISOString()
     };
     

@@ -52,9 +52,9 @@ export class GiltDataFetcher {
           
           if (response.ok) {
             const html = await response.text();
-            const giltData = this.parseGiltHTML(html);
-            if (giltData && giltData.length > 0) {
-              return giltData;
+            const result = this.parseGiltHTML(html);
+            if (result && result.data && result.data.length > 0) {
+              return result;
             }
           }
         } catch (urlError) {
@@ -75,6 +75,13 @@ export class GiltDataFetcher {
     try {
       // Parse the HTML table from DividendData
       const giltData = [];
+      
+      // Extract the trading date from the HTML
+      let tradingDate = this.extractTradingDate(html);
+      if (!tradingDate) {
+        // Fallback to calculated last trading date if not found in HTML
+        tradingDate = this.getLastTradingDate();
+      }
       
       // Extract table rows using regex patterns
       const tableRowPattern = /<tr[^>]*>.*?<\/tr>/gi;
@@ -116,7 +123,12 @@ export class GiltDataFetcher {
       }
       
       console.log(`Parsed ${giltData.length} gilts from DividendData`);
-      return giltData.length > 0 ? giltData : null;
+      
+      // Return both data and trading date
+      return {
+        data: giltData.length > 0 ? giltData : null,
+        tradingDate: tradingDate
+      };
       
     } catch (error) {
       console.error('Error parsing gilt HTML:', error);
@@ -186,6 +198,64 @@ export class GiltDataFetcher {
       'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
     };
     return months[monthStr] || 1;
+  }
+
+  extractTradingDate(html) {
+    try {
+      // Look for common date patterns in the HTML
+      const datePatterns = [
+        /(?:updated|close|trading|data).*?(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/i,
+        /(?:updated|close|trading|data).*?(\d{1,2}\s+\w+\s+\d{4})/i,
+        /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/,
+        /(\d{1,2}\s+\w+\s+\d{4})/
+      ];
+      
+      for (const pattern of datePatterns) {
+        const match = html.match(pattern);
+        if (match && match[1]) {
+          const dateStr = match[1];
+          const parsedDate = this.parseExtractedDate(dateStr);
+          if (parsedDate) {
+            console.log(`Found trading date in HTML: ${dateStr} → ${parsedDate}`);
+            return parsedDate;
+          }
+        }
+      }
+      
+      console.log('No trading date found in HTML, will use fallback');
+      return null;
+    } catch (error) {
+      console.warn('Error extracting trading date:', error);
+      return null;
+    }
+  }
+
+  parseExtractedDate(dateStr) {
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+      return date.toLocaleDateString('en-GB');
+    } catch (error) {
+      return null;
+    }
+  }
+
+  getLastTradingDate() {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    
+    let tradingDate = new Date(today);
+    
+    if (dayOfWeek === 0) { // Sunday
+      tradingDate.setDate(today.getDate() - 2); // Go to Friday
+    } else if (dayOfWeek === 6) { // Saturday
+      tradingDate.setDate(today.getDate() - 1); // Go to Friday
+    }
+    // For Monday-Friday, use today as trading date
+    
+    return tradingDate.toLocaleDateString('en-GB');
   }
 
   calculateGiltMetrics(giltData) {
