@@ -2108,7 +2108,6 @@ export async function renderHomePage(request, env) {
                         '<h5 style="margin-bottom: 5px;">Final Payment</h5>' +
                         '<p style="margin: 2px 0;"><strong>Maturity:</strong> ' + formattedMaturityDate + '</p>' +
                         lastCouponSection +
-                        '<p style="margin: 2px 0;"><strong>Principal:</strong> £100.00 per £100 nominal</p>' +
                         '</div>' +
                         '</div>' +
                         '</div>' +
