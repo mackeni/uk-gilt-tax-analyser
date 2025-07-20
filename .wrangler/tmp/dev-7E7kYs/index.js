@@ -6421,7 +6421,7 @@ async function renderAnalysisPage(request, env) {
 </html>
   `;
   return new Response(html, {
-    headers: { "Content-Type": "text/html" }
+    headers: { "Content-Type": "text/html; charset=utf-8" }
   });
 }
 __name(renderAnalysisPage, "renderAnalysisPage");

@@ -250,6 +250,6 @@ export async function renderAnalysisPage(request, env) {
   `;
   
   return new Response(html, {
-    headers: { 'Content-Type': 'text/html' }
+    headers: { 'Content-Type': 'text/html; charset=utf-8' }
   });
 }
