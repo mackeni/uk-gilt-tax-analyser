@@ -901,7 +901,7 @@ export async function renderHomePage(request, env) {
                                 </div>
                                 <div>
                                     <label for="durationMax">Max:</label>
-                                    <input type="number" id="durationMax" min="0" max="45" value="50" step="0.5">
+                                    <input type="number" id="durationMax" min="0" max="50" value="50" step="0.5">
                                 </div>
                             </div>
                             <div class="range-info">
@@ -1934,11 +1934,17 @@ export async function renderHomePage(request, env) {
             const dataDiv = document.getElementById('giltData');
             const metricsDiv = document.getElementById('metrics');
             
+            console.log('displayResults called with', results.length, 'gilts');
+            console.log('Current duration filter:', durationFilter);
+            console.log('Sample gilt years to maturity:', results.slice(0, 3).map(g => g.yearsToMaturity));
+            
             // Filter results by duration
             const filteredResults = results.filter(gilt => 
                 gilt.yearsToMaturity >= durationFilter.min && 
                 gilt.yearsToMaturity <= durationFilter.max
             );
+            
+            console.log('Filtered results:', filteredResults.length, 'gilts');
             
             // Sort by years to maturity (increasing duration)
             const sortedResults = filteredResults.sort((a, b) => 

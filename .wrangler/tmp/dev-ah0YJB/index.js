@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-N2CVpA/checked-fetch.js
+// .wrangler/tmp/bundle-eeaNS6/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-N2CVpA/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-eeaNS6/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-N2CVpA/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-eeaNS6/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-N2CVpA/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-eeaNS6/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4180,7 +4180,7 @@ async function renderHomePage(request, env) {
                                 </div>
                                 <div>
                                     <label for="durationMax">Max:</label>
-                                    <input type="number" id="durationMax" min="0" max="45" value="50" step="0.5">
+                                    <input type="number" id="durationMax" min="0" max="50" value="50" step="0.5">
                                 </div>
                             </div>
                             <div class="range-info">
@@ -5213,11 +5213,17 @@ async function renderHomePage(request, env) {
             const dataDiv = document.getElementById('giltData');
             const metricsDiv = document.getElementById('metrics');
             
+            console.log('displayResults called with', results.length, 'gilts');
+            console.log('Current duration filter:', durationFilter);
+            console.log('Sample gilt years to maturity:', results.slice(0, 3).map(g => g.yearsToMaturity));
+            
             // Filter results by duration
             const filteredResults = results.filter(gilt => 
                 gilt.yearsToMaturity >= durationFilter.min && 
                 gilt.yearsToMaturity <= durationFilter.max
             );
+            
+            console.log('Filtered results:', filteredResults.length, 'gilts');
             
             // Sort by years to maturity (increasing duration)
             const sortedResults = filteredResults.sort((a, b) => 
@@ -6929,7 +6935,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-N2CVpA/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-eeaNS6/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6963,7 +6969,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-N2CVpA/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-eeaNS6/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
