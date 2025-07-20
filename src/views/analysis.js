@@ -259,7 +259,13 @@ export async function renderAnalysisPage(request, env) {
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; media-src 'none'; frame-src 'none';",
       'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), speaker=(), vibrate=(), fullscreen=(self), sync-xhr=()',
-      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
+      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Resource-Policy': 'same-origin',
+      'Origin-Agent-Cluster': '?1',
+      'X-Permitted-Cross-Domain-Policies': 'none',
+      'Clear-Site-Data': '"cache", "cookies", "storage"'
     }
   });
 }

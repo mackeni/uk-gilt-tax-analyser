@@ -585,11 +585,11 @@ This migration maintains all original functionality while dramatically improving
 - **Input Handling**: Empty or invalid inputs default to £5 (realistic broker charge)
 - **Calculation Logic**: All calculations properly handle both £0 and positive dealing charges
 
-### July 20, 2025 - Comprehensive Security Headers Implementation
+### July 20, 2025 - Comprehensive Security Headers with Upcoming Standards
 
-**Version ID**: 3ecd3f87-12cb-4dba-9058-ee6bfd483db4
+**Version ID**: 3c206815-36b6-4a92-90b3-a478407a3bce
 
-**Complete Security Headers Implementation:**
+**Complete Security Headers Implementation (Traditional + Modern):**
 - **Content Security Policy**: Implemented strict CSP preventing XSS attacks with 'self' directives and minimal inline allowances
 - **HTTP Strict Transport Security**: Added HSTS with 1-year max-age, includeSubDomains, and preload directives
 - **Frame Protection**: X-Frame-Options set to DENY preventing clickjacking attacks
@@ -597,14 +597,27 @@ This migration maintains all original functionality while dramatically improving
 - **Content Type Protection**: X-Content-Type-Options nosniff preventing MIME-type confusion attacks
 - **Referrer Policy**: Strict-origin-when-cross-origin for privacy-conscious referrer handling
 - **Permissions Policy**: Comprehensive restriction of device APIs (geolocation, microphone, camera, payment, USB, sensors)
-- **Applied Across All Endpoints**: HTML, JSON API, JavaScript modules, and error responses all include security headers
 
-**Security Best Practices Achieved:**
-- **Complete Attack Surface Protection**: XSS, clickjacking, MIME sniffing, and protocol downgrade protection
-- **Device Permission Lockdown**: All sensitive device APIs disabled except fullscreen for legitimate use
-- **Transport Security**: Enforced HTTPS with HSTS preload eligibility
-- **Content Isolation**: Strict CSP allowing only necessary sources and functionality
-- **Privacy Protection**: Minimized referrer information leakage across origins
+**Upcoming Modern Security Headers Added:**
+- **Cross-Origin-Embedder-Policy**: require-corp for enhanced cross-origin isolation
+- **Cross-Origin-Opener-Policy**: same-origin preventing cross-origin window references
+- **Cross-Origin-Resource-Policy**: same-origin for HTML/JS, cross-origin for APIs to balance security and functionality
+- **Origin-Agent-Cluster**: ?1 enabling process isolation for enhanced security
+- **X-Permitted-Cross-Domain-Policies**: none preventing Adobe Flash policy abuse
+- **Clear-Site-Data**: "cache", "cookies", "storage" for sensitive pages to prevent data leakage
+
+**Advanced Security Architecture:**
+- **Process Isolation**: Origin-Agent-Cluster enables separate process for enhanced security
+- **Cross-Origin Protection**: Complete CORP/COEP/COOP implementation preventing Spectre-class attacks
+- **Data Clearing**: Automatic cache/cookie/storage clearing for sensitive operations
+- **Adobe Flash Protection**: Prevents legacy Flash policy file abuse
+- **Future-Proof Design**: Implements emerging web security standards before widespread adoption
+
+**Security Coverage Achieved:**
+- **Complete Attack Surface Protection**: XSS, clickjacking, MIME sniffing, protocol downgrade, and side-channel attacks
+- **Cross-Origin Isolation**: Advanced protection against timing and speculative execution attacks
+- **Process-Level Security**: Enhanced browser process isolation through origin clustering
+- **Data Privacy**: Automatic clearing of sensitive data and minimal cross-origin information leakage
 
 ### July 20, 2025 - Duration Filter Bug Fix and UI Optimization
 

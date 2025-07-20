@@ -236,7 +236,10 @@ export function getCachedCalculation(key, calculationFn, ...args) {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+        'Cross-Origin-Resource-Policy': 'same-origin',
+        'Origin-Agent-Cluster': '?1',
+        'X-Permitted-Cross-Domain-Policies': 'none'
       }
     });
   }
@@ -298,7 +301,10 @@ async function handleAPIRequest(request, env, path) {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+        'Cross-Origin-Resource-Policy': 'cross-origin',
+        'Origin-Agent-Cluster': '?1',
+        'X-Permitted-Cross-Domain-Policies': 'none'
       }
     });
   }
@@ -326,7 +332,10 @@ async function getGiltData(request, env) {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+        'Cross-Origin-Resource-Policy': 'cross-origin',
+        'Origin-Agent-Cluster': '?1',
+        'X-Permitted-Cross-Domain-Policies': 'none'
       }
     });
   } catch (error) {
@@ -344,7 +353,10 @@ async function getGiltData(request, env) {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+        'Cross-Origin-Resource-Policy': 'cross-origin',
+        'Origin-Agent-Cluster': '?1',
+        'X-Permitted-Cross-Domain-Policies': 'none'
       }
     });
   }
@@ -440,7 +452,10 @@ async function calculateTax(request, env) {
           'X-Content-Type-Options': 'nosniff',
           'X-Frame-Options': 'DENY',
           'Referrer-Policy': 'strict-origin-when-cross-origin',
-          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+          'Cross-Origin-Resource-Policy': 'cross-origin',
+          'Origin-Agent-Cluster': '?1',
+          'X-Permitted-Cross-Domain-Policies': 'none'
         }
       });
     } else {
@@ -462,7 +477,10 @@ async function calculateTax(request, env) {
           'X-Content-Type-Options': 'nosniff',
           'X-Frame-Options': 'DENY',
           'Referrer-Policy': 'strict-origin-when-cross-origin',
-          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+          'Cross-Origin-Resource-Policy': 'cross-origin',
+          'Origin-Agent-Cluster': '?1',
+          'X-Permitted-Cross-Domain-Policies': 'none'
         }
       });
     }
@@ -476,7 +494,10 @@ async function calculateTax(request, env) {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+        'Cross-Origin-Resource-Policy': 'cross-origin',
+        'Origin-Agent-Cluster': '?1',
+        'X-Permitted-Cross-Domain-Policies': 'none'
       }
     });
   }

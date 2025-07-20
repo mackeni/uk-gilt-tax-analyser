@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-T3TcF3/checked-fetch.js
+// .wrangler/tmp/bundle-z5cNbE/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-T3TcF3/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-z5cNbE/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-T3TcF3/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-z5cNbE/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-T3TcF3/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-z5cNbE/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -6149,7 +6149,13 @@ async function renderHomePage(request, env) {
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; media-src 'none'; frame-src 'none';",
       "Permissions-Policy": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), speaker=(), vibrate=(), fullscreen=(self), sync-xhr=()",
-      "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Resource-Policy": "same-origin",
+      "Origin-Agent-Cluster": "?1",
+      "X-Permitted-Cross-Domain-Policies": "none",
+      "Clear-Site-Data": '"cache", "cookies", "storage"'
     }
   });
 }
@@ -6413,7 +6419,13 @@ async function renderAnalysisPage(request, env) {
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; media-src 'none'; frame-src 'none';",
       "Permissions-Policy": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), speaker=(), vibrate=(), fullscreen=(self), sync-xhr=()",
-      "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
+      "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Resource-Policy": "same-origin",
+      "Origin-Agent-Cluster": "?1",
+      "X-Permitted-Cross-Domain-Policies": "none",
+      "Clear-Site-Data": '"cache", "cookies", "storage"'
     }
   });
 }
@@ -6638,7 +6650,10 @@ export function getCachedCalculation(key, calculationFn, ...args) {
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Cross-Origin-Resource-Policy": "same-origin",
+        "Origin-Agent-Cluster": "?1",
+        "X-Permitted-Cross-Domain-Policies": "none"
       }
     });
   }
@@ -6696,7 +6711,10 @@ async function handleAPIRequest(request, env, path) {
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Cross-Origin-Resource-Policy": "cross-origin",
+        "Origin-Agent-Cluster": "?1",
+        "X-Permitted-Cross-Domain-Policies": "none"
       }
     });
   }
@@ -6721,7 +6739,10 @@ async function getGiltData(request, env) {
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Cross-Origin-Resource-Policy": "cross-origin",
+        "Origin-Agent-Cluster": "?1",
+        "X-Permitted-Cross-Domain-Policies": "none"
       }
     });
   } catch (error) {
@@ -6739,7 +6760,10 @@ async function getGiltData(request, env) {
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Cross-Origin-Resource-Policy": "cross-origin",
+        "Origin-Agent-Cluster": "?1",
+        "X-Permitted-Cross-Domain-Policies": "none"
       }
     });
   }
@@ -6820,7 +6844,10 @@ async function calculateTax(request, env) {
           "X-Content-Type-Options": "nosniff",
           "X-Frame-Options": "DENY",
           "Referrer-Policy": "strict-origin-when-cross-origin",
-          "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+          "Cross-Origin-Resource-Policy": "cross-origin",
+          "Origin-Agent-Cluster": "?1",
+          "X-Permitted-Cross-Domain-Policies": "none"
         }
       });
     } else {
@@ -6840,7 +6867,10 @@ async function calculateTax(request, env) {
           "X-Content-Type-Options": "nosniff",
           "X-Frame-Options": "DENY",
           "Referrer-Policy": "strict-origin-when-cross-origin",
-          "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+          "Cross-Origin-Resource-Policy": "cross-origin",
+          "Origin-Agent-Cluster": "?1",
+          "X-Permitted-Cross-Domain-Policies": "none"
         }
       });
     }
@@ -6854,7 +6884,10 @@ async function calculateTax(request, env) {
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload"
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+        "Cross-Origin-Resource-Policy": "cross-origin",
+        "Origin-Agent-Cluster": "?1",
+        "X-Permitted-Cross-Domain-Policies": "none"
       }
     });
   }
@@ -7008,7 +7041,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-T3TcF3/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-z5cNbE/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -7042,7 +7075,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-T3TcF3/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-z5cNbE/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
