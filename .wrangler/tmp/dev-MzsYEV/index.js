@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-yTIod0/checked-fetch.js
+// .wrangler/tmp/bundle-rZbDod/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-yTIod0/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-rZbDod/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-yTIod0/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-rZbDod/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-yTIod0/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-rZbDod/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -6645,7 +6645,10 @@ async function handleAPIRequest(request, env, path) {
     console.error("API Error:", error);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
-      headers: { "Content-Type": "application/json" }
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache, no-store, must-revalidate"
+      }
     });
   }
 }
@@ -6664,7 +6667,8 @@ async function getGiltData(request, env) {
     return new Response(JSON.stringify(result), {
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache, no-store, must-revalidate"
       }
     });
   } catch (error) {
@@ -6677,7 +6681,8 @@ async function getGiltData(request, env) {
       status: 500,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache, no-store, must-revalidate"
       }
     });
   }
@@ -6747,7 +6752,8 @@ async function calculateTax(request, env) {
       return new Response(JSON.stringify(results), {
         headers: {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "no-cache, no-store, must-revalidate"
         }
       });
     } else {
@@ -6762,7 +6768,8 @@ async function calculateTax(request, env) {
       return new Response(JSON.stringify({ afterTaxYield: result }), {
         headers: {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "no-cache, no-store, must-revalidate"
         }
       });
     }
@@ -6771,7 +6778,8 @@ async function calculateTax(request, env) {
       status: 500,
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache, no-store, must-revalidate"
       }
     });
   }
@@ -6866,7 +6874,8 @@ async function getCouponSchedule(request, env) {
   }), {
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*"
+      "Access-Control-Allow-Origin": "*",
+      "Cache-Control": "no-cache, no-store, must-revalidate"
     }
   });
 }
@@ -6917,7 +6926,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-yTIod0/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-rZbDod/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6951,7 +6960,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-yTIod0/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-rZbDod/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

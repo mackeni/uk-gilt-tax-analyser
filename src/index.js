@@ -258,7 +258,10 @@ async function handleAPIRequest(request, env, path) {
     console.error('API Error:', error);
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
+      }
     });
   }
 }
@@ -280,7 +283,8 @@ async function getGiltData(request, env) {
     return new Response(JSON.stringify(result), {
       headers: { 
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
       }
     });
   } catch (error) {
@@ -293,7 +297,8 @@ async function getGiltData(request, env) {
       status: 500,
       headers: { 
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
       }
     });
   }
@@ -378,7 +383,8 @@ async function calculateTax(request, env) {
       return new Response(JSON.stringify(results), {
         headers: { 
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
         }
       });
     } else {
@@ -395,7 +401,8 @@ async function calculateTax(request, env) {
       return new Response(JSON.stringify({ afterTaxYield: result }), {
         headers: { 
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
         }
       });
     }
@@ -404,7 +411,8 @@ async function calculateTax(request, env) {
       status: 500,
       headers: { 
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
       }
     });
   }
@@ -508,7 +516,8 @@ async function getCouponSchedule(request, env) {
   }), {
     headers: { 
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': '*',
+      'Cache-Control': 'no-cache, no-store, must-revalidate'
     }
   });
 }
