@@ -1197,6 +1197,9 @@ export async function renderHomePage(request, env) {
             const investmentAmount = parseFloat(document.getElementById('investmentAmount').value) || 10000;
             currentSettings.investmentAmount = investmentAmount;
             
+            // Clear cache since investment amount affects unit calculations
+            clearAllCaches();
+            
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
             }
@@ -1205,6 +1208,9 @@ export async function renderHomePage(request, env) {
         function updateSavingsRate() {
             const savingsRate = parseFloat(document.getElementById('savingsRate').value) || 4.5;
             currentSettings.savingsRate = savingsRate;
+            
+            // Clear cache since savings rate affects comparison calculations
+            clearAllCaches();
             
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
@@ -1269,6 +1275,9 @@ export async function renderHomePage(request, env) {
             
             // Store the confirmed PSA amount
             currentSettings.psaAmount = confirmedPSA;
+            
+            // Clear cache since tax settings affect all calculations
+            clearAllCaches();
             
             document.getElementById('taxDetails').innerHTML = \`
                 <p><strong>Income Tax Rate:</strong> \${info.rate}%</p>
@@ -1359,19 +1368,7 @@ export async function renderHomePage(request, env) {
             });
         }
         
-        function updateInvestmentAmount() {
-            currentSettings.investmentAmount = parseFloat(document.getElementById('investmentAmount').value);
-            if (currentGiltData.length > 0) {
-                calculateTaxEfficiency();
-            }
-        }
-        
-        function updateSavingsRate() {
-            currentSettings.savingsRate = parseFloat(document.getElementById('savingsRate').value);
-            if (currentGiltData.length > 0) {
-                calculateTaxEfficiency();
-            }
-        }
+
         
         function updateDurationFilter() {
             const minInput = document.getElementById('durationMin');

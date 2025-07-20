@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-hHIkzg/checked-fetch.js
+// .wrangler/tmp/bundle-vP7d9K/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-hHIkzg/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-vP7d9K/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-hHIkzg/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-vP7d9K/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-hHIkzg/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-vP7d9K/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4447,6 +4447,9 @@ async function renderHomePage(request, env) {
             const investmentAmount = parseFloat(document.getElementById('investmentAmount').value) || 10000;
             currentSettings.investmentAmount = investmentAmount;
             
+            // Clear cache since investment amount affects unit calculations
+            clearAllCaches();
+            
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
             }
@@ -4455,6 +4458,9 @@ async function renderHomePage(request, env) {
         function updateSavingsRate() {
             const savingsRate = parseFloat(document.getElementById('savingsRate').value) || 4.5;
             currentSettings.savingsRate = savingsRate;
+            
+            // Clear cache since savings rate affects comparison calculations
+            clearAllCaches();
             
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
@@ -4519,6 +4525,9 @@ async function renderHomePage(request, env) {
             
             // Store the confirmed PSA amount
             currentSettings.psaAmount = confirmedPSA;
+            
+            // Clear cache since tax settings affect all calculations
+            clearAllCaches();
             
             document.getElementById('taxDetails').innerHTML = \`
                 <p><strong>Income Tax Rate:</strong> \${info.rate}%</p>
@@ -4609,19 +4618,7 @@ async function renderHomePage(request, env) {
             });
         }
         
-        function updateInvestmentAmount() {
-            currentSettings.investmentAmount = parseFloat(document.getElementById('investmentAmount').value);
-            if (currentGiltData.length > 0) {
-                calculateTaxEfficiency();
-            }
-        }
-        
-        function updateSavingsRate() {
-            currentSettings.savingsRate = parseFloat(document.getElementById('savingsRate').value);
-            if (currentGiltData.length > 0) {
-                calculateTaxEfficiency();
-            }
-        }
+
         
         function updateDurationFilter() {
             const minInput = document.getElementById('durationMin');
@@ -6722,7 +6719,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-hHIkzg/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-vP7d9K/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6756,7 +6753,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-hHIkzg/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-vP7d9K/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
