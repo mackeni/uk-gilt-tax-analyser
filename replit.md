@@ -585,9 +585,19 @@ This migration maintains all original functionality while dramatically improving
 - **Input Handling**: Empty or invalid inputs default to £5 (realistic broker charge)
 - **Calculation Logic**: All calculations properly handle both £0 and positive dealing charges
 
-### July 20, 2025 - Code Simplification Without Accuracy Loss
+### July 20, 2025 - Duration Filter Bug Fix and Code Simplification
 
 **Version ID**: [Latest Deployment]
+
+**Critical Bug Fix:**
+- **Fixed Duration Filter Issue**: Resolved bug where yearsToMaturity was null for all gilts, causing complete filtering failure
+- **Added Missing Calculation**: Ensured yearsToMaturity is calculated during data processing for any gilt missing this value
+- **Corrected Filter Defaults**: Set duration filter to 0-50 years (was 0-2 years) to show all gilts by default
+- **Enhanced Debug Logging**: Added comprehensive logging to identify filtering issues quickly
+
+### July 20, 2025 - Code Simplification Without Accuracy Loss
+
+**Version ID**: [Previous Deployment]
 
 **Significant Code Simplification Achieved:**
 - **Removed Complex Caching Infrastructure**: Eliminated all memoization, TTL caches, and cache statistics tracking which added complexity without improving accuracy

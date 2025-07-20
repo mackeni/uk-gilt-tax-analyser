@@ -1632,6 +1632,7 @@ export async function renderHomePage(request, env) {
                 // Ensure yearsToMaturity is calculated
                 if (!gilt.yearsToMaturity || gilt.yearsToMaturity === null) {
                     gilt.yearsToMaturity = calculateYearsToMaturity(gilt.maturityDate);
+                    console.log('Calculated yearsToMaturity for', gilt.name, ':', gilt.yearsToMaturity);
                 }
                 
                 // Include dealing charge in units calculation (if any)
@@ -1941,7 +1942,8 @@ export async function renderHomePage(request, env) {
             
             console.log('displayResults called with', results.length, 'gilts');
             console.log('Current duration filter:', durationFilter);
-            console.log('Sample gilt years to maturity:', results.slice(0, 3).map(g => g.yearsToMaturity));
+            console.log('Sample gilt years to maturity:', results.slice(0, 3).map(g => ({ name: g.name, years: g.yearsToMaturity, maturity: g.maturityDate })));
+            console.log('All gilt years to maturity:', results.map(g => ({ name: g.name, years: g.yearsToMaturity })));
             
             // Filter results by duration
             const filteredResults = results.filter(gilt => 
