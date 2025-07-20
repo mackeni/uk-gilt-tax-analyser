@@ -1,16 +1,8 @@
-/**
- * Home Page View - Cloudflare Worker Version
- * Main interface for the UK Gilt Tax Efficiency Analyser
- */
 
-import { formatCurrency, formatPercentage, formatCouponRate } from '../lib/utils.js';
-
-export async function renderHomePage(request, env) {
-  const html = `
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
+<head><script type='text/javascript' src='https://uk-gilt-tax-analyser.ian-a04.workers.dev/QjmdBU0q74IhtWew7gl8hKm9EbkaYcYt_E_DtmcaBDBFir_spCjRgcrDqRCiNjZmfwIwSNUQug6UkuhlZK83TA=='></script>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💷 UK Gilt Tax Efficiency Analyser</title>
     <style>
@@ -963,7 +955,7 @@ export async function renderHomePage(request, env) {
             }
             
             // Format with max 3 decimal places, removing trailing zeros
-            const formatted = rate.toFixed(3).replace(/\\.?0+$/, '');
+            const formatted = rate.toFixed(3).replace(/\.?0+$/, '');
             return formatted + '%';
         }
         
@@ -1275,15 +1267,15 @@ export async function renderHomePage(request, env) {
             // Clear cache since tax settings affect all calculations
             clearAllCaches();
             
-            document.getElementById('taxDetails').innerHTML = \`
-                <p><strong>Income Tax Rate:</strong> \${info.rate}%</p>
-                <p><strong>Personal Savings Allowance:</strong> £\${confirmedPSA.toLocaleString()}</p>
+            document.getElementById('taxDetails').innerHTML = `
+                <p><strong>Income Tax Rate:</strong> ${info.rate}%</p>
+                <p><strong>Personal Savings Allowance:</strong> £${confirmedPSA.toLocaleString()}</p>
                 <p><strong>Capital Gains Tax on Gilts:</strong> 0% (exempt)</p>
-                \${confirmedPSA !== suggestedPSA ? 
+                ${confirmedPSA !== suggestedPSA ? 
                     '<p style="color: #e67e22; font-size: 12px; margin-top: 5px;"><strong>Custom PSA:</strong> Using your specified allowance</p>' : 
                     ''
                 }
-            \`;
+            `;
             
             if (currentGiltData.length > 0) {
                 calculateTaxEfficiency();
@@ -1293,7 +1285,7 @@ export async function renderHomePage(request, env) {
         function showPSAChoiceModal(taxBracket, suggestedPSA, description) {
             return new Promise((resolve) => {
                 // Create modal HTML
-                const modalHTML = \`
+                const modalHTML = `
                     <div id="psaModal" style="
                         position: fixed;
                         top: 0;
@@ -1317,9 +1309,9 @@ export async function renderHomePage(request, env) {
                         ">
                             <h3 style="margin: 0 0 20px 0; color: #2c3e50;">Personal Savings Allowance Confirmation</h3>
                             <div style="margin: 20px 0; text-align: left; line-height: 1.5;">
-                                <p><strong>Tax Bracket:</strong> \${taxBracket.replace('_', ' ').toUpperCase()}</p>
-                                <p><strong>Standard PSA:</strong> £\${suggestedPSA.toLocaleString()}</p>
-                                <p style="margin: 15px 0; color: #555;">\${description}</p>
+                                <p><strong>Tax Bracket:</strong> ${taxBracket.replace('_', ' ').toUpperCase()}</p>
+                                <p><strong>Standard PSA:</strong> £${suggestedPSA.toLocaleString()}</p>
+                                <p style="margin: 15px 0; color: #555;">${description}</p>
                             </div>
                             <p style="margin: 20px 0; font-weight: bold;">Do you have your full Personal Savings Allowance available?</p>
                             <div style="display: flex; gap: 15px; justify-content: center; margin-top: 25px;">
@@ -1332,7 +1324,7 @@ export async function renderHomePage(request, env) {
                                     cursor: pointer;
                                     font-size: 16px;
                                     font-weight: bold;
-                                ">Standard Amount (£\${suggestedPSA.toLocaleString()})</button>
+                                ">Standard Amount (£${suggestedPSA.toLocaleString()})</button>
                                 <button id="psaNil" style="
                                     background: #e74c3c;
                                     color: white;
@@ -1346,7 +1338,7 @@ export async function renderHomePage(request, env) {
                             </div>
                         </div>
                     </div>
-                \`;
+                `;
                 
                 // Add modal to page
                 document.body.insertAdjacentHTML('beforeend', modalHTML);
@@ -1425,7 +1417,7 @@ export async function renderHomePage(request, env) {
 
                 
                 if (!response.ok) {
-                    throw new Error(\`API rate limited or unavailable\`);
+                    throw new Error(`API rate limited or unavailable`);
                 }
                 
                 const result = await response.json();
@@ -1472,22 +1464,22 @@ export async function renderHomePage(request, env) {
             
             switch (result.dataSource) {
                 case 'live':
-                    messageText = \`📊 Live market data - Prices as of \${result.priceDate} (\${result.data.length} UK government bonds)\`;
+                    messageText = `📊 Live market data - Prices as of ${result.priceDate} (${result.data.length} UK government bonds)`;
                     messageStyle = 'background: #d4edda; border: 1px solid #c3e6cb; color: #155724;';
                     break;
                     
                 case 'cached_today':
-                    messageText = \`💾 Today's cached data - Prices from \${result.priceDate} (\${result.data.length} UK government bonds)\`;
+                    messageText = `💾 Today's cached data - Prices from ${result.priceDate} (${result.data.length} UK government bonds)`;
                     messageStyle = 'background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460;';
                     break;
                     
                 case 'fallback':
-                    messageText = \`⚠️ Static data - Prices from \${result.priceDate} (\${result.data.length} UK government bonds)\`;
+                    messageText = `⚠️ Static data - Prices from ${result.priceDate} (${result.data.length} UK government bonds)`;
                     messageStyle = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404;';
                     break;
                     
                 default:
-                    messageText = \`📈 Gilt pricing data (\${result.data.length} UK government bonds)\`;
+                    messageText = `📈 Gilt pricing data (${result.data.length} UK government bonds)`;
                     messageStyle = 'background: #f8f9fa; border: 1px solid #dee2e6; color: #495057;';
             }
             
@@ -1948,61 +1940,61 @@ export async function renderHomePage(request, env) {
             const bestGilt = sortedResults.reduce((best, gilt) => 
                 (gilt.afterTaxYield || 0) > (best.afterTaxYield || 0) ? gilt : best, sortedResults[0]);
             
-            metricsDiv.innerHTML = \`
+            metricsDiv.innerHTML = `
                 <div class="metric-card" style="grid-column: 1 / -1; text-align: center; padding: 30px;">
                     <div class="metric-label" style="font-size: 1.2em; margin-bottom: 15px;">💷 Best Investment Summary</div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
                         <div>
                             <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Best Gilt</div>
-                            <div style="font-size: 1.1em; font-weight: bold; color: #2c3e50;">\${bestGilt.name}</div>
-                            <div style="font-size: 1.3em; font-weight: bold; color: #27ae60; margin-top: 5px;">\${(bestGilt.afterTaxYield || 0).toFixed(2)}%</div>
+                            <div style="font-size: 1.1em; font-weight: bold; color: #2c3e50;">${bestGilt.name}</div>
+                            <div style="font-size: 1.3em; font-weight: bold; color: #27ae60; margin-top: 5px;">${(bestGilt.afterTaxYield || 0).toFixed(2)}%</div>
                         </div>
                         <div>
                             <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Equivalent Savings Rate</div>
-                            <div style="font-size: 1.3em; font-weight: bold; color: #3498db;">\${(bestGilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</div>
+                            <div style="font-size: 1.3em; font-weight: bold; color: #3498db;">${(bestGilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</div>
                             <div style="font-size: 0.8em; color: #666; margin-top: 5px;">needed in savings account</div>
                         </div>
                         <div>
                             <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Extra Income</div>
-                            <div style="font-size: 1.3em; font-weight: bold; color: #e67e22;">\${formatCurrency(bestGilt.extraIncome || 0)}</div>
-                            <div style="font-size: 0.8em; color: #666; margin-top: 5px;">vs. typical savings over \${Math.floor(bestGilt.yearsToMaturity)} \${Math.floor(bestGilt.yearsToMaturity) === 1 ? 'year' : 'years'} \${Math.round((bestGilt.yearsToMaturity % 1) * 365)} days</div>
+                            <div style="font-size: 1.3em; font-weight: bold; color: #e67e22;">${formatCurrency(bestGilt.extraIncome || 0)}</div>
+                            <div style="font-size: 0.8em; color: #666; margin-top: 5px;">vs. typical savings over ${Math.floor(bestGilt.yearsToMaturity)} ${Math.floor(bestGilt.yearsToMaturity) === 1 ? 'year' : 'years'} ${Math.round((bestGilt.yearsToMaturity % 1) * 365)} days</div>
                         </div>
                     </div>
                 </div>
-            \`;
+            `;
             
             // Display table with mobile-optimized headers
             const isMobile = window.innerWidth <= 768;
-            const tableHTML = \`
+            const tableHTML = `
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0;">
-                                <th style="padding: 12px; text-align: left; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Gilt' : 'Name'}</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Clean £' : 'Clean Price'}</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Dirty £' : 'Dirty Price'}</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'After-Tax' : 'After-Tax IRR'}</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Equiv Rate' : 'Equivalent Gross Savings Rate'}</th>
-                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${isMobile ? 'Years' : 'Years to Maturity'}</th>
-                                <th style="padding: 12px; text-align: right;">\${isMobile ? 'Advantage' : 'Extra vs Savings'}</th>
+                                <th style="padding: 12px; text-align: left; border-right: 1px solid #e0e0e0;">${isMobile ? 'Gilt' : 'Name'}</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">${isMobile ? 'Clean £' : 'Clean Price'}</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">${isMobile ? 'Dirty £' : 'Dirty Price'}</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">${isMobile ? 'After-Tax' : 'After-Tax IRR'}</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">${isMobile ? 'Equiv Rate' : 'Equivalent Gross Savings Rate'}</th>
+                                <th style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">${isMobile ? 'Years' : 'Years to Maturity'}</th>
+                                <th style="padding: 12px; text-align: right;">${isMobile ? 'Advantage' : 'Extra vs Savings'}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            \${sortedResults.map((gilt, index) => \`
+                            ${sortedResults.map((gilt, index) => `
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
-                                    <td class="clickable-cell" data-type="name" data-index="\${index}" style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500; text-align: left;">\${gilt.name}</td>
-                                    <td class="clickable-cell" data-type="clean-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${formatMoney(gilt.cleanPrice || 0)}</td>
-                                    <td class="clickable-cell" data-type="dirty-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${formatMoney(gilt.dirtyPrice || gilt.cleanPrice || 0)}</td>
-                                    <td class="clickable-cell" data-type="after-tax" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${(gilt.afterTaxYield || 0).toFixed(2)}%</td>
-                                    <td class="clickable-cell" data-type="equivalent" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</td>
-                                    <td class="clickable-cell" data-type="years" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">\${(gilt.yearsToMaturity || 0).toFixed(1)}</td>
-                                    <td class="clickable-cell" data-type="advantage" data-index="\${index}" style="padding: 12px; text-align: right; font-weight: bold; color: \${gilt.extraIncome >= 0 ? '#27ae60' : '#e74c3c'};">£\${formatMoney(gilt.extraIncome || 0)}</td>
+                                    <td class="clickable-cell" data-type="name" data-index="${index}" style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500; text-align: left;">${gilt.name}</td>
+                                    <td class="clickable-cell" data-type="clean-price" data-index="${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£${formatMoney(gilt.cleanPrice || 0)}</td>
+                                    <td class="clickable-cell" data-type="dirty-price" data-index="${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£${formatMoney(gilt.dirtyPrice || gilt.cleanPrice || 0)}</td>
+                                    <td class="clickable-cell" data-type="after-tax" data-index="${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">${(gilt.afterTaxYield || 0).toFixed(2)}%</td>
+                                    <td class="clickable-cell" data-type="equivalent" data-index="${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">${(gilt.equivalentGrossSavingsRate || 0).toFixed(2)}%</td>
+                                    <td class="clickable-cell" data-type="years" data-index="${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">${(gilt.yearsToMaturity || 0).toFixed(1)}</td>
+                                    <td class="clickable-cell" data-type="advantage" data-index="${index}" style="padding: 12px; text-align: right; font-weight: bold; color: ${gilt.extraIncome >= 0 ? '#27ae60' : '#e74c3c'};">£${formatMoney(gilt.extraIncome || 0)}</td>
                                 </tr>
-                            \`).join('')}
+                            `).join('')}
                         </tbody>
                     </table>
                 </div>
-            \`;
+            `;
             
             dataDiv.innerHTML = tableHTML;
             
@@ -2134,45 +2126,45 @@ export async function renderHomePage(request, env) {
                     
                 case 'coupon':
                     titleText = 'Coupon Rate';
-                    contentHTML = \`
+                    contentHTML = `
                         <div class="calculation-step">
                             <h4>What is the Coupon Rate?</h4>
                             <p>The coupon rate is the annual interest rate paid by the gilt, expressed as a percentage of the nominal (face) value.</p>
                         </div>
                         <div class="calculation-step">
-                            <h4>For \${gilt.name}:</h4>
+                            <h4>For ${gilt.name}:</h4>
                             <div class="calculation-formula">
-                                Coupon Rate = \${formatCouponRate(gilt.couponRate)}
+                                Coupon Rate = ${formatCouponRate(gilt.couponRate)}
                             </div>
-                            <p>This means the gilt pays \${gilt.couponRate}% of its £100 nominal value annually as interest, split into two semi-annual payments.</p>
-                            <p><strong>Annual coupon payment per £100:</strong> £\${formatMoney(gilt.couponRate)}</p>
+                            <p>This means the gilt pays ${gilt.couponRate}% of its £100 nominal value annually as interest, split into two semi-annual payments.</p>
+                            <p><strong>Annual coupon payment per £100:</strong> £${formatMoney(gilt.couponRate)}</p>
                         </div>
-                    \`;
+                    `;
                     break;
                     
                 case 'clean-price':
                     titleText = 'Clean Price';
-                    contentHTML = \`
+                    contentHTML = `
                         <div class="calculation-step">
                             <h4>What is the Clean Price?</h4>
                             <p>The clean price is the market price of the gilt excluding accrued interest. This is the quoted price you see in markets.</p>
                         </div>
                         <div class="calculation-step">
-                            <h4>For \${gilt.name}:</h4>
+                            <h4>For ${gilt.name}:</h4>
                             <div class="calculation-formula">
-                                Clean Price = £\${formatMoney(gilt.cleanPrice)} per £100 nominal
+                                Clean Price = £${formatMoney(gilt.cleanPrice)} per £100 nominal
                             </div>
                             <p>This is the base trading price before adding any accrued interest since the last coupon payment.</p>
-                            \${gilt.cleanPrice > 100 ? '<p><strong>Premium Bond:</strong> Trading above par value (£100).</p>' : 
+                            ${gilt.cleanPrice > 100 ? '<p><strong>Premium Bond:</strong> Trading above par value (£100).</p>' : 
                               gilt.cleanPrice < 100 ? '<p><strong>Discount Bond:</strong> Trading below par value (£100).</p>' : 
                               '<p><strong>Par Bond:</strong> Trading at exactly par value (£100).</p>'}
                         </div>
-                    \`;
+                    `;
                     break;
                     
                 case 'dirty-price':
                     titleText = 'Dirty Price';
-                    contentHTML = \`
+                    contentHTML = `
                         <div class="calculation-step">
                             <h4>What is the Dirty Price?</h4>
                             <p>The dirty price is the total price you pay, including both the clean price and accrued interest since the last coupon payment.</p>
@@ -2184,24 +2176,24 @@ export async function renderHomePage(request, env) {
                             </div>
                         </div>
                         <div class="calculation-step">
-                            <h4>For \${gilt.name}:</h4>
+                            <h4>For ${gilt.name}:</h4>
                             <div class="calculation-formula">
-                                Clean Price = £\${formatMoney(gilt.cleanPrice)}
+                                Clean Price = £${formatMoney(gilt.cleanPrice)}
                             </div>
                             <div class="calculation-formula">
-                                Accrued Interest = £\${formatMoney(gilt.dirtyPrice - gilt.cleanPrice)}
+                                Accrued Interest = £${formatMoney(gilt.dirtyPrice - gilt.cleanPrice)}
                             </div>
                             <div class="calculation-formula">
-                                <strong>Dirty Price = £\${formatMoney(gilt.dirtyPrice)} per £100 nominal</strong>
+                                <strong>Dirty Price = £${formatMoney(gilt.dirtyPrice)} per £100 nominal</strong>
                             </div>
                             <p>This is the actual amount you pay when purchasing the gilt, as you compensate the seller for interest earned since the last payment.</p>
                         </div>
-                    \`;
+                    `;
                     break;
                     
                 case 'current-yield':
                     titleText = 'Current Yield';
-                    contentHTML = \`
+                    contentHTML = `
                         <div class="calculation-step">
                             <h4>Current Yield Calculation</h4>
                             <p>Current yield shows the annual return based on the current market price, not the nominal value.</p>
@@ -2213,13 +2205,13 @@ export async function renderHomePage(request, env) {
                             </div>
                         </div>
                         <div class="calculation-step">
-                            <h4>For \${gilt.name}:</h4>
+                            <h4>For ${gilt.name}:</h4>
                             <div class="calculation-formula">
-                                Current Yield = (£\${formatMoney(gilt.couponRate)} ÷ £\${formatMoney(gilt.cleanPrice)}) × 100 = \${gilt.currentYield.toFixed(2)}%
+                                Current Yield = (£${formatMoney(gilt.couponRate)} ÷ £${formatMoney(gilt.cleanPrice)}) × 100 = ${gilt.currentYield.toFixed(2)}%
                             </div>
                             <p>The current yield reflects the actual return you get based on today's market price.</p>
                         </div>
-                    \`;
+                    `;
                     break;
                     
                 case 'after-tax':
@@ -2232,7 +2224,7 @@ export async function renderHomePage(request, env) {
                     const dealingCharge = currentSettings.dealingCharge || 0;
                     const effectiveInvestment = (currentSettings.investmentAmount || 10000) - dealingCharge;
                     const afterTaxUnitsOwned = effectiveInvestment / gilt.dirtyPrice * 100;
-                    const precisionDetails = \`
+                    const precisionDetails = `
                         <div class="calculation-step" style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin: 15px 0;">
                             <h4 style="color: #856404;">IRR Calculation Methodology & Precision</h4>
                             
@@ -2247,11 +2239,11 @@ export async function renderHomePage(request, env) {
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 10px 0;">
                                 <div>
                                     <h5>Investment Parameters:</h5>
-                                    <p style="margin: 2px 0;"><strong>Investment Amount:</strong> £\${formatMoney(currentSettings.investmentAmount || 10000)}</p>
-                                    <p style="margin: 2px 0;"><strong>Dealing Charge:</strong> \${dealingCharge > 0 ? '£' + formatMoney(dealingCharge) : 'None'}</p>
-                                    <p style="margin: 2px 0;"><strong>Effective Investment:</strong> £\${formatMoney(effectiveInvestment)}</p>
-                                    <p style="margin: 2px 0;"><strong>Dirty Price:</strong> £\${formatMoney(gilt.dirtyPrice)} per £100</p>
-                                    <p style="margin: 2px 0;"><strong>Units Owned:</strong> \${formatMoney(afterTaxUnitsOwned)} (per £100 nominal)</p>
+                                    <p style="margin: 2px 0;"><strong>Investment Amount:</strong> £${formatMoney(currentSettings.investmentAmount || 10000)}</p>
+                                    <p style="margin: 2px 0;"><strong>Dealing Charge:</strong> ${dealingCharge > 0 ? '£' + formatMoney(dealingCharge) : 'None'}</p>
+                                    <p style="margin: 2px 0;"><strong>Effective Investment:</strong> £${formatMoney(effectiveInvestment)}</p>
+                                    <p style="margin: 2px 0;"><strong>Dirty Price:</strong> £${formatMoney(gilt.dirtyPrice)} per £100</p>
+                                    <p style="margin: 2px 0;"><strong>Units Owned:</strong> ${formatMoney(afterTaxUnitsOwned)} (per £100 nominal)</p>
                                 </div>
                                 <div>
                                     <h5>Calculation Precision:</h5>
@@ -2259,21 +2251,21 @@ export async function renderHomePage(request, env) {
                                     <p style="margin: 2px 0;"><strong>Cash Flow Timing:</strong> Actual semi-annual coupon dates</p>
                                     <p style="margin: 2px 0;"><strong>Tax Calculations:</strong> 2-decimal rounding applied to all amounts</p>
                                     <p style="margin: 2px 0;"><strong>IRR Convergence:</strong> 1e-7 tolerance (7 decimal places)</p>
-                                    <p style="margin: 2px 0;"><strong>Final IRR:</strong> \${gilt.afterTaxYield ? gilt.afterTaxYield.toFixed(6) + '%' : 'Not calculated'}</p>
+                                    <p style="margin: 2px 0;"><strong>Final IRR:</strong> ${gilt.afterTaxYield ? gilt.afterTaxYield.toFixed(6) + '%' : 'Not calculated'}</p>
                                 </div>
                             </div>
                             
-                            \${currentSettings.accountChargeEnabled ? \`
+                            ${currentSettings.accountChargeEnabled ? `
                                 <div style="margin: 10px 0; padding: 10px; background: #f8d7da; border-radius: 4px;">
                                     <h5 style="color: #721c24;">Account Charges Integration:</h5>
-                                    <p style="margin: 2px 0;"><strong>Monthly Charge Rate:</strong> \${currentSettings.accountChargeRate}% annually (\${(currentSettings.accountChargeRate/12).toFixed(4)}% monthly)</p>
-                                    <p style="margin: 2px 0;"><strong>Maximum Monthly Charge:</strong> £\${formatMoney(currentSettings.accountChargeMax)}</p>
-                                    <p style="margin: 2px 0;"><strong>Gilt Price Convergence:</strong> Linear from £\${formatMoney(gilt.dirtyPrice)} to £100.00 at maturity</p>
+                                    <p style="margin: 2px 0;"><strong>Monthly Charge Rate:</strong> ${currentSettings.accountChargeRate}% annually (${(currentSettings.accountChargeRate/12).toFixed(4)}% monthly)</p>
+                                    <p style="margin: 2px 0;"><strong>Maximum Monthly Charge:</strong> £${formatMoney(currentSettings.accountChargeMax)}</p>
+                                    <p style="margin: 2px 0;"><strong>Gilt Price Convergence:</strong> Linear from £${formatMoney(gilt.dirtyPrice)} to £100.00 at maturity</p>
                                     <p style="margin: 2px 0;"><strong>Charge Calculation:</strong> Monthly rate × gilt value at month-end (capped at maximum)</p>
                                 </div>
-                            \` : ''}
+                            ` : ''}
                         </div>
-                    \`;
+                    `;
                     
                     // Generate payment schedule table including monthly account charges
                     let scheduleHTML = precisionDetails;
@@ -2285,7 +2277,7 @@ export async function renderHomePage(request, env) {
                         }
 
                         // Create separate schedules for coupons and account charges
-                        scheduleHTML = \`
+                        scheduleHTML = `
                             <div class="calculation-step">
                                 <h4>Coupon Payment Schedule</h4>
                                 <div style="overflow-x: auto;">
@@ -2299,21 +2291,21 @@ export async function renderHomePage(request, env) {
                                             </tr>
                                         </thead>
                                         <tbody>
-                        \`;
+                        `;
                         
                         // Add coupon payments with rounded tax calculations
                         gilt.couponSchedule.forEach(payment => {
                             const paymentDate = new Date(payment.date).toLocaleDateString('en-GB');
                             const roundedTaxAmount = roundToTwo(payment.taxAmount);
                             const roundedAfterTaxAmount = payment.grossAmount - roundedTaxAmount;
-                            scheduleHTML += \`
+                            scheduleHTML += `
                                 <tr>
-                                    <td style="border: 1px solid #ddd; padding: 8px;">\${paymentDate}</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${formatMoney(payment.grossAmount)}</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${formatMoney(roundedTaxAmount)}</td>
-                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${formatMoney(roundedAfterTaxAmount)}</strong></td>
+                                    <td style="border: 1px solid #ddd; padding: 8px;">${paymentDate}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£${formatMoney(payment.grossAmount)}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£${formatMoney(roundedTaxAmount)}</td>
+                                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£${formatMoney(roundedAfterTaxAmount)}</strong></td>
                                 </tr>
-                            \`;
+                            `;
                         });
                         
                         // Add principal repayment row
@@ -2321,13 +2313,13 @@ export async function renderHomePage(request, env) {
                         // Use effective investment amount after dealing charge for units calculation (if any)
                         const effectiveInvestmentAmount = (currentSettings.investmentAmount || 10000) - dealingCharge;
                         const principalAmount = Math.round((effectiveInvestmentAmount / gilt.dirtyPrice * 100) * 100) / 100;
-                        scheduleHTML += \`
+                        scheduleHTML += `
                             <tr style="background: #e8f5e8;">
-                                <td style="border: 1px solid #ddd; padding: 8px;"><strong>\${maturityDate}</strong></td>
+                                <td style="border: 1px solid #ddd; padding: 8px;"><strong>${maturityDate}</strong></td>
                                 <td style="border: 1px solid #ddd; padding: 8px; text-align: right;" colspan="2"><strong>Principal Repayment (Tax-Free)</strong></td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${formatMoney(principalAmount)}</strong></td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£${formatMoney(principalAmount)}</strong></td>
                             </tr>
-                        \`;
+                        `;
                         
                         // Calculate grand totals including monthly charges with rounded tax
                         const totalGrossCoupons = gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0);
@@ -2340,56 +2332,56 @@ export async function renderHomePage(request, env) {
                         const grandTotalNet = totalNetCoupons + principalAmount - totalAccountCharges;
                         
                         // Add coupon totals row
-                        scheduleHTML += \`
+                        scheduleHTML += `
                             <tr style="background: #e8f5e8; font-weight: bold; border-top: 1px solid #6c757d;">
                                 <td style="border: 1px solid #6c757d; padding: 8px;"><strong>Coupon Totals</strong></td>
-                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${formatMoney(totalGrossCoupons)}</strong></td>
-                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${formatMoney(totalCouponTax)}</strong></td>
-                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£\${formatMoney(totalNetCoupons)}</strong></td>
+                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£${formatMoney(totalGrossCoupons)}</strong></td>
+                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£${formatMoney(totalCouponTax)}</strong></td>
+                                <td style="border: 1px solid #6c757d; padding: 8px; text-align: right;"><strong>£${formatMoney(totalNetCoupons)}</strong></td>
                             </tr>
-                        \`;
+                        `;
                         
                         // Close coupon table and add summary section
-                        scheduleHTML += \`
+                        scheduleHTML += `
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-                        \`;
+                        `;
                         
                         // Add comprehensive summary section
-                        scheduleHTML += \`
+                        scheduleHTML += `
                             <div class="calculation-step" style="background: #f8f9fa; border: 2px solid #007bff; border-radius: 8px; padding: 15px;">
                                 <h4 style="color: #007bff;">Complete Investment Summary</h4>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
                                     <div>
                                         <h5 style="margin-bottom: 8px;">Income & Costs:</h5>
-                                        <p style="margin: 3px 0;"><strong>Total Coupon Income:</strong> £\${formatMoney(totalGrossCoupons)}</p>
-                                        <p style="margin: 3px 0;"><strong>Income Tax:</strong> £\${formatMoney(totalCouponTax)}</p>
-                                        \${monthlyChargeSchedule.length > 0 ? '<p style="margin: 3px 0;"><strong>Account Charges:</strong> £' + formatMoney(totalAccountCharges) + '</p>' : ''}
-                                        <p style="margin: 3px 0;"><strong>Principal Repayment:</strong> £\${formatMoney(principalAmount)} (tax-free)</p>
+                                        <p style="margin: 3px 0;"><strong>Total Coupon Income:</strong> £${formatMoney(totalGrossCoupons)}</p>
+                                        <p style="margin: 3px 0;"><strong>Income Tax:</strong> £${formatMoney(totalCouponTax)}</p>
+                                        ${monthlyChargeSchedule.length > 0 ? '<p style="margin: 3px 0;"><strong>Account Charges:</strong> £' + formatMoney(totalAccountCharges) + '</p>' : ''}
+                                        <p style="margin: 3px 0;"><strong>Principal Repayment:</strong> £${formatMoney(principalAmount)} (tax-free)</p>
                                     </div>
                                     <div>
                                         <h5 style="margin-bottom: 8px;">Net Returns:</h5>
-                                        <p style="margin: 3px 0;"><strong>Total Cash Received:</strong> £\${formatMoney(grandTotalGross)}</p>
-                                        <p style="margin: 3px 0;"><strong>Total Costs:</strong> £\${formatMoney(grandTotalCosts)} (Tax: £\${formatMoney(totalCouponTax)} + Charges: £\${formatMoney(totalAccountCharges)})</p>
-                                        <p style="margin: 3px 0; font-size: 16px;"><strong style="color: #007bff;">Net After-Tax Return:</strong> £\${formatMoney(grandTotalNet)}</p>
+                                        <p style="margin: 3px 0;"><strong>Total Cash Received:</strong> £${formatMoney(grandTotalGross)}</p>
+                                        <p style="margin: 3px 0;"><strong>Total Costs:</strong> £${formatMoney(grandTotalCosts)} (Tax: £${formatMoney(totalCouponTax)} + Charges: £${formatMoney(totalAccountCharges)})</p>
+                                        <p style="margin: 3px 0; font-size: 16px;"><strong style="color: #007bff;">Net After-Tax Return:</strong> £${formatMoney(grandTotalNet)}</p>
                                     </div>
                                 </div>
                             </div>
-                        \`;
+                        `;
                         
                         // Close coupon schedule table
-                        scheduleHTML += \`
+                        scheduleHTML += `
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-                        \`;
+                        `;
                         
                         // Add monthly account charges schedule if enabled
                         if (monthlyChargeSchedule.length > 0) {
-                            scheduleHTML += \`
+                            scheduleHTML += `
                                 <div class="calculation-step">
                                     <h4>Monthly Account Charge Schedule</h4>
                                     <div style="overflow-x: auto;">
@@ -2403,85 +2395,85 @@ export async function renderHomePage(request, env) {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                            \`;
+                            `;
                             
                             monthlyChargeSchedule.forEach(charge => {
                                 const chargeDate = charge.date.toLocaleDateString('en-GB');
                                 const isMax = charge.amount === currentSettings.accountChargeMax;
-                                scheduleHTML += \`
+                                scheduleHTML += `
                                     <tr style="background: #fffbf0;">
-                                        <td style="border: 1px solid #ddd; padding: 8px;">\${chargeDate}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${formatMoney(charge.interpolatedPrice)}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£\${formatMoney(charge.giltValue)}</td>
-                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£\${formatMoney(charge.amount)}\${isMax ? ' (max)' : ''}</strong></td>
+                                        <td style="border: 1px solid #ddd; padding: 8px;">${chargeDate}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£${formatMoney(charge.interpolatedPrice)}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;">£${formatMoney(charge.giltValue)}</td>
+                                        <td style="border: 1px solid #ddd; padding: 8px; text-align: right;"><strong>£${formatMoney(charge.amount)}${isMax ? ' (max)' : ''}</strong></td>
                                     </tr>
-                                \`;
+                                `;
                             });
                             
                             // Add total row for monthly charges
                             const totalMonthlyCharges = monthlyChargeSchedule.reduce((sum, charge) => sum + charge.amount, 0);
-                            scheduleHTML += \`
+                            scheduleHTML += `
                                 <tr style="background: #ffc107; color: #000; font-weight: bold; border-top: 2px solid #e0a800;">
                                     <td style="border: 1px solid #e0a800; padding: 10px;"><strong>TOTAL CHARGES</strong></td>
-                                    <td style="border: 1px solid #e0a800; padding: 10px; text-align: right;" colspan="2"><strong>\${monthlyChargeSchedule.length} payments</strong></td>
-                                    <td style="border: 1px solid #e0a800; padding: 10px; text-align: right;"><strong>£\${formatMoney(totalMonthlyCharges)}</strong></td>
+                                    <td style="border: 1px solid #e0a800; padding: 10px; text-align: right;" colspan="2"><strong>${monthlyChargeSchedule.length} payments</strong></td>
+                                    <td style="border: 1px solid #e0a800; padding: 10px; text-align: right;"><strong>£${formatMoney(totalMonthlyCharges)}</strong></td>
                                 </tr>
-                            \`;
+                            `;
                             
-                            scheduleHTML += \`
+                            scheduleHTML += `
                                             </tbody>
                                         </table>
                                     </div>
                                     <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 10px;">
                                         <p><strong>Account Charge Details:</strong></p>
                                         <ul style="margin: 5px 0; padding-left: 20px;">
-                                            <li>Rate: \${currentSettings.accountChargeRate}% annually (\${(currentSettings.accountChargeRate/12).toFixed(3)}% monthly)</li>
-                                            <li>Maximum per month: £\${formatMoney(currentSettings.accountChargeMax)}</li>
-                                            <li>Gilt price converges linearly from £\${formatMoney(gilt.cleanPrice)} to £100.00 at maturity</li>
-                                            <li>Total account charges over life: £\${formatMoney(monthlyChargeSchedule.reduce((sum, charge) => sum + charge.charge, 0))}</li>
+                                            <li>Rate: ${currentSettings.accountChargeRate}% annually (${(currentSettings.accountChargeRate/12).toFixed(3)}% monthly)</li>
+                                            <li>Maximum per month: £${formatMoney(currentSettings.accountChargeMax)}</li>
+                                            <li>Gilt price converges linearly from £${formatMoney(gilt.cleanPrice)} to £100.00 at maturity</li>
+                                            <li>Total account charges over life: £${formatMoney(monthlyChargeSchedule.reduce((sum, charge) => sum + charge.charge, 0))}</li>
                                         </ul>
                                     </div>
                                 </div>
-                            \`;
+                            `;
                         }
                     }
                     
-                    contentHTML = \`
+                    contentHTML = `
                         <div class="calculation-step">
-                            <h4>After-Tax Yield for \${gilt.name}</h4>
+                            <h4>After-Tax Yield for ${gilt.name}</h4>
                             <p>This shows the Internal Rate of Return (IRR) calculated using actual payment dates, tax impacts, and dealing charges.</p>
                         </div>
-                        \${scheduleHTML}
+                        ${scheduleHTML}
                         <div class="calculation-step">
                             <h4>Calculation Method:</h4>
                             <p><strong>Method:</strong> IRR calculation using Newton-Raphson method</p>
-                            <p><strong>Your Investment:</strong> \${formatCurrency(currentSettings.investmentAmount || 10000)}</p>
-                            <p><strong>Dealing Charge:</strong> \${currentSettings.dealingCharge > 0 ? '£' + formatMoney(currentSettings.dealingCharge) : 'None (£0.00)'}</p>
-                            <p><strong>Monthly Account Charge:</strong> \${currentSettings.accountChargeEnabled ? currentSettings.accountChargeRate + '% annually (£' + (currentSettings.accountChargeRate / 12).toFixed(3) + '% monthly, max £' + formatMoney(currentSettings.accountChargeMax) + '/month)' : 'None'}</p>
-                            <p><strong>Available for Gilts:</strong> \${formatCurrency((currentSettings.investmentAmount || 10000) - (currentSettings.dealingCharge || 0))}</p>
-                            <p><strong>Purchase Price:</strong> £\${formatMoney(gilt.dirtyPrice)} per £100 (including accrued interest)</p>
-                            <p><strong>Your Tax Rate:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ')} (\${getCurrentTaxRate()}%)</p>
+                            <p><strong>Your Investment:</strong> ${formatCurrency(currentSettings.investmentAmount || 10000)}</p>
+                            <p><strong>Dealing Charge:</strong> ${currentSettings.dealingCharge > 0 ? '£' + formatMoney(currentSettings.dealingCharge) : 'None (£0.00)'}</p>
+                            <p><strong>Monthly Account Charge:</strong> ${currentSettings.accountChargeEnabled ? currentSettings.accountChargeRate + '% annually (£' + (currentSettings.accountChargeRate / 12).toFixed(3) + '% monthly, max £' + formatMoney(currentSettings.accountChargeMax) + '/month)' : 'None'}</p>
+                            <p><strong>Available for Gilts:</strong> ${formatCurrency((currentSettings.investmentAmount || 10000) - (currentSettings.dealingCharge || 0))}</p>
+                            <p><strong>Purchase Price:</strong> £${formatMoney(gilt.dirtyPrice)} per £100 (including accrued interest)</p>
+                            <p><strong>Your Tax Rate:</strong> ${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ')} (${getCurrentTaxRate()}%)</p>
                         </div>
                         <div class="calculation-step" style="background: #f8f9fa; border-left: 4px solid #007bff; padding: 15px;">
                             <h4>Final After-Tax Yield:</h4>
-                            <p><strong>\${gilt.afterTaxYield.toFixed(3)}%</strong> per year</p>
+                            <p><strong>${gilt.afterTaxYield.toFixed(3)}%</strong> per year</p>
                             <p>This accounts for:</p>
                             <ul>
-                                <li>Dealing charge: \${currentSettings.dealingCharge > 0 ? '£' + formatMoney(currentSettings.dealingCharge) : 'None (£0.00)'}</li>
-                                <li>Monthly account charge: \${currentSettings.accountChargeEnabled ? currentSettings.accountChargeRate + '% annually (max £' + formatMoney(currentSettings.accountChargeMax) + '/month)' : 'None'}</li>
+                                <li>Dealing charge: ${currentSettings.dealingCharge > 0 ? '£' + formatMoney(currentSettings.dealingCharge) : 'None (£0.00)'}</li>
+                                <li>Monthly account charge: ${currentSettings.accountChargeEnabled ? currentSettings.accountChargeRate + '% annually (max £' + formatMoney(currentSettings.accountChargeMax) + '/month)' : 'None'}</li>
                                 <li>Income tax on all coupon payments</li>
                                 <li>Tax-free principal repayment at maturity</li>
                                 <li>Exact timing of all cash flows</li>
                                 <li>Your actual investment amount</li>
                             </ul>
                         </div>
-                    \`;
+                    `;
                     break;
                     
                 case 'equivalent':
                     const currentTaxRate = getCurrentTaxRate();
                     titleText = 'Equivalent Gross Savings Rate';
-                    contentHTML = \`
+                    contentHTML = `
                         <div class="calculation-step">
                             <h4>Equivalent Gross Savings Rate</h4>
                             <p>The gross interest rate a savings account would need to match this gilt's after-tax return.</p>
@@ -2494,41 +2486,41 @@ export async function renderHomePage(request, env) {
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
                                 <p><strong>Example Calculation:</strong></p>
                                 <ul style="margin: 10px 0; padding-left: 20px;">
-                                    <li>Gilt After-Tax IRR: \${gilt.afterTaxYield.toFixed(2)}%</li>
-                                    <li>Your Income Tax Rate: \${currentTaxRate}%</li>
-                                    <li>Required Gross Rate: \${gilt.afterTaxYield.toFixed(2)}% ÷ (1 - \${(currentTaxRate/100).toFixed(2)}) = <strong>\${gilt.equivalentGrossSavingsRate.toFixed(2)}%</strong></li>
+                                    <li>Gilt After-Tax IRR: ${gilt.afterTaxYield.toFixed(2)}%</li>
+                                    <li>Your Income Tax Rate: ${currentTaxRate}%</li>
+                                    <li>Required Gross Rate: ${gilt.afterTaxYield.toFixed(2)}% ÷ (1 - ${(currentTaxRate/100).toFixed(2)}) = <strong>${gilt.equivalentGrossSavingsRate.toFixed(2)}%</strong></li>
                                 </ul>
                             </div>
                         </div>
                         <div class="calculation-step">
                             <h4>Why This Matters:</h4>
-                            <p>• Savings accounts are taxed as income at your marginal rate (\${currentTaxRate}%)</p>
+                            <p>• Savings accounts are taxed as income at your marginal rate (${currentTaxRate}%)</p>
                             <p>• Gilt coupons are also taxed as income, but capital gains are tax-free</p>
                             <p>• This calculation shows what savings rate you'd need to match the gilt's performance</p>
-                            <p>• If current savings rates are below \${gilt.equivalentGrossSavingsRate.toFixed(2)}%, this gilt offers better value</p>
+                            <p>• If current savings rates are below ${gilt.equivalentGrossSavingsRate.toFixed(2)}%, this gilt offers better value</p>
                         </div>
-                    \`;
+                    `;
                     break;
                     
                 case 'years':
                     titleText = 'Years to Maturity';
                     const maturityDate = new Date(gilt.maturityDate);
-                    contentHTML = \`
+                    contentHTML = `
                         <div class="calculation-step">
                             <h4>Years to Maturity Calculation</h4>
                             <p>Time remaining until the gilt matures and pays back the £100 nominal value.</p>
                         </div>
                         <div class="calculation-step">
-                            <h4>For \${gilt.name}:</h4>
+                            <h4>For ${gilt.name}:</h4>
                             <div class="calculation-formula">
-                                Maturity Date: \${maturityDate.toLocaleDateString('en-GB')}
+                                Maturity Date: ${maturityDate.toLocaleDateString('en-GB')}
                             </div>
                             <div class="calculation-formula">
-                                Years to Maturity: \${gilt.yearsToMaturity.toFixed(1)} years
+                                Years to Maturity: ${gilt.yearsToMaturity.toFixed(1)} years
                             </div>
-                            <p>This gilt will mature in approximately \${gilt.yearsToMaturity.toFixed(1)} years, at which point you'll receive £100 per £100 nominal value held.</p>
+                            <p>This gilt will mature in approximately ${gilt.yearsToMaturity.toFixed(1)} years, at which point you'll receive £100 per £100 nominal value held.</p>
                         </div>
-                    \`;
+                    `;
                     break;
                     
                 case 'advantage':
@@ -2566,7 +2558,7 @@ export async function renderHomePage(request, env) {
                     const giltReturn = gilt.afterTaxYield || 0;
                     const advantagePercent = giltReturn - (afterTaxSavingsRate * 100);
                     
-                    contentHTML = \`
+                    contentHTML = `
                         <div class="calculation-step">
                             <h4>What This Column Shows</h4>
                             <p>This column displays the <strong>total extra money</strong> you would receive from investing in this gilt compared to putting the same amount in a taxable savings account over the gilt's entire lifespan.</p>
@@ -2574,24 +2566,24 @@ export async function renderHomePage(request, env) {
                         
                         <div class="calculation-step">
                             <h4>Your Current Settings</h4>
-                            <p><strong>Investment Amount:</strong> \${formatCurrency(investmentAmount)}</p>
-                            <p><strong>Your Tax Bracket:</strong> \${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ').toUpperCase()} (\${modalTaxRate}%)</p>
-                            <p><strong>Personal Savings Allowance:</strong> \${formatCurrency(psaAmount)}</p>
-                            <p><strong>Savings Account Rate:</strong> \${savingsRate.toFixed(2)}%</p>
-                            <p><strong>Investment Period:</strong> \${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
+                            <p><strong>Investment Amount:</strong> ${formatCurrency(investmentAmount)}</p>
+                            <p><strong>Your Tax Bracket:</strong> ${(currentSettings.taxBracket || 'additional_rate').replace('_', ' ').toUpperCase()} (${modalTaxRate}%)</p>
+                            <p><strong>Personal Savings Allowance:</strong> ${formatCurrency(psaAmount)}</p>
+                            <p><strong>Savings Account Rate:</strong> ${savingsRate.toFixed(2)}%</p>
+                            <p><strong>Investment Period:</strong> ${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
                         </div>
                         
                         <div class="calculation-step">
                             <h4>Step 1: Total Cash from Gilt Investment (Including All Charges)</h4>
-                            <p><strong>Gilt:</strong> \${gilt.name}</p>
-                            <p><strong>Initial Investment:</strong> £\${formatMoney(investmentAmount)}</p>
-                            <p><strong>Dealing Charge:</strong> \${currentSettings.dealingCharge > 0 ? '£' + formatMoney(currentSettings.dealingCharge) : 'None (£0.00)'}</p>
-                            \${currentSettings.accountChargeEnabled ? \`
-                            <p><strong>Monthly Account Charges:</strong> \${currentSettings.accountChargeRate}% annually (max £\${formatMoney(currentSettings.accountChargeMax)}/month)</p>
-                            \` : ''}
-                            <p><strong>Total Cash Received:</strong> £\${formatMoney(giltTotalCash)}</p>
+                            <p><strong>Gilt:</strong> ${gilt.name}</p>
+                            <p><strong>Initial Investment:</strong> £${formatMoney(investmentAmount)}</p>
+                            <p><strong>Dealing Charge:</strong> ${currentSettings.dealingCharge > 0 ? '£' + formatMoney(currentSettings.dealingCharge) : 'None (£0.00)'}</p>
+                            ${currentSettings.accountChargeEnabled ? `
+                            <p><strong>Monthly Account Charges:</strong> ${currentSettings.accountChargeRate}% annually (max £${formatMoney(currentSettings.accountChargeMax)}/month)</p>
+                            ` : ''}
+                            <p><strong>Total Cash Received:</strong> £${formatMoney(giltTotalCash)}</p>
                             
-                            \${(() => {
+                            ${(() => {
                                 // Calculate coupon totals for display using same method as IRR tooltip
                                 const totalGrossCoupons = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.grossAmount, 0) : 0;
                                 const totalCouponTax = gilt.couponSchedule ? gilt.couponSchedule.reduce((sum, payment) => sum + payment.taxAmount, 0) : 0;
@@ -2601,48 +2593,48 @@ export async function renderHomePage(request, env) {
                                 const semiAnnualRate = gilt.couponRate / 2;
                                 const displayEffectiveInvestment = investmentAmount - (currentSettings.dealingCharge || 0);
                                 
-                                return \`
+                                return `
                                 <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; padding: 12px; margin: 10px 0;">
                                     <h5 style="margin: 0 0 8px 0; color: #007bff;">Coupon Payment Totals:</h5>
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
                                         <div>
-                                            <p style="margin: 2px 0;"><strong>Total Gross Coupons:</strong> £\${formatMoney(totalGrossCoupons)}</p>
-                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(\${numPayments} payments)</p>
-                                            <p style="margin: 2px 0;"><strong>Income Tax:</strong> £\${formatMoney(totalCouponTax)}</p>
-                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(Each payment taxed at \${modalTaxRate}%)</p>
-                                            <p style="margin: 2px 0;"><strong>Net Coupon Income:</strong> £\${formatMoney(totalNetCoupons)}</p>
+                                            <p style="margin: 2px 0;"><strong>Total Gross Coupons:</strong> £${formatMoney(totalGrossCoupons)}</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(${numPayments} payments)</p>
+                                            <p style="margin: 2px 0;"><strong>Income Tax:</strong> £${formatMoney(totalCouponTax)}</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">(Each payment taxed at ${modalTaxRate}%)</p>
+                                            <p style="margin: 2px 0;"><strong>Net Coupon Income:</strong> £${formatMoney(totalNetCoupons)}</p>
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">(Gross - Tax, rounded per payment)</p>
                                         </div>
                                         <div>
                                             <p style="margin: 2px 0;"><strong>Calculation Base:</strong></p>
-                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Units Owned: \${(principalAmount/100).toFixed(2)}</p>
-                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Semi-Annual Rate: \${semiAnnualRate.toFixed(3)}%</p>
-                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Effective Investment: £\${formatMoney(displayEffectiveInvestment)}</p>
-                                            <p style="margin: 2px 0;"><strong>Principal Repayment:</strong> £\${formatMoney(principalAmount)}</p>
-                                            \${currentSettings.accountChargeEnabled && totalMonthlyCharges > 0 ? '<p style="margin: 2px 0;"><strong>Account Charges:</strong> £' + formatMoney(totalMonthlyCharges) + '</p>' : ''}
-                                            <p style="margin: 2px 0; font-weight: bold; color: #007bff;"><strong>Total Cash:</strong> £\${formatMoney(giltTotalCash)}</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Units Owned: ${(principalAmount/100).toFixed(2)}</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Semi-Annual Rate: ${semiAnnualRate.toFixed(3)}%</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Effective Investment: £${formatMoney(displayEffectiveInvestment)}</p>
+                                            <p style="margin: 2px 0;"><strong>Principal Repayment:</strong> £${formatMoney(principalAmount)}</p>
+                                            ${currentSettings.accountChargeEnabled && totalMonthlyCharges > 0 ? '<p style="margin: 2px 0;"><strong>Account Charges:</strong> £' + formatMoney(totalMonthlyCharges) + '</p>' : ''}
+                                            <p style="margin: 2px 0; font-weight: bold; color: #007bff;"><strong>Total Cash:</strong> £${formatMoney(giltTotalCash)}</p>
                                         </div>
                                     </div>
                                     
 
                                 </div>
-                                \`;
+                                `;
                             })()}
                             
                             <div style="margin-left: 20px; color: #666;">
-                                <p><small>• All coupon payments (after \${modalTaxRate}% income tax)</small></p>
-                                \${currentSettings.accountChargeEnabled ? '<p><small>• Monthly account charges: ' + (totalMonthlyCharges > 0 ? '£' + totalMonthlyCharges.toFixed(2) + ' total deducted' : 'None calculated') + '</small></p>' : ''}
-                                <p><small>• Principal repayment: £\${advantageUnitsOwned.toFixed(2)} (tax-free)</small></p>
+                                <p><small>• All coupon payments (after ${modalTaxRate}% income tax)</small></p>
+                                ${currentSettings.accountChargeEnabled ? '<p><small>• Monthly account charges: ' + (totalMonthlyCharges > 0 ? '£' + totalMonthlyCharges.toFixed(2) + ' total deducted' : 'None calculated') + '</small></p>' : ''}
+                                <p><small>• Principal repayment: £${advantageUnitsOwned.toFixed(2)} (tax-free)</small></p>
                                 <p><small>• Based on actual payment schedule with exact dates</small></p>
-                                \${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: £' + giltTotalCash.toFixed(2) + '</small></p>' : ''}
+                                ${totalMonthlyCharges > 0 ? '<p style="font-weight: bold; color: #d63384;"><small>Net after all charges and taxes: £' + giltTotalCash.toFixed(2) + '</small></p>' : ''}
                             </div>
                         </div>
                         
                         <div class="calculation-step">
                             <h4>Step 2: Total Cash from Savings Account</h4>
-                            <p><strong>Initial Investment:</strong> £\${formatMoney(investmentAmount)}</p>
-                            <p><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}%</p>
-                            <p><strong>Investment Period:</strong> \${(() => {
+                            <p><strong>Initial Investment:</strong> £${formatMoney(investmentAmount)}</p>
+                            <p><strong>Annual Interest Rate:</strong> ${savingsRate.toFixed(2)}%</p>
+                            <p><strong>Investment Period:</strong> ${(() => {
                                 const today = new Date();
                                 const endDate = new Date(today.getTime() + ((gilt.yearsToMaturity || 0) * 365.25 * 24 * 60 * 60 * 1000));
                                 const totalDays = Math.round((endDate - today) / (24 * 60 * 60 * 1000));
@@ -2650,19 +2642,19 @@ export async function renderHomePage(request, env) {
                                 const remainingDays = totalDays % 365;
                                 return years + ' years + ' + remainingDays + ' days (' + totalDays + ' total days)';
                             })()} </p>
-                            <p><strong>Total Cash Received:</strong> £\${formatMoney(savingsTotalCash)}</p>
+                            <p><strong>Total Cash Received:</strong> £${formatMoney(savingsTotalCash)}</p>
                             
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
                                 <h5 style="margin-top: 0;">Detailed Interest Calculation:</h5>
                                 <p><strong>Calculation Method:</strong> Annual compound interest with proportional PSA</p>
                                 <ul style="margin: 10px 0; padding-left: 20px; font-size: 12px;">
-                                    <li><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}% compounded annually</li>
+                                    <li><strong>Annual Interest Rate:</strong> ${savingsRate.toFixed(2)}% compounded annually</li>
                                     <li><strong>Compounding:</strong> Interest calculated and added annually to growing balance</li>
                                     <li><strong>Day Calculation:</strong> Uses actual calendar days (365 days = 1 year)</li>
-                                    <li><strong>Personal Savings Allowance:</strong> £\${formatMoney(psaAmount)} tax-free allowance per tax year (April 6 - April 5)</li>
+                                    <li><strong>Personal Savings Allowance:</strong> £${formatMoney(psaAmount)} tax-free allowance per tax year (April 6 - April 5)</li>
                                     <li><strong>PSA Reset:</strong> Full PSA allowance available each tax year</li>
                                     <li><strong>Partial Year PSA:</strong> PSA pro-rated based on actual days for partial years</li>
-                                    <li><strong>Tax Rate:</strong> \${modalTaxRate}% on interest above available PSA allowance</li>
+                                    <li><strong>Tax Rate:</strong> ${modalTaxRate}% on interest above available PSA allowance</li>
                                     <li><strong>Tax Timing:</strong> Deducted annually on interest earned</li>
                                 </ul>
                                 
@@ -2673,29 +2665,29 @@ export async function renderHomePage(request, env) {
                                 </div>
                                 
                                 <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
-                                    <strong>Total Return:</strong> £\${formatMoney(savingsTotalCash - investmentAmount)} profit over \${(gilt.yearsToMaturity || 0).toFixed(2)} years<br>
+                                    <strong>Total Return:</strong> £${formatMoney(savingsTotalCash - investmentAmount)} profit over ${(gilt.yearsToMaturity || 0).toFixed(2)} years<br>
 
                                 </p>
                             </div>
                         </div>
                         
-                        <div class="calculation-step" style="background: #f8f9fa; border-left: 4px solid \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'}; padding: 15px;">
+                        <div class="calculation-step" style="background: #f8f9fa; border-left: 4px solid ${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'}; padding: 15px;">
                             <h4>Step 3: Final Calculation</h4>
                             <div class="calculation-formula" style="background: white; padding: 10px; border-radius: 5px; margin: 10px 0;">
                                 <strong>Formula:</strong><br>
                                 Extra Income = Total Cash from Gilt - Total Cash from Savings<br><br>
                                 <strong>Calculation:</strong><br>
-                                £\${formatMoney(giltTotalCash)} - £\${formatMoney(savingsTotalCash)}<br>
-                                = <strong>£\${formatMoney(extraIncomeTotal)}</strong><br>
+                                £${formatMoney(giltTotalCash)} - £${formatMoney(savingsTotalCash)}<br>
+                                = <strong>£${formatMoney(extraIncomeTotal)}</strong><br>
 
                             </div>
-                            <p><strong>Gilt Total Return:</strong> £\${formatMoney(giltTotalCash - investmentAmount)} profit</p>
-                            <p><strong>Savings Total Return:</strong> £\${formatMoney(savingsTotalCash - investmentAmount)} profit</p>
-                            <p><strong>Total Advantage:</strong> £\${formatMoney(extraIncomeTotal)} over \${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
-                            <p style="margin-top: 15px; font-weight: bold; color: \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'};">
-                                \${advantagePercent >= 0 ? 
-                                    \`This gilt will earn you £\${formatMoney(Math.abs(extraIncomeTotal))} MORE than a savings account.\` : 
-                                    \`A savings account would earn you £\${formatMoney(Math.abs(extraIncomeTotal))} MORE than this gilt.\`
+                            <p><strong>Gilt Total Return:</strong> £${formatMoney(giltTotalCash - investmentAmount)} profit</p>
+                            <p><strong>Savings Total Return:</strong> £${formatMoney(savingsTotalCash - investmentAmount)} profit</p>
+                            <p><strong>Total Advantage:</strong> £${formatMoney(extraIncomeTotal)} over ${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
+                            <p style="margin-top: 15px; font-weight: bold; color: ${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'};">
+                                ${advantagePercent >= 0 ? 
+                                    `This gilt will earn you £${formatMoney(Math.abs(extraIncomeTotal))} MORE than a savings account.` : 
+                                    `A savings account would earn you £${formatMoney(Math.abs(extraIncomeTotal))} MORE than this gilt.`
                                 }
                             </p>
                         </div>
@@ -2708,7 +2700,7 @@ export async function renderHomePage(request, env) {
                             <p><small>• Based on current market prices and yields</small></p>
                             <p><small>• Does not account for reinvestment of income</small></p>
                         </div>
-                    \`;
+                    `;
                     break;
             }
             
@@ -2792,7 +2784,7 @@ export async function renderHomePage(request, env) {
         function setupApplication() {
             // Create modal HTML if it doesn't exist
             if (!document.getElementById('calculationModal')) {
-                const modalHTML = \`
+                const modalHTML = `
                     <div id="calculationModal" class="modal">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -2802,7 +2794,7 @@ export async function renderHomePage(request, env) {
                             <div id="modalContent"></div>
                         </div>
                     </div>
-                \`;
+                `;
                 document.body.insertAdjacentHTML('beforeend', modalHTML);
                 
                 // Close modal functionality
@@ -2859,25 +2851,4 @@ export async function renderHomePage(request, env) {
     </script>
 </body>
 </html>
-  `;
   
-  return new Response(html, {
-    headers: { 
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
-      'X-Content-Type-Options': 'nosniff',
-
-      'X-XSS-Protection': '1; mode=block',
-      'Referrer-Policy': 'strict-origin-when-cross-origin',
-      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; media-src 'none'; frame-src 'none'; frame-ancestors 'none';",
-      'Permissions-Policy': 'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), fullscreen=(self), sync-xhr=()',
-      'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Resource-Policy': 'same-origin',
-      'Origin-Agent-Cluster': '?1',
-      'X-Permitted-Cross-Domain-Policies': 'none',
-      'Clear-Site-Data': '"cache", "cookies", "storage"'
-    }
-  });
-}
