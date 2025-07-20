@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-RvyGM1/checked-fetch.js
+// .wrangler/tmp/bundle-GOOowE/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-RvyGM1/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-GOOowE/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-RvyGM1/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-GOOowE/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-RvyGM1/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-GOOowE/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -3576,19 +3576,23 @@ async function renderHomePage(request, env) {
         
         // Initialize app - use fallback data immediately when rate limited
         function initializeApp() {
+            console.log('InitializeApp called, DOM ready state:', document.readyState);
             
             // Ensure DOM is ready before setting up listeners
             if (document.readyState === 'loading') {
+                console.log('DOM loading, adding event listener');
                 document.addEventListener('DOMContentLoaded', () => {
+                    console.log('DOM content loaded event fired');
                     setupEventListeners();
                     updateTaxSettings();
                 });
             } else {
+                console.log('DOM already loaded, setting up immediately');
                 setupEventListeners();
                 updateTaxSettings();
             }
             
-            // Load gilt data using the daily caching system
+            console.log('Loading gilt data using daily caching system...');
             
             // Add a small delay to ensure DOM is ready
             setTimeout(() => {
@@ -3639,6 +3643,7 @@ async function renderHomePage(request, env) {
         }
         
         function setupEventListeners() {
+            console.log('Setting up event listeners...');
             // Set up standard listeners
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
             document.getElementById('investmentAmount').addEventListener('input', updateInvestmentAmount);
@@ -6869,7 +6874,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-RvyGM1/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-GOOowE/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6903,7 +6908,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-RvyGM1/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-GOOowE/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

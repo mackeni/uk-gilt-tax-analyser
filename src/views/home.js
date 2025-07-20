@@ -297,19 +297,23 @@ export async function renderHomePage(request, env) {
         
         // Initialize app - use fallback data immediately when rate limited
         function initializeApp() {
+            console.log('InitializeApp called, DOM ready state:', document.readyState);
             
             // Ensure DOM is ready before setting up listeners
             if (document.readyState === 'loading') {
+                console.log('DOM loading, adding event listener');
                 document.addEventListener('DOMContentLoaded', () => {
+                    console.log('DOM content loaded event fired');
                     setupEventListeners();
                     updateTaxSettings();
                 });
             } else {
+                console.log('DOM already loaded, setting up immediately');
                 setupEventListeners();
                 updateTaxSettings();
             }
             
-            // Load gilt data using the daily caching system
+            console.log('Loading gilt data using daily caching system...');
             
             // Add a small delay to ensure DOM is ready
             setTimeout(() => {
@@ -360,6 +364,7 @@ export async function renderHomePage(request, env) {
         }
         
         function setupEventListeners() {
+            console.log('Setting up event listeners...');
             // Set up standard listeners
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
             document.getElementById('investmentAmount').addEventListener('input', updateInvestmentAmount);
