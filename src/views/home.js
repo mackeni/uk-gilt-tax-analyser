@@ -2035,7 +2035,6 @@ export async function renderHomePage(request, env) {
                             });
                             paymentItems += '<div style="padding: 5px; border: 1px solid #e0e0e0; border-radius: 3px; background: white;">' +
                                 '<div style="font-weight: bold; font-size: 0.9em;">' + paymentDate + '</div>' +
-                                '<div style="color: #666; font-size: 0.8em;">£' + formatMoney(payment.grossAmount) + ' gross</div>' +
                                 '</div>';
                         });
                         
@@ -2066,8 +2065,7 @@ export async function renderHomePage(request, env) {
                     // Build next coupon section
                     let nextCouponSection = '';
                     if (nextCouponInfo) {
-                        nextCouponSection = '<p style="margin: 2px 0;"><strong>Date:</strong> ' + new Date(nextCouponInfo.date).toLocaleDateString('en-GB') + '</p>' +
-                            '<p style="margin: 2px 0;"><strong>Amount:</strong> £' + formatMoney(nextCouponInfo.grossAmount) + ' per £100</p>';
+                        nextCouponSection = '<p style="margin: 2px 0;"><strong>Date:</strong> ' + new Date(nextCouponInfo.date).toLocaleDateString('en-GB') + '</p>';
                     } else {
                         nextCouponSection = '<p>No coupon data available</p>';
                     }
@@ -2075,7 +2073,7 @@ export async function renderHomePage(request, env) {
                     // Build last coupon section
                     let lastCouponSection = '';
                     if (lastCouponInfo) {
-                        lastCouponSection = '<p style="margin: 2px 0;"><strong>Last Coupon:</strong> £' + formatMoney(lastCouponInfo.grossAmount) + ' per £100</p>';
+                        lastCouponSection = '<p style="margin: 2px 0;"><strong>Last Coupon Date:</strong> ' + new Date(lastCouponInfo.date).toLocaleDateString('en-GB') + '</p>';
                     }
                     
                     contentHTML = '<div class="calculation-step">' +

@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-9qo6Np/checked-fetch.js
+// .wrangler/tmp/bundle-S49Lib/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-9qo6Np/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-S49Lib/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-9qo6Np/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-S49Lib/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-9qo6Np/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-S49Lib/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5285,7 +5285,6 @@ async function renderHomePage(request, env) {
                             });
                             paymentItems += '<div style="padding: 5px; border: 1px solid #e0e0e0; border-radius: 3px; background: white;">' +
                                 '<div style="font-weight: bold; font-size: 0.9em;">' + paymentDate + '</div>' +
-                                '<div style="color: #666; font-size: 0.8em;">\xA3' + formatMoney(payment.grossAmount) + ' gross</div>' +
                                 '</div>';
                         });
                         
@@ -5316,8 +5315,7 @@ async function renderHomePage(request, env) {
                     // Build next coupon section
                     let nextCouponSection = '';
                     if (nextCouponInfo) {
-                        nextCouponSection = '<p style="margin: 2px 0;"><strong>Date:</strong> ' + new Date(nextCouponInfo.date).toLocaleDateString('en-GB') + '</p>' +
-                            '<p style="margin: 2px 0;"><strong>Amount:</strong> \xA3' + formatMoney(nextCouponInfo.grossAmount) + ' per \xA3100</p>';
+                        nextCouponSection = '<p style="margin: 2px 0;"><strong>Date:</strong> ' + new Date(nextCouponInfo.date).toLocaleDateString('en-GB') + '</p>';
                     } else {
                         nextCouponSection = '<p>No coupon data available</p>';
                     }
@@ -5325,7 +5323,7 @@ async function renderHomePage(request, env) {
                     // Build last coupon section
                     let lastCouponSection = '';
                     if (lastCouponInfo) {
-                        lastCouponSection = '<p style="margin: 2px 0;"><strong>Last Coupon:</strong> \xA3' + formatMoney(lastCouponInfo.grossAmount) + ' per \xA3100</p>';
+                        lastCouponSection = '<p style="margin: 2px 0;"><strong>Last Coupon Date:</strong> ' + new Date(lastCouponInfo.date).toLocaleDateString('en-GB') + '</p>';
                     }
                     
                     contentHTML = '<div class="calculation-step">' +
@@ -6878,7 +6876,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-9qo6Np/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-S49Lib/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6912,7 +6910,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-9qo6Np/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-S49Lib/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
