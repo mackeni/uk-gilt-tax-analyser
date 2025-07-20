@@ -5675,8 +5675,8 @@ async function renderHomePage(request, env) {
                     
                     // Calculate units owned using same method as IRR tooltip
                     const advantageDealingCharge = currentSettings.dealingCharge || 0;
-                    const effectiveInvestment = investmentAmount - advantageDealingCharge;
-                    const unitsOwned = Math.round((effectiveInvestment / gilt.dirtyPrice * 100) * 100) / 100;
+                    const advantageEffectiveInvestment = investmentAmount - advantageDealingCharge;
+                    const unitsOwned = Math.round((advantageEffectiveInvestment / gilt.dirtyPrice * 100) * 100) / 100;
                     
                     // Calculate precise total cash flows - ensure we use the function that includes charges
                     const giltTotalCash = calculateTotalCashFromGilt(gilt, unitsOwned, modalTaxRate / 100);
@@ -5733,7 +5733,7 @@ async function renderHomePage(request, env) {
                                 const principalAmount = Math.round(unitsOwned * 100) / 100;
                                 const numPayments = gilt.couponSchedule ? gilt.couponSchedule.length : 0;
                                 const semiAnnualRate = gilt.couponRate / 2;
-                                const effectiveInvestment = investmentAmount - (currentSettings.dealingCharge || 0);
+                                const displayEffectiveInvestment = investmentAmount - (currentSettings.dealingCharge || 0);
                                 
                                 return \`
                                 <div style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; padding: 12px; margin: 10px 0;">
@@ -5751,7 +5751,7 @@ async function renderHomePage(request, env) {
                                             <p style="margin: 2px 0;"><strong>Calculation Base:</strong></p>
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">Units Owned: \${(principalAmount/100).toFixed(2)}</p>
                                             <p style="margin: 2px 0; color: #666; font-size: 10px;">Semi-Annual Rate: \${semiAnnualRate.toFixed(3)}%</p>
-                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Effective Investment: \xA3\${effectiveInvestment.toFixed(2)}</p>
+                                            <p style="margin: 2px 0; color: #666; font-size: 10px;">Effective Investment: \xA3\${displayEffectiveInvestment.toFixed(2)}</p>
                                             <p style="margin: 2px 0;"><strong>Principal Repayment:</strong> \xA3\${principalAmount.toFixed(2)}</p>
                                             \${currentSettings.accountChargeEnabled && totalMonthlyCharges > 0 ? '<p style="margin: 2px 0;"><strong>Account Charges:</strong> \xA3' + totalMonthlyCharges.toFixed(2) + '</p>' : ''}
                                             <p style="margin: 2px 0; font-weight: bold; color: #007bff;"><strong>Total Cash:</strong> \xA3\${giltTotalCash.toFixed(2)}</p>
