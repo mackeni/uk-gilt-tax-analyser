@@ -978,7 +978,7 @@ export async function renderHomePage(request, env) {
             if (!utilsLoaded) {
                 utils = await import('../lib/utils.js');
                 utilsLoaded = true;
-                console.log('Consolidated utility functions loaded');
+
             }
             return utils;
         }
@@ -1075,12 +1075,10 @@ export async function renderHomePage(request, env) {
             if (utilsLoaded && utils.clearCache) {
                 utils.clearCache();
             }
-            console.log('All caches cleared');
+
         }
         
-        // IMMEDIATE DEBUG - Check if JavaScript is loading
-        console.log('=== JAVASCRIPT FILE STARTED LOADING ===');
-        console.log('Current time:', new Date());
+        // Initialize application variables
         
         let currentGiltData = [];
         let currentResults = [];
@@ -1097,8 +1095,6 @@ export async function renderHomePage(request, env) {
         
         // Initialize app - use fallback data immediately when rate limited
         function initializeApp() {
-            console.log('=== APP INITIALIZATION STARTED ===');
-            console.log('Current settings:', currentSettings);
             
             // Ensure DOM is ready before setting up listeners
             if (document.readyState === 'loading') {
@@ -1111,8 +1107,7 @@ export async function renderHomePage(request, env) {
                 updateTaxSettings();
             }
             
-            // Load gilt data using the new daily caching system
-            console.log('=== STARTING GILT DATA LOAD WITH DAILY CACHING ===');
+            // Load gilt data using the daily caching system
             
             // Add a small delay to ensure DOM is ready
             setTimeout(() => {
@@ -1121,22 +1116,15 @@ export async function renderHomePage(request, env) {
         }
         
         async function loadFallbackData() {
-            console.log('=== STARTING FALLBACK DATA LOAD ===');
             const loadingDiv = document.getElementById('loading');
             const errorDiv = document.getElementById('error');
-            
-            console.log('Loading div:', loadingDiv);
-            console.log('Error div:', errorDiv);
             
             if (loadingDiv) loadingDiv.style.display = 'block';
             if (errorDiv) errorDiv.style.display = 'none';
             
             try {
-                console.log('Calling getFallbackGiltData...');
                 currentGiltData = await getFallbackGiltData();
-                console.log('=== FALLBACK DATA LOADED ===');
-                console.log('Current gilt data length:', currentGiltData ? currentGiltData.length : 'NULL');
-                console.log('First gilt:', currentGiltData ? currentGiltData[0] : 'NULL');
+
                 
                 if (!currentGiltData || currentGiltData.length === 0) {
                     throw new Error('Fallback data is empty or null');
@@ -1154,7 +1142,7 @@ export async function renderHomePage(request, env) {
                 };
                 showDataFreshnessMessage(fallbackResult);
                 
-                console.log('Calling calculateTaxEfficiency...');
+
                 calculateTaxEfficiency();
             } catch (error) {
                 console.error('=== FALLBACK DATA FAILED ===');
@@ -1423,7 +1411,7 @@ export async function renderHomePage(request, env) {
             await ensureUtilsLoaded();
             
             try {
-                console.log('Fetching gilt data from /api/gilt-data...');
+
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for daily API calls
                 
@@ -1432,17 +1420,14 @@ export async function renderHomePage(request, env) {
                 });
                 clearTimeout(timeoutId);
                 
-                console.log('Response status:', response.status);
-                console.log('Response ok:', response.ok);
+
                 
                 if (!response.ok) {
                     throw new Error(\`API rate limited or unavailable\`);
                 }
                 
                 const result = await response.json();
-                console.log('Received data from API:', result?.data?.length, 'gilts');
-                console.log('Data source:', result?.dataSource);
-                console.log('Price date:', result?.priceDate);
+
                 
                 if (!result?.data || !Array.isArray(result.data) || result.data.length === 0) {
                     throw new Error('No gilt data received from API');
@@ -1515,13 +1500,13 @@ export async function renderHomePage(request, env) {
         }
         
         async function getFallbackGiltData() {
-            console.log('Creating fallback gilt data...');
+
             
             // Ensure utils are loaded before processing fallback data
             await ensureUtilsLoaded();
             
             const today = new Date();
-            console.log('Today date:', today);
+
             const fallbackData = [
                 { name: "Treasury 2% 2025", couponRate: 2.0, cleanPrice: 99.72, currentYield: 4.073, maturityDate: "2025-09-07" },
                 { name: "Treasury 3.5% 2025", couponRate: 3.5, cleanPrice: 99.82, currentYield: 4.187, maturityDate: "2025-10-22" },
@@ -1561,22 +1546,22 @@ export async function renderHomePage(request, env) {
                     accruedInterest: accruedInterest
                 };
                 
-                console.log('Processed gilt:', processedGilt.name, 'years:', processedGilt.yearsToMaturity);
+
                 return processedGilt;
             }).filter(gilt => {
                 const isValid = gilt.yearsToMaturity > 0;
-                console.log('Gilt valid:', gilt.name, isValid);
+
                 return isValid;
             });
             
-            console.log('Final fallback data count:', processedData.length);
+
             return processedData;
         }
         
         async function calculateTaxEfficiency() {
             if (currentGiltData.length === 0) return;
             
-            console.log('Calculating tax efficiency locally...');
+
             
             try {
                 // Calculate tax efficiency locally without API calls
@@ -1587,7 +1572,7 @@ export async function renderHomePage(request, env) {
                     currentSettings.savingsRate
                 );
                 
-                console.log('Local calculation results:', results.length, 'gilts processed');
+
                 currentResults = results;
                 
                 // Now show the data sections since we have complete results
@@ -1607,12 +1592,9 @@ export async function renderHomePage(request, env) {
         }
         
         async function calculateTaxEfficiencyLocal(giltData, taxBracket, investmentAmount, savingsRate) {
-            console.log('Starting local tax calculations...');
-            console.log('Gilt data type:', typeof giltData, 'Is array:', Array.isArray(giltData), 'Length:', giltData?.length);
             
             // Ensure giltData is an array
             if (!Array.isArray(giltData)) {
-                console.error('giltData is not an array:', giltData);
                 return [];
             }
             
@@ -1626,7 +1608,7 @@ export async function renderHomePage(request, env) {
             // Use confirmed PSA amount if available, otherwise use standard
             const psaAmount = currentSettings.psaAmount !== undefined ? currentSettings.psaAmount : taxInfo.psa;
             
-            console.log('Using tax rates:', taxInfo);
+
             
             return giltData.map(gilt => {
                 // Ensure yearsToMaturity is calculated
@@ -2023,27 +2005,20 @@ export async function renderHomePage(request, env) {
             dataDiv.innerHTML = tableHTML;
             
             // Add click event listeners to clickable cells
-            console.log('Adding click listeners to cells...');
             document.querySelectorAll('.clickable-cell').forEach(cell => {
-                console.log('Adding listener to cell:', cell.dataset.type);
                 cell.addEventListener('click', function() {
-                    console.log('Cell clicked:', this.dataset.type, this.dataset.index);
                     const type = this.dataset.type;
                     const index = parseInt(this.dataset.index);
                     const gilt = sortedResults[index];
-                    console.log('Calling showCalculationModal with:', type, gilt);
                     showCalculationModal(type, gilt);
                 });
             });
         }
         
         function showCalculationModal(type, gilt) {
-            console.log('showCalculationModal called with type:', type, 'gilt:', gilt?.name);
             const modal = document.getElementById('calculationModal');
             const title = document.getElementById('modalTitle');
             const content = document.getElementById('modalContent');
-            
-            console.log('Modal elements found:', !!modal, !!title, !!content);
             
             let titleText = '';
             let contentHTML = '';
@@ -2813,7 +2788,6 @@ export async function renderHomePage(request, env) {
         
         // Add modal HTML and event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('=== DOM CONTENT LOADED ===');
             // Create modal HTML
             const modalHTML = \`
                 <div id="calculationModal" class="modal">
