@@ -764,11 +764,16 @@ export async function renderHomePage(request, env) {
         }
         
         async function calculateTaxEfficiency() {
-            if (currentGiltData.length === 0) return;
+            console.log('calculateTaxEfficiency called with data length:', currentGiltData.length);
+            if (currentGiltData.length === 0) {
+                console.error('No gilt data available for tax efficiency calculation');
+                return;
+            }
             
-
+            console.log('Current settings:', currentSettings);
             
             try {
+                console.log('About to call calculateTaxEfficiencyLocal...');
                 // Calculate tax efficiency locally without API calls
                 const results = await calculateTaxEfficiencyLocal(
                     currentGiltData,
@@ -797,14 +802,23 @@ export async function renderHomePage(request, env) {
         }
         
         async function calculateTaxEfficiencyLocal(giltData, taxBracket, investmentAmount, savingsRate) {
+            console.log('calculateTaxEfficiencyLocal called with:', {
+                dataLength: giltData?.length,
+                taxBracket,
+                investmentAmount,
+                savingsRate
+            });
             
             // Ensure giltData is an array
             if (!Array.isArray(giltData)) {
+                console.error('giltData is not an array:', typeof giltData);
                 return [];
             }
             
+            console.log('Loading utils for tax calculations...');
             // Ensure utils are loaded
             await ensureUtilsLoaded();
+            console.log('Utils loaded successfully for tax calculations');
             
             // Use consolidated tax rate function
             const taxInfo = getTaxRateInfo(taxBracket);

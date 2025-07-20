@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-vcxZtC/checked-fetch.js
+// .wrangler/tmp/bundle-hALpvm/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-vcxZtC/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-hALpvm/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-vcxZtC/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-hALpvm/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-vcxZtC/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-hALpvm/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4043,11 +4043,16 @@ async function renderHomePage(request, env) {
         }
         
         async function calculateTaxEfficiency() {
-            if (currentGiltData.length === 0) return;
+            console.log('calculateTaxEfficiency called with data length:', currentGiltData.length);
+            if (currentGiltData.length === 0) {
+                console.error('No gilt data available for tax efficiency calculation');
+                return;
+            }
             
-
+            console.log('Current settings:', currentSettings);
             
             try {
+                console.log('About to call calculateTaxEfficiencyLocal...');
                 // Calculate tax efficiency locally without API calls
                 const results = await calculateTaxEfficiencyLocal(
                     currentGiltData,
@@ -4076,14 +4081,23 @@ async function renderHomePage(request, env) {
         }
         
         async function calculateTaxEfficiencyLocal(giltData, taxBracket, investmentAmount, savingsRate) {
+            console.log('calculateTaxEfficiencyLocal called with:', {
+                dataLength: giltData?.length,
+                taxBracket,
+                investmentAmount,
+                savingsRate
+            });
             
             // Ensure giltData is an array
             if (!Array.isArray(giltData)) {
+                console.error('giltData is not an array:', typeof giltData);
                 return [];
             }
             
+            console.log('Loading utils for tax calculations...');
             // Ensure utils are loaded
             await ensureUtilsLoaded();
+            console.log('Utils loaded successfully for tax calculations');
             
             // Use consolidated tax rate function
             const taxInfo = getTaxRateInfo(taxBracket);
@@ -6909,7 +6923,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-vcxZtC/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-hALpvm/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6943,7 +6957,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-vcxZtC/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-hALpvm/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
