@@ -3350,7 +3350,8 @@ async function renderHomePage(request, env) {
             margin-bottom: 20px;
         }
         
-        .form-group label {
+        .form-group label,
+        .form-group .form-label {
             display: block;
             margin-bottom: 5px;
             font-weight: 600;
@@ -3709,7 +3710,8 @@ async function renderHomePage(request, env) {
                 margin-bottom: 15px;
             }
             
-            .form-group label {
+            .form-group label,
+            .form-group .form-label {
                 font-size: 14px;
                 margin-bottom: 5px;
             }
@@ -4172,7 +4174,7 @@ async function renderHomePage(request, env) {
                     
                     <div id="filterControls" class="filter-controls" style="display: none;">
                         <div class="form-group">
-                            <label for="durationRange">Filter by Duration (Years):</label>
+                            <span class="form-label">Filter by Duration (Years):</span>
                             <div class="range-container">
                                 <div>
                                     <label for="durationMin">Min:</label>
