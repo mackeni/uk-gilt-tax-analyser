@@ -2575,17 +2575,17 @@ export async function renderHomePage(request, env) {
                                 <strong>Formula:</strong><br>
                                 Extra Income = Total Cash from Gilt - Total Cash from Savings<br><br>
                                 <strong>Calculation:</strong><br>
-                                £\${giltTotalCash.toFixed(2)} - £\${savingsTotalCash.toFixed(2)}<br>
-                                = <strong>£\${extraIncomeTotal.toFixed(2)}</strong><br>
+                                £\${formatMoney(giltTotalCash)} - £\${formatMoney(savingsTotalCash)}<br>
+                                = <strong>£\${formatMoney(extraIncomeTotal)}</strong><br>
 
                             </div>
-                            <p><strong>Gilt Total Return:</strong> £\${(giltTotalCash - investmentAmount).toFixed(2)} profit</p>
-                            <p><strong>Savings Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit</p>
-                            <p><strong>Total Advantage:</strong> £\${extraIncomeTotal.toFixed(2)} over \${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
+                            <p><strong>Gilt Total Return:</strong> £\${formatMoney(giltTotalCash - investmentAmount)} profit</p>
+                            <p><strong>Savings Total Return:</strong> £\${formatMoney(savingsTotalCash - investmentAmount)} profit</p>
+                            <p><strong>Total Advantage:</strong> £\${formatMoney(extraIncomeTotal)} over \${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
                             <p style="margin-top: 15px; font-weight: bold; color: \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'};">
                                 \${advantagePercent >= 0 ? 
-                                    \`This gilt will earn you £\${Math.abs(extraIncomeTotal).toFixed(2)} MORE than a savings account.\` : 
-                                    \`A savings account would earn you £\${Math.abs(extraIncomeTotal).toFixed(2)} MORE than this gilt.\`
+                                    \`This gilt will earn you £\${formatMoney(Math.abs(extraIncomeTotal))} MORE than a savings account.\` : 
+                                    \`A savings account would earn you £\${formatMoney(Math.abs(extraIncomeTotal))} MORE than this gilt.\`
                                 }
                             </p>
                         </div>

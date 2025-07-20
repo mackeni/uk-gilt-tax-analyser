@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-KdK7LO/checked-fetch.js
+// .wrangler/tmp/bundle-WNuorc/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-KdK7LO/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-WNuorc/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-KdK7LO/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-WNuorc/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-KdK7LO/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-WNuorc/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5825,17 +5825,17 @@ async function renderHomePage(request, env) {
                                 <strong>Formula:</strong><br>
                                 Extra Income = Total Cash from Gilt - Total Cash from Savings<br><br>
                                 <strong>Calculation:</strong><br>
-                                \xA3\${giltTotalCash.toFixed(2)} - \xA3\${savingsTotalCash.toFixed(2)}<br>
-                                = <strong>\xA3\${extraIncomeTotal.toFixed(2)}</strong><br>
+                                \xA3\${formatMoney(giltTotalCash)} - \xA3\${formatMoney(savingsTotalCash)}<br>
+                                = <strong>\xA3\${formatMoney(extraIncomeTotal)}</strong><br>
 
                             </div>
-                            <p><strong>Gilt Total Return:</strong> \xA3\${(giltTotalCash - investmentAmount).toFixed(2)} profit</p>
-                            <p><strong>Savings Total Return:</strong> \xA3\${(savingsTotalCash - investmentAmount).toFixed(2)} profit</p>
-                            <p><strong>Total Advantage:</strong> \xA3\${extraIncomeTotal.toFixed(2)} over \${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
+                            <p><strong>Gilt Total Return:</strong> \xA3\${formatMoney(giltTotalCash - investmentAmount)} profit</p>
+                            <p><strong>Savings Total Return:</strong> \xA3\${formatMoney(savingsTotalCash - investmentAmount)} profit</p>
+                            <p><strong>Total Advantage:</strong> \xA3\${formatMoney(extraIncomeTotal)} over \${(gilt.yearsToMaturity || 0).toFixed(2)} years</p>
                             <p style="margin-top: 15px; font-weight: bold; color: \${advantagePercent >= 0 ? '#27ae60' : '#e74c3c'};">
                                 \${advantagePercent >= 0 ? 
-                                    \`This gilt will earn you \xA3\${Math.abs(extraIncomeTotal).toFixed(2)} MORE than a savings account.\` : 
-                                    \`A savings account would earn you \xA3\${Math.abs(extraIncomeTotal).toFixed(2)} MORE than this gilt.\`
+                                    \`This gilt will earn you \xA3\${formatMoney(Math.abs(extraIncomeTotal))} MORE than a savings account.\` : 
+                                    \`A savings account would earn you \xA3\${formatMoney(Math.abs(extraIncomeTotal))} MORE than this gilt.\`
                                 }
                             </p>
                         </div>
@@ -6771,7 +6771,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-KdK7LO/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-WNuorc/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6805,7 +6805,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-KdK7LO/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-WNuorc/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
