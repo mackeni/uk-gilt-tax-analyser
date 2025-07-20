@@ -7,9 +7,7 @@ import { addMonths, addDays, isSameDay, isWeekend } from 'date-fns';
 
 export class CouponScheduler {
   constructor() {
-    // UK holidays should be loaded from an authentic data source
-    // No hardcoded holiday data - implement proper holiday calendar API
-    this.ukHolidays = [];
+    // Simplified - no hardcoded holidays
   }
 
   generateCouponSchedule(giltInfo) {
@@ -87,19 +85,14 @@ export class CouponScheduler {
   }
 
   adjustForBusinessDay(date) {
-    // Move to next business day if weekend
+    // Move to next business day if weekend (simplified)
     let adjustedDate = new Date(date);
     
-    while (isWeekend(adjustedDate) || this.isUKHoliday(adjustedDate)) {
+    while (isWeekend(adjustedDate)) {
       adjustedDate = addDays(adjustedDate, 1);
     }
     
     return adjustedDate;
-  }
-
-  isUKHoliday(date) {
-    const dateStr = date.toISOString().split('T')[0];
-    return this.ukHolidays.includes(dateStr);
   }
 
   calculateAccruedInterest(couponRate, lastPaymentDate, nextPaymentDate, settlementDate = null) {

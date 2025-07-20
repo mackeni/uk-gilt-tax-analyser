@@ -31,10 +31,6 @@ export function formatCouponRate(rate) {
 }
 
 export function calculateYearsToMaturity(maturityDate, referenceDate = null) {
-  return getCachedCalculation('yearsToMaturity', _calculateYearsToMaturity, maturityDate, referenceDate);
-}
-
-function _calculateYearsToMaturity(maturityDate, referenceDate = null) {
   if (!referenceDate) {
     referenceDate = new Date();
   }
@@ -88,17 +84,13 @@ export function calculateCouponPaymentDates(maturityDate, numPayments = 20) {
 }
 
 export function findLastCouponDate(maturityDate, referenceDate = null) {
-  return getCachedCalculation('lastCouponDate', _findLastCouponDate, maturityDate, referenceDate);
-}
-
-function _findLastCouponDate(maturityDate, referenceDate = null) {
   if (!referenceDate) {
     referenceDate = new Date();
   }
   
   const paymentDates = calculateCouponPaymentDates(maturityDate);
   
-  // Find last payment before reference date (more efficient than loop)
+  // Find last payment before reference date
   for (let i = paymentDates.length - 1; i >= 0; i--) {
     if (paymentDates[i] <= referenceDate) {
       return paymentDates[i];
@@ -109,10 +101,6 @@ function _findLastCouponDate(maturityDate, referenceDate = null) {
 }
 
 export function findNextCouponDate(maturityDate, referenceDate = null) {
-  return getCachedCalculation('nextCouponDate', _findNextCouponDate, maturityDate, referenceDate);
-}
-
-function _findNextCouponDate(maturityDate, referenceDate = null) {
   if (!referenceDate) {
     referenceDate = new Date();
   }
@@ -130,10 +118,6 @@ function _findNextCouponDate(maturityDate, referenceDate = null) {
 }
 
 export function calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
-  return getCachedCalculation('accruedInterest', _calculateAccruedInterest, couponRate, lastPaymentDate, settlementDate);
-}
-
-function _calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
   if (!settlementDate) {
     settlementDate = new Date();
   }
@@ -166,87 +150,9 @@ export function calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate
   return afterTaxYield / (1 - incomeTaxRate);
 }
 
-// Enhanced memoization cache for expensive calculations
-const calculationCache = new Map();
-const cacheStats = { hits: 0, misses: 0 };
-
-export function getCachedCalculation(key, calculationFn, ...args) {
-  // Use faster string concatenation instead of JSON.stringify for simple args
-  let cacheKey;
-  if (args.length <= 2 && args.every(arg => typeof arg === 'string' || typeof arg === 'number')) {
-    cacheKey = key + '_' + args.join('_');
-  } else {
-    cacheKey = key + '_' + JSON.stringify(args);
-  }
-  
-  if (calculationCache.has(cacheKey)) {
-    cacheStats.hits++;
-    return calculationCache.get(cacheKey);
-  }
-  
-  cacheStats.misses++;
-  const result = calculationFn(...args);
-  calculationCache.set(cacheKey, result);
-  
-  // More efficient cache cleanup - only when needed
-  if (calculationCache.size > 2000) {
-    let deleteCount = 0;
-    for (const [k] of calculationCache) {
-      calculationCache.delete(k);
-      if (++deleteCount >= 500) break;
-    }
-  }
-  
-  return result;
-}
-
-// Cache for complex calculations with TTL (time-to-live)
-const timedCache = new Map();
-
-export function getCachedCalculationWithTTL(key, calculationFn, ttlMs = 300000, ...args) { // 5 minute default TTL
-  const cacheKey = `${key}_${JSON.stringify(args)}`;
-  const now = Date.now();
-  
-  if (timedCache.has(cacheKey)) {
-    const cached = timedCache.get(cacheKey);
-    if (now - cached.timestamp < ttlMs) {
-      console.log(`TTL cache hit for ${key}`);
-      return cached.value;
-    } else {
-      timedCache.delete(cacheKey);
-    }
-  }
-  
-  const result = calculationFn(...args);
-  timedCache.set(cacheKey, { value: result, timestamp: now });
-  
-  // Cleanup expired entries
-  if (timedCache.size > 100) {
-    for (const [k, v] of timedCache.entries()) {
-      if (now - v.timestamp >= ttlMs) {
-        timedCache.delete(k);
-      }
-    }
-  }
-  
-  return result;
-}
-
-export function clearCache() {
-  calculationCache.clear();
-  timedCache.clear();
-  cacheStats.hits = 0;
-  cacheStats.misses = 0;
-  console.log('All caches cleared');
-}
-
-export function getCacheStats() {
-  return {
-    ...cacheStats,
-    cacheSize: calculationCache.size,
-    timedCacheSize: timedCache.size,
-    hitRate: cacheStats.hits / (cacheStats.hits + cacheStats.misses) || 0
-  };
+// Simple utility functions
+export function roundToTwo(num) {
+  return Math.round(num * 100) / 100;
 }
 
 export function sortData(data, sortBy, ascending = true) {

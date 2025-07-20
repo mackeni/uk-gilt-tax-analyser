@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-bTutpu/checked-fetch.js
+// .wrangler/tmp/bundle-lF5pnE/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-bTutpu/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-lF5pnE/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2392,7 +2392,6 @@ var init_coupon_scheduler = __esm({
         __name(this, "CouponScheduler");
       }
       constructor() {
-        this.ukHolidays = [];
       }
       generateCouponSchedule(giltInfo) {
         const { maturityDate, couponRate, faceValue = 100 } = giltInfo;
@@ -2453,14 +2452,10 @@ var init_coupon_scheduler = __esm({
       }
       adjustForBusinessDay(date) {
         let adjustedDate = new Date(date);
-        while (isWeekend(adjustedDate) || this.isUKHoliday(adjustedDate)) {
+        while (isWeekend(adjustedDate)) {
           adjustedDate = addDays(adjustedDate, 1);
         }
         return adjustedDate;
-      }
-      isUKHoliday(date) {
-        const dateStr = date.toISOString().split("T")[0];
-        return this.ukHolidays.includes(dateStr);
       }
       calculateAccruedInterest(couponRate, lastPaymentDate, nextPaymentDate, settlementDate = null) {
         if (!settlementDate) {
@@ -2508,7 +2503,6 @@ __export(utils_exports, {
   calculateInvestmentMetrics: () => calculateInvestmentMetrics,
   calculateUnitsOwned: () => calculateUnitsOwned,
   calculateYearsToMaturity: () => calculateYearsToMaturity,
-  clearCache: () => clearCache,
   createDataTable: () => createDataTable,
   debounce: () => debounce,
   filterData: () => filterData,
@@ -2518,10 +2512,8 @@ __export(utils_exports, {
   formatCurrency: () => formatCurrency,
   formatPercentage: () => formatPercentage,
   generateChartData: () => generateChartData,
-  getCacheStats: () => getCacheStats,
-  getCachedCalculation: () => getCachedCalculation,
-  getCachedCalculationWithTTL: () => getCachedCalculationWithTTL,
   getTaxRateInfo: () => getTaxRateInfo,
+  roundToTwo: () => roundToTwo,
   sortData: () => sortData,
   throttle: () => throttle,
   validateGiltData: () => validateGiltData
@@ -2546,9 +2538,6 @@ function formatCouponRate(rate) {
   return `${formatted}%`;
 }
 function calculateYearsToMaturity(maturityDate, referenceDate = null) {
-  return getCachedCalculation("yearsToMaturity", _calculateYearsToMaturity, maturityDate, referenceDate);
-}
-function _calculateYearsToMaturity(maturityDate, referenceDate = null) {
   if (!referenceDate) {
     referenceDate = /* @__PURE__ */ new Date();
   }
@@ -2587,9 +2576,6 @@ function calculateCouponPaymentDates(maturityDate, numPayments = 20) {
   return paymentDates.reverse();
 }
 function findLastCouponDate(maturityDate, referenceDate = null) {
-  return getCachedCalculation("lastCouponDate", _findLastCouponDate, maturityDate, referenceDate);
-}
-function _findLastCouponDate(maturityDate, referenceDate = null) {
   if (!referenceDate) {
     referenceDate = /* @__PURE__ */ new Date();
   }
@@ -2602,9 +2588,6 @@ function _findLastCouponDate(maturityDate, referenceDate = null) {
   return null;
 }
 function findNextCouponDate(maturityDate, referenceDate = null) {
-  return getCachedCalculation("nextCouponDate", _findNextCouponDate, maturityDate, referenceDate);
-}
-function _findNextCouponDate(maturityDate, referenceDate = null) {
   if (!referenceDate) {
     referenceDate = /* @__PURE__ */ new Date();
   }
@@ -2617,9 +2600,6 @@ function _findNextCouponDate(maturityDate, referenceDate = null) {
   return new Date(maturityDate);
 }
 function calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
-  return getCachedCalculation("accruedInterest", _calculateAccruedInterest, couponRate, lastPaymentDate, settlementDate);
-}
-function _calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
   if (!settlementDate) {
     settlementDate = /* @__PURE__ */ new Date();
   }
@@ -2643,66 +2623,8 @@ function calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate) {
   }
   return afterTaxYield / (1 - incomeTaxRate);
 }
-function getCachedCalculation(key, calculationFn, ...args) {
-  let cacheKey;
-  if (args.length <= 2 && args.every((arg) => typeof arg === "string" || typeof arg === "number")) {
-    cacheKey = key + "_" + args.join("_");
-  } else {
-    cacheKey = key + "_" + JSON.stringify(args);
-  }
-  if (calculationCache.has(cacheKey)) {
-    cacheStats.hits++;
-    return calculationCache.get(cacheKey);
-  }
-  cacheStats.misses++;
-  const result = calculationFn(...args);
-  calculationCache.set(cacheKey, result);
-  if (calculationCache.size > 2e3) {
-    let deleteCount = 0;
-    for (const [k] of calculationCache) {
-      calculationCache.delete(k);
-      if (++deleteCount >= 500) break;
-    }
-  }
-  return result;
-}
-function getCachedCalculationWithTTL(key, calculationFn, ttlMs = 3e5, ...args) {
-  const cacheKey = `${key}_${JSON.stringify(args)}`;
-  const now = Date.now();
-  if (timedCache.has(cacheKey)) {
-    const cached = timedCache.get(cacheKey);
-    if (now - cached.timestamp < ttlMs) {
-      console.log(`TTL cache hit for ${key}`);
-      return cached.value;
-    } else {
-      timedCache.delete(cacheKey);
-    }
-  }
-  const result = calculationFn(...args);
-  timedCache.set(cacheKey, { value: result, timestamp: now });
-  if (timedCache.size > 100) {
-    for (const [k, v] of timedCache.entries()) {
-      if (now - v.timestamp >= ttlMs) {
-        timedCache.delete(k);
-      }
-    }
-  }
-  return result;
-}
-function clearCache() {
-  calculationCache.clear();
-  timedCache.clear();
-  cacheStats.hits = 0;
-  cacheStats.misses = 0;
-  console.log("All caches cleared");
-}
-function getCacheStats() {
-  return {
-    ...cacheStats,
-    cacheSize: calculationCache.size,
-    timedCacheSize: timedCache.size,
-    hitRate: cacheStats.hits / (cacheStats.hits + cacheStats.misses) || 0
-  };
+function roundToTwo(num) {
+  return Math.round(num * 100) / 100;
 }
 function sortData(data, sortBy, ascending = true) {
   return [...data].sort((a, b) => {
@@ -2807,7 +2729,6 @@ function throttle(func, limit) {
     }
   };
 }
-var calculationCache, cacheStats, timedCache;
 var init_utils = __esm({
   "src/lib/utils.js"() {
     init_checked_fetch();
@@ -2816,25 +2737,15 @@ var init_utils = __esm({
     __name(formatPercentage, "formatPercentage");
     __name(formatCouponRate, "formatCouponRate");
     __name(calculateYearsToMaturity, "calculateYearsToMaturity");
-    __name(_calculateYearsToMaturity, "_calculateYearsToMaturity");
     __name(calculateDirtyPrice, "calculateDirtyPrice");
     __name(calculateUnitsOwned, "calculateUnitsOwned");
     __name(calculateCouponPaymentDates, "calculateCouponPaymentDates");
     __name(findLastCouponDate, "findLastCouponDate");
-    __name(_findLastCouponDate, "_findLastCouponDate");
     __name(findNextCouponDate, "findNextCouponDate");
-    __name(_findNextCouponDate, "_findNextCouponDate");
     __name(calculateAccruedInterest, "calculateAccruedInterest");
-    __name(_calculateAccruedInterest, "_calculateAccruedInterest");
     __name(getTaxRateInfo, "getTaxRateInfo");
     __name(calculateEquivalentGrossSavingsRate, "calculateEquivalentGrossSavingsRate");
-    calculationCache = /* @__PURE__ */ new Map();
-    cacheStats = { hits: 0, misses: 0 };
-    __name(getCachedCalculation, "getCachedCalculation");
-    timedCache = /* @__PURE__ */ new Map();
-    __name(getCachedCalculationWithTTL, "getCachedCalculationWithTTL");
-    __name(clearCache, "clearCache");
-    __name(getCacheStats, "getCacheStats");
+    __name(roundToTwo, "roundToTwo");
     __name(sortData, "sortData");
     __name(filterData, "filterData");
     __name(generateChartData, "generateChartData");
@@ -2846,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-bTutpu/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-lF5pnE/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-bTutpu/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-lF5pnE/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -3160,26 +3071,10 @@ var TaxCalculator = class {
     __name(this, "TaxCalculator");
   }
   constructor() {
-    this.taxRates = {
-      additional_rate: 0.45,
-      higher_rate: 0.4,
-      basic_rate: 0.2,
-      cgt_rate_higher: 0.2,
-      cgt_rate_basic: 0.1
-    };
-    this.psa = {
-      additional_rate: 0,
-      // No PSA for additional rate taxpayers
-      higher_rate: 500,
-      // £500 PSA for higher rate taxpayers
-      basic_rate: 1e3
-      // £1,000 PSA for basic rate taxpayers
-    };
-    this.thresholds = {
-      basic_rate_limit: 37700,
-      higher_rate_limit: 125140,
-      personal_allowance: 12570,
-      cgt_allowance: 3e3
+    this.rates = {
+      basic_rate: { income: 0.2, psa: 1e3 },
+      higher_rate: { income: 0.4, psa: 500 },
+      additional_rate: { income: 0.45, psa: 0 }
     };
   }
   async calculateAfterTaxYieldWithSchedule(gilt, taxpayerType = "additional_rate", investmentAmount = 1e4) {
@@ -3193,7 +3088,8 @@ var TaxCalculator = class {
     if (!couponSchedule || couponSchedule.length === 0) {
       return this.calculateAfterTaxYield(gilt.currentYield, gilt.yearsToMaturity, gilt.couponRate, taxpayerType, gilt.dirtyPrice, gilt.cleanPrice);
     }
-    const incomeTaxRate = this.taxRates[taxpayerType] || this.taxRates["additional_rate"];
+    const taxInfo = this.rates[taxpayerType] || this.rates["additional_rate"];
+    const incomeTaxRate = taxInfo.income;
     const dirtyPrice = gilt.dirtyPrice || gilt.cleanPrice;
     const unitsOwned = Math.round(investmentAmount / dirtyPrice * 100) / 100;
     const afterTaxSchedule = couponSchedule.map((payment) => {
@@ -3241,7 +3137,8 @@ var TaxCalculator = class {
     if (!couponRate || couponRate === 0) {
       return 0;
     }
-    const incomeTaxRate = this.taxRates[taxpayerType] || this.taxRates["additional_rate"];
+    const taxInfo = this.rates[taxpayerType] || this.rates["additional_rate"];
+    const incomeTaxRate = taxInfo.income;
     const afterTaxCouponYield = couponRate * (1 - incomeTaxRate);
     let capitalGainsYield = 0;
     if (cleanPrice && cleanPrice !== 100 && yearsToMaturity > 0) {
@@ -7032,7 +6929,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-bTutpu/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-lF5pnE/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -7066,7 +6963,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-bTutpu/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-lF5pnE/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

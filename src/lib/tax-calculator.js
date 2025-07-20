@@ -5,28 +5,11 @@
 
 export class TaxCalculator {
   constructor() {
-    // UK tax rates for 2025/26
-    this.taxRates = {
-      additional_rate: 0.45,
-      higher_rate: 0.40,
-      basic_rate: 0.20,
-      cgt_rate_higher: 0.20,
-      cgt_rate_basic: 0.10
-    };
-    
-    // Personal Savings Allowance
-    this.psa = {
-      additional_rate: 0,      // No PSA for additional rate taxpayers
-      higher_rate: 500,        // £500 PSA for higher rate taxpayers
-      basic_rate: 1000         // £1,000 PSA for basic rate taxpayers
-    };
-    
-    // Current tax year thresholds
-    this.thresholds = {
-      basic_rate_limit: 37700,
-      higher_rate_limit: 125140,
-      personal_allowance: 12570,
-      cgt_allowance: 3000
+    // Simplified tax rates for 2025/26
+    this.rates = {
+      basic_rate: { income: 0.20, psa: 1000 },
+      higher_rate: { income: 0.40, psa: 500 },
+      additional_rate: { income: 0.45, psa: 0 }
     };
   }
 
@@ -46,7 +29,8 @@ export class TaxCalculator {
     }
     
     // Get tax rate
-    const incomeTaxRate = this.taxRates[taxpayerType] || this.taxRates['additional_rate'];
+    const taxInfo = this.rates[taxpayerType] || this.rates['additional_rate'];
+    const incomeTaxRate = taxInfo.income;
     
     // Calculate units owned with 2-decimal rounding
     const dirtyPrice = gilt.dirtyPrice || gilt.cleanPrice;
@@ -109,7 +93,8 @@ export class TaxCalculator {
     }
     
     // Get applicable tax rates
-    const incomeTaxRate = this.taxRates[taxpayerType] || this.taxRates['additional_rate'];
+    const taxInfo = this.rates[taxpayerType] || this.rates['additional_rate'];
+    const incomeTaxRate = taxInfo.income;
     
     // Calculate after-tax coupon yield (coupons are taxed as income)
     const afterTaxCouponYield = couponRate * (1 - incomeTaxRate);
