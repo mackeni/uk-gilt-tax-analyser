@@ -587,7 +587,13 @@ This migration maintains all original functionality while dramatically improving
 
 ### July 20, 2025 - Modern Security Headers with CSP Frame-Ancestors Migration
 
-**Version ID**: 3fb45428-b2a9-4250-9c18-f72045c69b16
+**Version ID**: 637af569-6cab-4441-ae15-2995a3afcb3e
+
+**Permissions-Policy Header Fixes:**
+- **Removed Unrecognized Features**: Fixed 'speaker' and 'vibrate' features that were causing browser errors
+- **Standards Compliance**: Updated Permissions-Policy to use only recognized standard features
+- **Enhanced Compatibility**: Cleaner security headers without browser warnings or console errors
+- **Maintained Security**: Preserved all essential device API restrictions (geolocation, microphone, camera, payment, usb, magnetometer, gyroscope)
 
 **Complete X-Frame-Options Removal Achievement:**
 - **100% Migration Complete**: Successfully removed all remaining X-Frame-Options headers from entire codebase
