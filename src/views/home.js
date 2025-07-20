@@ -2530,7 +2530,7 @@ export async function renderHomePage(request, env) {
                         
                         <div class="calculation-step">
                             <h4>Step 2: Total Cash from Savings Account</h4>
-                            <p><strong>Initial Investment:</strong> £\${investmentAmount.toFixed(2)}</p>
+                            <p><strong>Initial Investment:</strong> £\${formatMoney(investmentAmount)}</p>
                             <p><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}%</p>
                             <p><strong>Investment Period:</strong> \${(() => {
                                 const today = new Date();
@@ -2540,7 +2540,7 @@ export async function renderHomePage(request, env) {
                                 const remainingDays = totalDays % 365;
                                 return years + ' years + ' + remainingDays + ' days (' + totalDays + ' total days)';
                             })()} </p>
-                            <p><strong>Total Cash Received:</strong> £\${savingsTotalCash.toFixed(2)}</p>
+                            <p><strong>Total Cash Received:</strong> £\${formatMoney(savingsTotalCash)}</p>
                             
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0;">
                                 <h5 style="margin-top: 0;">Detailed Interest Calculation:</h5>
@@ -2549,7 +2549,7 @@ export async function renderHomePage(request, env) {
                                     <li><strong>Annual Interest Rate:</strong> \${savingsRate.toFixed(2)}% compounded annually</li>
                                     <li><strong>Compounding:</strong> Interest calculated and added annually to growing balance</li>
                                     <li><strong>Day Calculation:</strong> Uses actual calendar days (365 days = 1 year)</li>
-                                    <li><strong>Personal Savings Allowance:</strong> £\${psaAmount.toFixed(2)} tax-free allowance per tax year (April 6 - April 5)</li>
+                                    <li><strong>Personal Savings Allowance:</strong> £\${formatMoney(psaAmount)} tax-free allowance per tax year (April 6 - April 5)</li>
                                     <li><strong>PSA Reset:</strong> Full PSA allowance available each tax year</li>
                                     <li><strong>Partial Year PSA:</strong> PSA pro-rated based on actual days for partial years</li>
                                     <li><strong>Tax Rate:</strong> \${modalTaxRate}% on interest above available PSA allowance</li>
@@ -2563,7 +2563,7 @@ export async function renderHomePage(request, env) {
                                 </div>
                                 
                                 <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
-                                    <strong>Total Return:</strong> £\${(savingsTotalCash - investmentAmount).toFixed(2)} profit over \${(gilt.yearsToMaturity || 0).toFixed(2)} years<br>
+                                    <strong>Total Return:</strong> £\${formatMoney(savingsTotalCash - investmentAmount)} profit over \${(gilt.yearsToMaturity || 0).toFixed(2)} years<br>
 
                                 </p>
                             </div>
