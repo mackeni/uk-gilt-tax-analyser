@@ -177,11 +177,19 @@ export async function renderHomePage(request, env) {
         let utils = {};
         
         async function ensureUtilsLoaded() {
+            console.log('ensureUtilsLoaded called, utilsLoaded:', utilsLoaded);
             if (!utilsLoaded) {
-                utils = await import('/lib/utils.js?v=1.0');
-                utilsLoaded = true;
-
+                console.log('Loading utils module from /lib/utils.js...');
+                try {
+                    utils = await import('/lib/utils.js?v=1.0');
+                    console.log('Utils import successful:', Object.keys(utils));
+                    utilsLoaded = true;
+                } catch (importError) {
+                    console.error('Failed to import utils module:', importError);
+                    throw importError;
+                }
             }
+            console.log('Utils ready, returning:', !!utils);
             return utils;
         }
         
@@ -567,18 +575,33 @@ export async function renderHomePage(request, env) {
         }
         
         async function loadGiltData() {
+            console.log('loadGiltData called - starting data fetch process');
             const loadingDiv = document.getElementById('loading');
             const errorDiv = document.getElementById('error');
             const dataDiv = document.getElementById('giltData');
             const metricsDiv = document.getElementById('metrics');
+            
+            console.log('Found DOM elements:', {
+                loading: !!loadingDiv,
+                error: !!errorDiv, 
+                data: !!dataDiv,
+                metrics: !!metricsDiv
+            });
             
             loadingDiv.style.display = 'block';
             errorDiv.style.display = 'none';
             dataDiv.style.display = 'none';
             metricsDiv.style.display = 'none';
             
+            console.log('About to ensure utils are loaded...');
             // Ensure utils are loaded first
-            await ensureUtilsLoaded();
+            try {
+                await ensureUtilsLoaded();
+                console.log('Utils loaded successfully!');
+            } catch (utilsError) {
+                console.error('Error loading utils:', utilsError);
+                throw new Error('Failed to load utility functions: ' + utilsError.message);
+            }
             
             try {
 

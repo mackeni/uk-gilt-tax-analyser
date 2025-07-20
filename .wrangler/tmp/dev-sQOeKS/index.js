@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-GOOowE/checked-fetch.js
+// .wrangler/tmp/bundle-Yn1IZK/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-GOOowE/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-Yn1IZK/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-GOOowE/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-Yn1IZK/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-GOOowE/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-Yn1IZK/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -3456,11 +3456,19 @@ async function renderHomePage(request, env) {
         let utils = {};
         
         async function ensureUtilsLoaded() {
+            console.log('ensureUtilsLoaded called, utilsLoaded:', utilsLoaded);
             if (!utilsLoaded) {
-                utils = await import('/lib/utils.js?v=1.0');
-                utilsLoaded = true;
-
+                console.log('Loading utils module from /lib/utils.js...');
+                try {
+                    utils = await import('/lib/utils.js?v=1.0');
+                    console.log('Utils import successful:', Object.keys(utils));
+                    utilsLoaded = true;
+                } catch (importError) {
+                    console.error('Failed to import utils module:', importError);
+                    throw importError;
+                }
             }
+            console.log('Utils ready, returning:', !!utils);
             return utils;
         }
         
@@ -3846,18 +3854,33 @@ async function renderHomePage(request, env) {
         }
         
         async function loadGiltData() {
+            console.log('loadGiltData called - starting data fetch process');
             const loadingDiv = document.getElementById('loading');
             const errorDiv = document.getElementById('error');
             const dataDiv = document.getElementById('giltData');
             const metricsDiv = document.getElementById('metrics');
+            
+            console.log('Found DOM elements:', {
+                loading: !!loadingDiv,
+                error: !!errorDiv, 
+                data: !!dataDiv,
+                metrics: !!metricsDiv
+            });
             
             loadingDiv.style.display = 'block';
             errorDiv.style.display = 'none';
             dataDiv.style.display = 'none';
             metricsDiv.style.display = 'none';
             
+            console.log('About to ensure utils are loaded...');
             // Ensure utils are loaded first
-            await ensureUtilsLoaded();
+            try {
+                await ensureUtilsLoaded();
+                console.log('Utils loaded successfully!');
+            } catch (utilsError) {
+                console.error('Error loading utils:', utilsError);
+                throw new Error('Failed to load utility functions: ' + utilsError.message);
+            }
             
             try {
 
@@ -6874,7 +6897,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-GOOowE/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-Yn1IZK/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6908,7 +6931,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-GOOowE/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-Yn1IZK/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
