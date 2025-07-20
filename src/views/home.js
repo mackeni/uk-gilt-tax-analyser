@@ -2051,7 +2051,7 @@ export async function renderHomePage(request, env) {
                     }
                     
                     // Calculate key dates and information
-                    const maturityDate = new Date(gilt.maturityDate).toLocaleDateString('en-GB', {
+                    const formattedMaturityDate = new Date(gilt.maturityDate).toLocaleDateString('en-GB', {
                         day: '2-digit',
                         month: 'long',
                         year: 'numeric'
@@ -2085,7 +2085,7 @@ export async function renderHomePage(request, env) {
                         '<h5 style="color: #2c3e50; margin-bottom: 8px;">📊 Bond Basics</h5>' +
                         '<p style="margin: 3px 0;"><strong>Full Name:</strong> ' + gilt.name + '</p>' +
                         '<p style="margin: 3px 0;"><strong>Coupon Rate:</strong> ' + formatCouponRate(gilt.couponRate) + '</p>' +
-                        '<p style="margin: 3px 0;"><strong>Maturity Date:</strong> ' + maturityDate + '</p>' +
+                        '<p style="margin: 3px 0;"><strong>Maturity Date:</strong> ' + formattedMaturityDate + '</p>' +
                         '<p style="margin: 3px 0;"><strong>Years to Maturity:</strong> ' + gilt.yearsToMaturity.toFixed(2) + ' years</p>' +
                         '</div>' +
                         '<div>' +
@@ -2108,7 +2108,7 @@ export async function renderHomePage(request, env) {
                         '</div>' +
                         '<div>' +
                         '<h5 style="margin-bottom: 5px;">Final Payment</h5>' +
-                        '<p style="margin: 2px 0;"><strong>Maturity:</strong> ' + maturityDate + '</p>' +
+                        '<p style="margin: 2px 0;"><strong>Maturity:</strong> ' + formattedMaturityDate + '</p>' +
                         lastCouponSection +
                         '<p style="margin: 2px 0;"><strong>Principal:</strong> £100.00 per £100 nominal</p>' +
                         '</div>' +

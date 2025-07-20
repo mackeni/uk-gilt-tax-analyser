@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-3wyPqY/checked-fetch.js
+// .wrangler/tmp/bundle-9qo6Np/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-3wyPqY/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-9qo6Np/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-3wyPqY/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-9qo6Np/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-3wyPqY/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-9qo6Np/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5301,7 +5301,7 @@ async function renderHomePage(request, env) {
                     }
                     
                     // Calculate key dates and information
-                    const maturityDate = new Date(gilt.maturityDate).toLocaleDateString('en-GB', {
+                    const formattedMaturityDate = new Date(gilt.maturityDate).toLocaleDateString('en-GB', {
                         day: '2-digit',
                         month: 'long',
                         year: 'numeric'
@@ -5335,7 +5335,7 @@ async function renderHomePage(request, env) {
                         '<h5 style="color: #2c3e50; margin-bottom: 8px;">\u{1F4CA} Bond Basics</h5>' +
                         '<p style="margin: 3px 0;"><strong>Full Name:</strong> ' + gilt.name + '</p>' +
                         '<p style="margin: 3px 0;"><strong>Coupon Rate:</strong> ' + formatCouponRate(gilt.couponRate) + '</p>' +
-                        '<p style="margin: 3px 0;"><strong>Maturity Date:</strong> ' + maturityDate + '</p>' +
+                        '<p style="margin: 3px 0;"><strong>Maturity Date:</strong> ' + formattedMaturityDate + '</p>' +
                         '<p style="margin: 3px 0;"><strong>Years to Maturity:</strong> ' + gilt.yearsToMaturity.toFixed(2) + ' years</p>' +
                         '</div>' +
                         '<div>' +
@@ -5358,7 +5358,7 @@ async function renderHomePage(request, env) {
                         '</div>' +
                         '<div>' +
                         '<h5 style="margin-bottom: 5px;">Final Payment</h5>' +
-                        '<p style="margin: 2px 0;"><strong>Maturity:</strong> ' + maturityDate + '</p>' +
+                        '<p style="margin: 2px 0;"><strong>Maturity:</strong> ' + formattedMaturityDate + '</p>' +
                         lastCouponSection +
                         '<p style="margin: 2px 0;"><strong>Principal:</strong> \xA3100.00 per \xA3100 nominal</p>' +
                         '</div>' +
@@ -6878,7 +6878,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-3wyPqY/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-9qo6Np/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6912,7 +6912,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-3wyPqY/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-9qo6Np/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
