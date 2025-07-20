@@ -2889,6 +2889,6 @@ export async function renderHomePage(request, env) {
   `;
   
   return new Response(html, {
-    headers: { 'Content-Type': 'text/html' }
+    headers: { 'Content-Type': 'text/html; charset=utf-8' }
   });
 }
