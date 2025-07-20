@@ -2020,6 +2020,115 @@ export async function renderHomePage(request, env) {
             let contentHTML = '';
             
             switch(type) {
+                case 'name':
+                    titleText = 'Gilt Details: ' + gilt.name;
+                    
+                    // Generate coupon payment schedule for display
+                    let couponScheduleDisplay = '';
+                    if (gilt.couponSchedule && gilt.couponSchedule.length > 0) {
+                        let paymentItems = '';
+                        gilt.couponSchedule.forEach((payment, index) => {
+                            const paymentDate = new Date(payment.date).toLocaleDateString('en-GB', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric'
+                            });
+                            paymentItems += '<div style="padding: 5px; border: 1px solid #e0e0e0; border-radius: 3px; background: white;">' +
+                                '<div style="font-weight: bold; font-size: 0.9em;">' + paymentDate + '</div>' +
+                                '<div style="color: #666; font-size: 0.8em;">£' + formatMoney(payment.grossAmount) + ' gross</div>' +
+                                '</div>';
+                        });
+                        
+                        couponScheduleDisplay = '<div style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 5px;">' +
+                            '<h5 style="margin-bottom: 10px; color: #2c3e50;">📅 Coupon Payment Schedule</h5>' +
+                            '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 200px; overflow-y: auto;">' +
+                            paymentItems +
+                            '</div>' +
+                            '<div style="margin-top: 10px; font-size: 0.9em; color: #666;">' +
+                            '<strong>Total Payments:</strong> ' + gilt.couponSchedule.length + ' semi-annual coupons' +
+                            '</div>' +
+                            '</div>';
+                    }
+                    
+                    // Calculate key dates and information
+                    const maturityDate = new Date(gilt.maturityDate).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric'
+                    });
+                    
+                    const nextCouponInfo = gilt.couponSchedule && gilt.couponSchedule.length > 0 ? 
+                        gilt.couponSchedule[0] : null;
+                    
+                    const lastCouponInfo = gilt.couponSchedule && gilt.couponSchedule.length > 0 ? 
+                        gilt.couponSchedule[gilt.couponSchedule.length - 1] : null;
+                    
+                    // Build next coupon section
+                    let nextCouponSection = '';
+                    if (nextCouponInfo) {
+                        nextCouponSection = '<p style="margin: 2px 0;"><strong>Date:</strong> ' + new Date(nextCouponInfo.date).toLocaleDateString('en-GB') + '</p>' +
+                            '<p style="margin: 2px 0;"><strong>Amount:</strong> £' + formatMoney(nextCouponInfo.grossAmount) + ' per £100</p>';
+                    } else {
+                        nextCouponSection = '<p>No coupon data available</p>';
+                    }
+                    
+                    // Build last coupon section
+                    let lastCouponSection = '';
+                    if (lastCouponInfo) {
+                        lastCouponSection = '<p style="margin: 2px 0;"><strong>Last Coupon:</strong> £' + formatMoney(lastCouponInfo.grossAmount) + ' per £100</p>';
+                    }
+                    
+                    contentHTML = '<div class="calculation-step">' +
+                        '<h4>UK Government Bond Information</h4>' +
+                        '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">' +
+                        '<div>' +
+                        '<h5 style="color: #2c3e50; margin-bottom: 8px;">📊 Bond Basics</h5>' +
+                        '<p style="margin: 3px 0;"><strong>Full Name:</strong> ' + gilt.name + '</p>' +
+                        '<p style="margin: 3px 0;"><strong>Coupon Rate:</strong> ' + formatCouponRate(gilt.couponRate) + '</p>' +
+                        '<p style="margin: 3px 0;"><strong>Maturity Date:</strong> ' + maturityDate + '</p>' +
+                        '<p style="margin: 3px 0;"><strong>Years to Maturity:</strong> ' + gilt.yearsToMaturity.toFixed(2) + ' years</p>' +
+                        '</div>' +
+                        '<div>' +
+                        '<h5 style="color: #2c3e50; margin-bottom: 8px;">💷 Current Pricing</h5>' +
+                        '<p style="margin: 3px 0;"><strong>Clean Price:</strong> £' + formatMoney(gilt.cleanPrice) + '</p>' +
+                        '<p style="margin: 3px 0;"><strong>Dirty Price:</strong> £' + formatMoney(gilt.dirtyPrice) + '</p>' +
+                        '<p style="margin: 3px 0;"><strong>Accrued Interest:</strong> £' + formatMoney(gilt.dirtyPrice - gilt.cleanPrice) + '</p>' +
+                        '<p style="margin: 3px 0;"><strong>Current Yield:</strong> ' + gilt.currentYield.toFixed(2) + '%</p>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        
+                        '<div class="calculation-step">' +
+                        '<h4>📅 Key Dates & Payment Information</h4>' +
+                        '<div style="margin: 10px 0; padding: 10px; background: #e8f5e8; border-radius: 5px;">' +
+                        '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">' +
+                        '<div>' +
+                        '<h5 style="margin-bottom: 5px;">Next Coupon Payment</h5>' +
+                        nextCouponSection +
+                        '</div>' +
+                        '<div>' +
+                        '<h5 style="margin-bottom: 5px;">Final Payment</h5>' +
+                        '<p style="margin: 2px 0;"><strong>Maturity:</strong> ' + maturityDate + '</p>' +
+                        lastCouponSection +
+                        '<p style="margin: 2px 0;"><strong>Principal:</strong> £100.00 per £100 nominal</p>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        
+                        couponScheduleDisplay +
+                        
+                        '<div class="calculation-step">' +
+                        '<h4>💡 Investment Notes</h4>' +
+                        '<div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">' +
+                        '<p style="margin: 3px 0;"><strong>Semi-Annual Payments:</strong> UK gilts pay interest twice yearly</p>' +
+                        '<p style="margin: 3px 0;"><strong>Tax Treatment:</strong> Coupon payments subject to income tax, capital gains generally tax-free</p>' +
+                        '<p style="margin: 3px 0;"><strong>Credit Risk:</strong> Backed by UK Government (minimal default risk)</p>' +
+                        '<p style="margin: 3px 0;"><strong>Liquidity:</strong> Actively traded on secondary markets</p>' +
+                        '</div>' +
+                        '</div>';
+                    break;
+                    
                 case 'coupon':
                     titleText = 'Coupon Rate';
                     contentHTML = \`
