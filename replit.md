@@ -585,14 +585,14 @@ This migration maintains all original functionality while dramatically improving
 - **Input Handling**: Empty or invalid inputs default to £5 (realistic broker charge)
 - **Calculation Logic**: All calculations properly handle both £0 and positive dealing charges
 
-### July 20, 2025 - Complete Security Headers Implementation with Cache Control Fix
+### July 20, 2025 - Modern Security Headers with CSP Frame-Ancestors Migration
 
-**Version ID**: 84e78e2f-9b25-4efe-949e-35b024f5c45c
+**Version ID**: d93deaf2-fe3d-4f30-909e-f60376e3d199
 
-**Complete Security Headers Implementation (Traditional + Modern):**
-- **Content Security Policy**: Implemented strict CSP preventing XSS attacks with 'self' directives and minimal inline allowances
+**Complete Modern Security Headers Implementation:**
+- **Content Security Policy**: Comprehensive CSP with strict 'self' directives and modern frame-ancestors 'none' directive
 - **HTTP Strict Transport Security**: Added HSTS with 1-year max-age, includeSubDomains, and preload directives
-- **Frame Protection**: X-Frame-Options set to DENY preventing clickjacking attacks
+- **Modern Frame Protection**: Migrated from deprecated X-Frame-Options to CSP frame-ancestors directive for better consistency
 - **XSS Protection**: X-XSS-Protection header with mode=block for legacy browser protection
 - **Content Type Protection**: X-Content-Type-Options nosniff preventing MIME-type confusion attacks
 - **Referrer Policy**: Strict-origin-when-cross-origin for privacy-conscious referrer handling
@@ -618,8 +618,10 @@ This migration maintains all original functionality while dramatically improving
 - **Cross-Origin Isolation**: Advanced protection against timing and speculative execution attacks
 - **Process-Level Security**: Enhanced browser process isolation through origin clustering
 - **Data Privacy**: Automatic clearing of sensitive data and minimal cross-origin information leakage
+- **Modern Standards Compliance**: Eliminated deprecated X-Frame-Options in favor of CSP frame-ancestors directive
 - **Complete Cache Control**: All endpoints (HTML, API, JavaScript, 404 errors) include proper cache-control headers
 - **Universal Header Coverage**: Every possible response includes comprehensive security and caching policies
+- **Future-Proof Architecture**: Uses modern security standards with better browser support and consistency
 
 ### July 20, 2025 - Duration Filter Bug Fix and UI Optimization
 

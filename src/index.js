@@ -44,7 +44,6 @@ export default {
             'Content-Type': 'text/plain; charset=utf-8',
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'X-Content-Type-Options': 'nosniff',
-            'X-Frame-Options': 'DENY',
             'Referrer-Policy': 'strict-origin-when-cross-origin',
             'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
             'Cross-Origin-Resource-Policy': 'same-origin',
@@ -241,7 +240,6 @@ export function getCachedCalculation(key, calculationFn, ...args) {
         'Cache-Control': 'public, max-age=31536000, immutable',
         'ETag': '"utils-v1.0"',
         'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
         'Cross-Origin-Resource-Policy': 'same-origin',
@@ -256,7 +254,6 @@ export function getCachedCalculation(key, calculationFn, ...args) {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
     }
@@ -271,7 +268,6 @@ async function handleStaticFile(request, env) {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
     }
@@ -306,7 +302,6 @@ async function handleAPIRequest(request, env, path) {
         'Content-Type': 'application/json; charset=utf-8',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
         'Cross-Origin-Resource-Policy': 'cross-origin',
@@ -337,7 +332,6 @@ async function getGiltData(request, env) {
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
         'Cross-Origin-Resource-Policy': 'cross-origin',
@@ -358,7 +352,6 @@ async function getGiltData(request, env) {
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
         'Cross-Origin-Resource-Policy': 'cross-origin',
@@ -457,7 +450,6 @@ async function calculateTax(request, env) {
           'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'X-Content-Type-Options': 'nosniff',
-          'X-Frame-Options': 'DENY',
           'Referrer-Policy': 'strict-origin-when-cross-origin',
           'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
           'Cross-Origin-Resource-Policy': 'cross-origin',
@@ -482,7 +474,6 @@ async function calculateTax(request, env) {
           'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'X-Content-Type-Options': 'nosniff',
-          'X-Frame-Options': 'DENY',
           'Referrer-Policy': 'strict-origin-when-cross-origin',
           'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
           'Cross-Origin-Resource-Policy': 'cross-origin',
@@ -499,7 +490,6 @@ async function calculateTax(request, env) {
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
         'Cross-Origin-Resource-Policy': 'cross-origin',
