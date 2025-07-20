@@ -976,7 +976,7 @@ export async function renderHomePage(request, env) {
         
         async function ensureUtilsLoaded() {
             if (!utilsLoaded) {
-                utils = await import('../lib/utils.js');
+                utils = await import('../lib/utils.js?v=1.0');
                 utilsLoaded = true;
 
             }
@@ -2863,6 +2863,9 @@ export async function renderHomePage(request, env) {
   `;
   
   return new Response(html, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8' }
+    headers: { 
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'public, max-age=0, must-revalidate'
+    }
   });
 }

@@ -16,7 +16,7 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
     
-    // Handle lib files (JavaScript modules)
+    // Handle lib files (JavaScript modules) with cache busting
     if (path.startsWith('/lib/')) {
       return await handleLibFile(request, env, path);
     }
@@ -225,7 +225,8 @@ export function getCachedCalculation(key, calculationFn, ...args) {
     return new Response(utilsContent, {
       headers: {
         'Content-Type': 'application/javascript',
-        'Cache-Control': 'public, max-age=3600'
+        'Cache-Control': 'public, max-age=31536000, immutable',
+        'ETag': '"utils-v1.0"'
       }
     });
   }
