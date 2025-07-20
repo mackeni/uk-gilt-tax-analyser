@@ -2109,10 +2109,57 @@ export async function renderHomePage(request, env) {
                     const taxRate = currentSettings.taxBracket === 'additional_rate' ? 45 : 
                                    currentSettings.taxBracket === 'higher_rate' ? 40 : 20;
                     
-                    titleText = 'After-Tax Yield Calculation with Detailed Payment Schedule';
+                    titleText = 'After-Tax IRR Calculation with Precision Details and Payment Schedule';
+                    
+                    // Add precision details and methodology section
+                    const dealingCharge = currentSettings.dealingCharge || 0;
+                    const effectiveInvestment = (currentSettings.investmentAmount || 10000) - dealingCharge;
+                    const unitsOwned = effectiveInvestment / gilt.dirtyPrice * 100;
+                    const precisionDetails = \`
+                        <div class="calculation-step" style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin: 15px 0;">
+                            <h4 style="color: #856404;">IRR Calculation Methodology & Precision</h4>
+                            
+                            <div style="margin: 10px 0;">
+                                <h5>Internal Rate of Return (IRR) Method:</h5>
+                                <p style="margin: 5px 0; font-family: monospace; background: #f8f9fa; padding: 8px; border-radius: 4px;">
+                                    NPV = 0 = -Initial_Investment + Σ(Cash_Flow_t / (1 + IRR)^t)
+                                </p>
+                                <p style="margin: 5px 0;">Solved using Newton-Raphson iterative method with 1e-7 tolerance (0.0000001% precision)</p>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 10px 0;">
+                                <div>
+                                    <h5>Investment Parameters:</h5>
+                                    <p style="margin: 2px 0;"><strong>Investment Amount:</strong> £\${(currentSettings.investmentAmount || 10000).toFixed(2)}</p>
+                                    <p style="margin: 2px 0;"><strong>Dealing Charge:</strong> \${dealingCharge > 0 ? '£' + dealingCharge.toFixed(2) : 'None'}</p>
+                                    <p style="margin: 2px 0;"><strong>Effective Investment:</strong> £\${effectiveInvestment.toFixed(2)}</p>
+                                    <p style="margin: 2px 0;"><strong>Dirty Price:</strong> £\${gilt.dirtyPrice.toFixed(6)} per £100</p>
+                                    <p style="margin: 2px 0;"><strong>Units Owned:</strong> \${unitsOwned.toFixed(6)} (per £100 nominal)</p>
+                                </div>
+                                <div>
+                                    <h5>Calculation Precision:</h5>
+                                    <p style="margin: 2px 0;"><strong>Time Calculation:</strong> Exact days / 365.25 for fractional years</p>
+                                    <p style="margin: 2px 0;"><strong>Cash Flow Timing:</strong> Actual semi-annual coupon dates</p>
+                                    <p style="margin: 2px 0;"><strong>Tax Calculations:</strong> 2-decimal rounding applied to all amounts</p>
+                                    <p style="margin: 2px 0;"><strong>IRR Convergence:</strong> 1e-7 tolerance (7 decimal places)</p>
+                                    <p style="margin: 2px 0;"><strong>Final IRR:</strong> \${gilt.afterTaxYield ? gilt.afterTaxYield.toFixed(6) + '%' : 'Not calculated'}</p>
+                                </div>
+                            </div>
+                            
+                            \${currentSettings.accountChargeEnabled ? \`
+                                <div style="margin: 10px 0; padding: 10px; background: #f8d7da; border-radius: 4px;">
+                                    <h5 style="color: #721c24;">Account Charges Integration:</h5>
+                                    <p style="margin: 2px 0;"><strong>Monthly Charge Rate:</strong> \${currentSettings.accountChargeRate}% annually (\${(currentSettings.accountChargeRate/12).toFixed(4)}% monthly)</p>
+                                    <p style="margin: 2px 0;"><strong>Maximum Monthly Charge:</strong> £\${currentSettings.accountChargeMax.toFixed(2)}</p>
+                                    <p style="margin: 2px 0;"><strong>Gilt Price Convergence:</strong> Linear from £\${gilt.dirtyPrice.toFixed(2)} to £100.00 at maturity</p>
+                                    <p style="margin: 2px 0;"><strong>Charge Calculation:</strong> Monthly rate × gilt value at month-end (capped at maximum)</p>
+                                </div>
+                            \` : ''}
+                        </div>
+                    \`;
                     
                     // Generate payment schedule table including monthly account charges
-                    let scheduleHTML = '';
+                    let scheduleHTML = precisionDetails;
                     if (gilt.couponSchedule && gilt.couponSchedule.length > 0) {
                         // Use stored monthly account charges from unified function
                         let monthlyChargeSchedule = [];

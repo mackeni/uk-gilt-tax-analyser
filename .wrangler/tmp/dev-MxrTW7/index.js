@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-vP7d9K/checked-fetch.js
+// .wrangler/tmp/bundle-PgUhyT/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-vP7d9K/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-PgUhyT/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-vP7d9K/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-PgUhyT/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-vP7d9K/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-PgUhyT/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -5359,10 +5359,57 @@ async function renderHomePage(request, env) {
                     const taxRate = currentSettings.taxBracket === 'additional_rate' ? 45 : 
                                    currentSettings.taxBracket === 'higher_rate' ? 40 : 20;
                     
-                    titleText = 'After-Tax Yield Calculation with Detailed Payment Schedule';
+                    titleText = 'After-Tax IRR Calculation with Precision Details and Payment Schedule';
+                    
+                    // Add precision details and methodology section
+                    const dealingCharge = currentSettings.dealingCharge || 0;
+                    const effectiveInvestment = (currentSettings.investmentAmount || 10000) - dealingCharge;
+                    const unitsOwned = effectiveInvestment / gilt.dirtyPrice * 100;
+                    const precisionDetails = \`
+                        <div class="calculation-step" style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin: 15px 0;">
+                            <h4 style="color: #856404;">IRR Calculation Methodology & Precision</h4>
+                            
+                            <div style="margin: 10px 0;">
+                                <h5>Internal Rate of Return (IRR) Method:</h5>
+                                <p style="margin: 5px 0; font-family: monospace; background: #f8f9fa; padding: 8px; border-radius: 4px;">
+                                    NPV = 0 = -Initial_Investment + \u03A3(Cash_Flow_t / (1 + IRR)^t)
+                                </p>
+                                <p style="margin: 5px 0;">Solved using Newton-Raphson iterative method with 1e-7 tolerance (0.0000001% precision)</p>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 10px 0;">
+                                <div>
+                                    <h5>Investment Parameters:</h5>
+                                    <p style="margin: 2px 0;"><strong>Investment Amount:</strong> \xA3\${(currentSettings.investmentAmount || 10000).toFixed(2)}</p>
+                                    <p style="margin: 2px 0;"><strong>Dealing Charge:</strong> \${dealingCharge > 0 ? '\xA3' + dealingCharge.toFixed(2) : 'None'}</p>
+                                    <p style="margin: 2px 0;"><strong>Effective Investment:</strong> \xA3\${effectiveInvestment.toFixed(2)}</p>
+                                    <p style="margin: 2px 0;"><strong>Dirty Price:</strong> \xA3\${gilt.dirtyPrice.toFixed(6)} per \xA3100</p>
+                                    <p style="margin: 2px 0;"><strong>Units Owned:</strong> \${unitsOwned.toFixed(6)} (per \xA3100 nominal)</p>
+                                </div>
+                                <div>
+                                    <h5>Calculation Precision:</h5>
+                                    <p style="margin: 2px 0;"><strong>Time Calculation:</strong> Exact days / 365.25 for fractional years</p>
+                                    <p style="margin: 2px 0;"><strong>Cash Flow Timing:</strong> Actual semi-annual coupon dates</p>
+                                    <p style="margin: 2px 0;"><strong>Tax Calculations:</strong> 2-decimal rounding applied to all amounts</p>
+                                    <p style="margin: 2px 0;"><strong>IRR Convergence:</strong> 1e-7 tolerance (7 decimal places)</p>
+                                    <p style="margin: 2px 0;"><strong>Final IRR:</strong> \${gilt.afterTaxYield ? gilt.afterTaxYield.toFixed(6) + '%' : 'Not calculated'}</p>
+                                </div>
+                            </div>
+                            
+                            \${currentSettings.accountChargeEnabled ? \`
+                                <div style="margin: 10px 0; padding: 10px; background: #f8d7da; border-radius: 4px;">
+                                    <h5 style="color: #721c24;">Account Charges Integration:</h5>
+                                    <p style="margin: 2px 0;"><strong>Monthly Charge Rate:</strong> \${currentSettings.accountChargeRate}% annually (\${(currentSettings.accountChargeRate/12).toFixed(4)}% monthly)</p>
+                                    <p style="margin: 2px 0;"><strong>Maximum Monthly Charge:</strong> \xA3\${currentSettings.accountChargeMax.toFixed(2)}</p>
+                                    <p style="margin: 2px 0;"><strong>Gilt Price Convergence:</strong> Linear from \xA3\${gilt.dirtyPrice.toFixed(2)} to \xA3100.00 at maturity</p>
+                                    <p style="margin: 2px 0;"><strong>Charge Calculation:</strong> Monthly rate \xD7 gilt value at month-end (capped at maximum)</p>
+                                </div>
+                            \` : ''}
+                        </div>
+                    \`;
                     
                     // Generate payment schedule table including monthly account charges
-                    let scheduleHTML = '';
+                    let scheduleHTML = precisionDetails;
                     if (gilt.couponSchedule && gilt.couponSchedule.length > 0) {
                         // Use stored monthly account charges from unified function
                         let monthlyChargeSchedule = [];
@@ -6719,7 +6766,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-vP7d9K/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-PgUhyT/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6753,7 +6800,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-vP7d9K/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-PgUhyT/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
