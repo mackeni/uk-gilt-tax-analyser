@@ -1597,6 +1597,16 @@ export async function renderHomePage(request, env) {
                 const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge
                 const unitsOwned = getCachedComplexCalculation('unitsOwned_' + dealingCharge + '_' + investmentAmount, calculateUnitsOwned, effectiveInvestmentAmount, gilt.dirtyPrice);
                 
+                // ALWAYS generate coupon schedule to ensure gilt object has required properties
+                if (!gilt.couponSchedule) {
+                    gilt.couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
+                }
+                
+                // ALWAYS generate account charges if enabled
+                if (currentSettings.accountChargeEnabled && !gilt.accountCharges) {
+                    gilt.accountCharges = calculateAccountCharges(gilt, unitsOwned);
+                }
+                
                 // Calculate after-tax yield using IRR method with caching (includes dealing charge)
                 const afterTaxYield = getCachedComplexCalculation('afterTaxIRR_' + dealingCharge + '_' + gilt.name, calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
                 
@@ -1629,9 +1639,8 @@ export async function renderHomePage(request, env) {
         }
         
         function calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate) {
-            // Generate detailed coupon schedule and calculate IRR
-            const couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
-            gilt.couponSchedule = couponSchedule; // Store for tooltips
+            // Use existing coupon schedule if available, otherwise generate it
+            const couponSchedule = gilt.couponSchedule || generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
             
             // Calculate initial investment INCLUDING dealing charge (if any)
             const dealingCharge = currentSettings.dealingCharge || 0;

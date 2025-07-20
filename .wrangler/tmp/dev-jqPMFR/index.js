@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-V7QQT3/checked-fetch.js
+// .wrangler/tmp/bundle-Rj4CUw/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-V7QQT3/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-Rj4CUw/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2846,11 +2846,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-V7QQT3/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-Rj4CUw/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-V7QQT3/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-Rj4CUw/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4847,6 +4847,16 @@ async function renderHomePage(request, env) {
                 const effectiveInvestmentAmount = investmentAmount - dealingCharge; // Reduce by dealing charge
                 const unitsOwned = getCachedComplexCalculation('unitsOwned_' + dealingCharge + '_' + investmentAmount, calculateUnitsOwned, effectiveInvestmentAmount, gilt.dirtyPrice);
                 
+                // ALWAYS generate coupon schedule to ensure gilt object has required properties
+                if (!gilt.couponSchedule) {
+                    gilt.couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
+                }
+                
+                // ALWAYS generate account charges if enabled
+                if (currentSettings.accountChargeEnabled && !gilt.accountCharges) {
+                    gilt.accountCharges = calculateAccountCharges(gilt, unitsOwned);
+                }
+                
                 // Calculate after-tax yield using IRR method with caching (includes dealing charge)
                 const afterTaxYield = getCachedComplexCalculation('afterTaxIRR_' + dealingCharge + '_' + gilt.name, calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
                 
@@ -4879,9 +4889,8 @@ async function renderHomePage(request, env) {
         }
         
         function calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate) {
-            // Generate detailed coupon schedule and calculate IRR
-            const couponSchedule = generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
-            gilt.couponSchedule = couponSchedule; // Store for tooltips
+            // Use existing coupon schedule if available, otherwise generate it
+            const couponSchedule = gilt.couponSchedule || generateCouponSchedule(gilt, unitsOwned, incomeTaxRate);
             
             // Calculate initial investment INCLUDING dealing charge (if any)
             const dealingCharge = currentSettings.dealingCharge || 0;
@@ -6703,7 +6712,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-V7QQT3/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-Rj4CUw/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -6737,7 +6746,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-V7QQT3/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-Rj4CUw/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
