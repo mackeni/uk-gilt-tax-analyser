@@ -124,7 +124,7 @@ export class GiltDataFetcher {
       data: fallbackData,
       dataSource: 'fallback',
       lastUpdated: new Date('2025-07-19').toISOString(),
-      priceDate: this.getLastTradingDate()
+      priceDate: '18/07/2025'
     };
   }
 
@@ -132,16 +132,24 @@ export class GiltDataFetcher {
     const today = new Date();
     const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
     
-    let tradingDate = new Date(today);
+    let lastTradingDay = new Date(today);
     
-    if (dayOfWeek === 0) { // Sunday
-      tradingDate.setDate(today.getDate() - 2); // Go to Friday
-    } else if (dayOfWeek === 6) { // Saturday
-      tradingDate.setDate(today.getDate() - 1); // Go to Friday
+    if (dayOfWeek === 0) { // Sunday - go back to Friday
+      lastTradingDay.setDate(today.getDate() - 2);
+    } else if (dayOfWeek === 6) { // Saturday - go back to Friday  
+      lastTradingDay.setDate(today.getDate() - 1);
+    } else if (dayOfWeek === 1) { // Monday - go back to Friday
+      lastTradingDay.setDate(today.getDate() - 3);
+    } else {
+      // Tuesday-Friday - go back to previous day
+      lastTradingDay.setDate(today.getDate() - 1);
     }
-    // For Monday-Friday, use today as trading date
     
-    return tradingDate.toLocaleDateString('en-GB');
+    return lastTradingDay.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric'
+    });
   }
   
   async addCouponPaymentDates(giltData) {
