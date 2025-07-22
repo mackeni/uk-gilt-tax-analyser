@@ -591,15 +591,9 @@ This migration maintains all original functionality while dramatically improving
 
 **Dynamic Date Calculation Fix:**
 - **Corrected Trading Date Logic**: Fixed date calculation to properly show previous business day pricing
-- **Tuesday Logic Fixed**: Now correctly shows Monday's prices when current day is Tuesday  
+- **Monday Logic Fixed**: Now correctly shows Monday's prices when current day is Tuesday
 - **Weekend Handling**: Properly handles weekends by showing Friday's prices on Saturday/Sunday/Monday
 - **Real-Time Date Updates**: Price dates now dynamically calculate based on current day instead of hardcoded values
-
-**Updated Market Pricing for July 22, 2025:**
-- **Current Market Yields**: Updated gilt prices to reflect higher yields (10-year at 4.63%, 30-year at 5.49%)
-- **Lower Bond Prices**: Adjusted all gilt clean prices downward to reflect current yield environment
-- **Market-Accurate Data**: Prices now properly reflect rising yield conditions across all maturities
-- **Yield Curve Adjustment**: Short-term yields 3.8-4.1%, medium-term 4.3-4.9%, long-term 5.1-5.3%
 
 **Content-Type Charset Standards Compliance:**
 - **Fixed Meta Charset**: Updated all HTML meta charset from "UTF-8" to "utf-8" for standards compliance
