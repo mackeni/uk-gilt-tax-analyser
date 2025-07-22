@@ -117,19 +117,28 @@ export function findNextCouponDate(maturityDate, referenceDate = null) {
   return new Date(maturityDate);
 }
 
-export function calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
+export function calculateAccruedInterest(couponRate, maturityDate, settlementDate = null) {
   if (!settlementDate) {
     settlementDate = new Date();
   }
   
-  const lastPayment = new Date(lastPaymentDate);
-  const daysSinceLastPayment = Math.floor((settlementDate - lastPayment) / (1000 * 60 * 60 * 24));
+  // Find the last and next coupon payment dates
+  const lastPaymentDate = findLastCouponDate(maturityDate, settlementDate);
+  const nextPaymentDate = findNextCouponDate(maturityDate, settlementDate);
   
-  // UK gilts use Actual/Actual day count convention with semi-annual payments
-  const daysInSemiAnnualPeriod = 184; // Approximate semi-annual period
-  const accruedFraction = daysSinceLastPayment / daysInSemiAnnualPeriod;
+  if (!lastPaymentDate || !nextPaymentDate) {
+    return 0;
+  }
   
-  // Return semi-annual coupon amount multiplied by accrued fraction
+  // Calculate actual days using proper Actual/Actual day count convention
+  const daysSinceLastPayment = Math.floor((settlementDate - lastPaymentDate) / (1000 * 60 * 60 * 24));
+  const totalDaysInPeriod = Math.floor((nextPaymentDate - lastPaymentDate) / (1000 * 60 * 60 * 24));
+  
+  // UK gilts use Actual/Actual day count - exact days between actual coupon dates
+  const accruedFraction = daysSinceLastPayment / totalDaysInPeriod;
+  
+  // Return semi-annual coupon amount (couponRate/2) multiplied by accrued fraction
+  // This gives accrued interest as £ per £100 nominal
   return (couponRate / 2) * accruedFraction;
 }
 

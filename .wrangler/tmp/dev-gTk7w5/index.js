@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-98hj6k/checked-fetch.js
+// .wrangler/tmp/bundle-tbzNjB/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-98hj6k/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-tbzNjB/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2599,14 +2599,18 @@ function findNextCouponDate(maturityDate, referenceDate = null) {
   }
   return new Date(maturityDate);
 }
-function calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
+function calculateAccruedInterest(couponRate, maturityDate, settlementDate = null) {
   if (!settlementDate) {
     settlementDate = /* @__PURE__ */ new Date();
   }
-  const lastPayment = new Date(lastPaymentDate);
-  const daysSinceLastPayment = Math.floor((settlementDate - lastPayment) / (1e3 * 60 * 60 * 24));
-  const daysInSemiAnnualPeriod = 184;
-  const accruedFraction = daysSinceLastPayment / daysInSemiAnnualPeriod;
+  const lastPaymentDate = findLastCouponDate(maturityDate, settlementDate);
+  const nextPaymentDate = findNextCouponDate(maturityDate, settlementDate);
+  if (!lastPaymentDate || !nextPaymentDate) {
+    return 0;
+  }
+  const daysSinceLastPayment = Math.floor((settlementDate - lastPaymentDate) / (1e3 * 60 * 60 * 24));
+  const totalDaysInPeriod = Math.floor((nextPaymentDate - lastPaymentDate) / (1e3 * 60 * 60 * 24));
+  const accruedFraction = daysSinceLastPayment / totalDaysInPeriod;
   return couponRate / 2 * accruedFraction;
 }
 function getTaxRateInfo(taxBracket) {
@@ -2757,11 +2761,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-98hj6k/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-tbzNjB/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-98hj6k/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-tbzNjB/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -4315,9 +4319,9 @@ async function renderHomePage(request, env) {
             return utils.calculateYearsToMaturity(maturityDate, referenceDate);
         }
         
-        function calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate) {
+        function calculateAccruedInterest(couponRate, maturityDate, settlementDate) {
             if (!utilsLoaded) throw new Error('Utils not loaded yet');
-            return utils.calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate);
+            return utils.calculateAccruedInterest(couponRate, maturityDate, settlementDate);
         }
         
         function calculateDirtyPrice(cleanPrice, accruedInterest) {
@@ -4861,8 +4865,7 @@ async function renderHomePage(request, env) {
                 const yearsToMaturity = getCachedComplexCalculation('fallbackYears', calculateYearsToMaturity, gilt.maturityDate, today);
                 
                 // Calculate basic accrued interest using consolidated function with caching
-                const lastPaymentDate = getCachedComplexCalculation('fallbackLastCoupon', findLastCouponDate, gilt.maturityDate, today);
-                const accruedInterest = getCachedComplexCalculation('fallbackAccrued', calculateAccruedInterest, gilt.couponRate, lastPaymentDate, today);
+                const accruedInterest = getCachedComplexCalculation('fallbackAccrued', calculateAccruedInterest, gilt.couponRate, gilt.maturityDate, today);
                 const dirtyPrice = getCachedComplexCalculation('fallbackDirty', calculateDirtyPrice, gilt.cleanPrice, accruedInterest);
                 
                 const processedGilt = {
@@ -7086,7 +7089,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-98hj6k/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-tbzNjB/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -7120,7 +7123,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-98hj6k/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-tbzNjB/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

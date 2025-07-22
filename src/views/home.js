@@ -991,9 +991,9 @@ export async function renderHomePage(request, env) {
             return utils.calculateYearsToMaturity(maturityDate, referenceDate);
         }
         
-        function calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate) {
+        function calculateAccruedInterest(couponRate, maturityDate, settlementDate) {
             if (!utilsLoaded) throw new Error('Utils not loaded yet');
-            return utils.calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate);
+            return utils.calculateAccruedInterest(couponRate, maturityDate, settlementDate);
         }
         
         function calculateDirtyPrice(cleanPrice, accruedInterest) {
@@ -1537,8 +1537,7 @@ export async function renderHomePage(request, env) {
                 const yearsToMaturity = getCachedComplexCalculation('fallbackYears', calculateYearsToMaturity, gilt.maturityDate, today);
                 
                 // Calculate basic accrued interest using consolidated function with caching
-                const lastPaymentDate = getCachedComplexCalculation('fallbackLastCoupon', findLastCouponDate, gilt.maturityDate, today);
-                const accruedInterest = getCachedComplexCalculation('fallbackAccrued', calculateAccruedInterest, gilt.couponRate, lastPaymentDate, today);
+                const accruedInterest = getCachedComplexCalculation('fallbackAccrued', calculateAccruedInterest, gilt.couponRate, gilt.maturityDate, today);
                 const dirtyPrice = getCachedComplexCalculation('fallbackDirty', calculateDirtyPrice, gilt.cleanPrice, accruedInterest);
                 
                 const processedGilt = {
