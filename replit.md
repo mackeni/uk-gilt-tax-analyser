@@ -587,7 +587,13 @@ This migration maintains all original functionality while dramatically improving
 
 ### July 20, 2025 - Modern Security Headers with CSP Frame-Ancestors Migration
 
-**Version ID**: 697121a4-3119-4d03-be38-e69fb943f1be
+**Version ID**: 5c554f4f-1f7f-4ccf-b96f-769ac7615094
+
+**Dynamic Date Calculation Fix:**
+- **Corrected Trading Date Logic**: Fixed date calculation to properly show previous business day pricing
+- **Monday Logic Fixed**: Now correctly shows Monday's prices when current day is Tuesday
+- **Weekend Handling**: Properly handles weekends by showing Friday's prices on Saturday/Sunday/Monday
+- **Real-Time Date Updates**: Price dates now dynamically calculate based on current day instead of hardcoded values
 
 **Content-Type Charset Standards Compliance:**
 - **Fixed Meta Charset**: Updated all HTML meta charset from "UTF-8" to "utf-8" for standards compliance

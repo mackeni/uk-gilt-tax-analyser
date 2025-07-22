@@ -124,7 +124,7 @@ export class GiltDataFetcher {
       data: fallbackData,
       dataSource: 'fallback',
       lastUpdated: new Date('2025-07-19').toISOString(),
-      priceDate: '18/07/2025'
+      priceDate: this.getLastTradingDate()
     };
   }
 
