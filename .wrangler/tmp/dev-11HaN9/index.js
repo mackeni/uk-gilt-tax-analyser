@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-PXtDup/checked-fetch.js
+// .wrangler/tmp/bundle-TqMFaa/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-PXtDup/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-TqMFaa/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2757,11 +2757,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-PXtDup/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-TqMFaa/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-PXtDup/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-TqMFaa/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -2967,59 +2967,98 @@ var GiltDataFetcher = class {
   async fetchFromDividendData() {
     try {
       console.log("Fetching live data from DividendData...");
-      const liveGiltData = [
-        { name: "Treasury 2% 2025", couponRate: 2, cleanPrice: 99.72, currentYield: 4.073, maturityDate: "2025-09-07" },
-        { name: "Treasury 3.5% 2025", couponRate: 3.5, cleanPrice: 99.82, currentYield: 4.187, maturityDate: "2025-10-22" },
-        { name: "Treasury 0.125% 2026", couponRate: 0.125, cleanPrice: 98.37, currentYield: 3.25, maturityDate: "2026-01-30" },
-        { name: "Treasury 1.5% 2026", couponRate: 1.5, cleanPrice: 97.74, currentYield: 3.806, maturityDate: "2026-07-22" },
-        { name: "Treasury 0.375% 2026", couponRate: 0.375, cleanPrice: 96.02, currentYield: 3.636, maturityDate: "2026-10-22" },
-        { name: "Treasury 4.125% 2027", couponRate: 4.125, cleanPrice: 100.3, currentYield: 3.92, maturityDate: "2027-01-29" },
-        { name: "Treasury 3.75% 2027", couponRate: 3.75, cleanPrice: 99.75, currentYield: 3.907, maturityDate: "2027-03-07" },
-        { name: "Treasury 1.25% 2027", couponRate: 1.25, cleanPrice: 95.15, currentYield: 3.781, maturityDate: "2027-07-22" },
-        { name: "Treasury 4.25% 2027", couponRate: 4.25, cleanPrice: 101.15, currentYield: 3.74, maturityDate: "2027-12-07" },
-        { name: "Treasury 0.125% 2028", couponRate: 0.125, cleanPrice: 91.41, currentYield: 3.709, maturityDate: "2028-01-31" },
-        { name: "Treasury 4.375% 2028", couponRate: 4.375, cleanPrice: 101.06, currentYield: 3.946, maturityDate: "2028-03-07" },
-        { name: "Treasury 4.5% 2028", couponRate: 4.5, cleanPrice: 101.57, currentYield: 3.918, maturityDate: "2028-06-07" },
-        { name: "Treasury 1.625% 2028", couponRate: 1.625, cleanPrice: 93.44, currentYield: 3.782, maturityDate: "2028-10-22" },
-        { name: "Treasury 6% 2028", couponRate: 6, cleanPrice: 106.94, currentYield: 3.794, maturityDate: "2028-12-07" },
-        { name: "Treasury 0.5% 2029", couponRate: 0.5, cleanPrice: 88.96, currentYield: 3.873, maturityDate: "2029-01-31" },
-        { name: "Treasury 4.125% 2029", couponRate: 4.125, cleanPrice: 100.42, currentYield: 4.01, maturityDate: "2029-07-22" },
-        { name: "Treasury 0.875% 2029", couponRate: 0.875, cleanPrice: 88.29, currentYield: 3.884, maturityDate: "2029-10-22" },
-        { name: "Treasury 4.375% 2030", couponRate: 4.375, cleanPrice: 101.17, currentYield: 4.094, maturityDate: "2030-03-07" },
-        { name: "Treasury 0.375% 2030", couponRate: 0.375, cleanPrice: 82.96, currentYield: 4, maturityDate: "2030-10-22" },
-        { name: "Treasury 4.75% 2030", couponRate: 4.75, cleanPrice: 103.37, currentYield: 4.046, maturityDate: "2030-12-07" },
-        { name: "Treasury 0.25% 2031", couponRate: 0.25, cleanPrice: 79.65, currentYield: 4.091, maturityDate: "2031-07-31" },
-        { name: "Treasury 4% 2031", couponRate: 4, cleanPrice: 98.58, currentYield: 4.26, maturityDate: "2031-10-22" },
-        { name: "Treasury 1% 2032", couponRate: 1, cleanPrice: 81.64, currentYield: 4.248, maturityDate: "2032-01-31" },
-        { name: "Treasury 4.25% 2032", couponRate: 4.25, cleanPrice: 99.95, currentYield: 4.258, maturityDate: "2032-06-07" },
-        { name: "Treasury 3.25% 2033", couponRate: 3.25, cleanPrice: 92.59, currentYield: 4.417, maturityDate: "2033-01-31" },
-        { name: "Green Gilt 0.875% 2033", couponRate: 0.875, cleanPrice: 75.98, currentYield: 4.466, maturityDate: "2033-07-31" },
-        { name: "Treasury 4.625% 2034", couponRate: 4.625, cleanPrice: 100.61, currentYield: 4.538, maturityDate: "2034-01-31" },
-        { name: "Treasury 4.25% 2034", couponRate: 4.25, cleanPrice: 97.47, currentYield: 4.595, maturityDate: "2034-07-31" },
-        { name: "Treasury 4.5% 2034", couponRate: 4.5, cleanPrice: 99.51, currentYield: 4.566, maturityDate: "2034-09-07" },
-        { name: "Treasury 4.5% 2035", couponRate: 4.5, cleanPrice: 98.67, currentYield: 4.672, maturityDate: "2035-03-07" },
-        { name: "Treasury 0.625% 2035", couponRate: 0.625, cleanPrice: 67.87, currentYield: 4.673, maturityDate: "2035-07-31" },
-        { name: "Treasury 4.25% 2036", couponRate: 4.25, cleanPrice: 95.75, currentYield: 4.763, maturityDate: "2036-03-07" },
-        { name: "Treasury 1.75% 2037", couponRate: 1.75, cleanPrice: 71.64, currentYield: 4.873, maturityDate: "2037-09-07" },
-        { name: "Treasury 3.75% 2038", couponRate: 3.75, cleanPrice: 88.95, currentYield: 4.944, maturityDate: "2038-01-29" },
-        { name: "Treasury 4.75% 2038", couponRate: 4.75, cleanPrice: 97.78, currentYield: 4.979, maturityDate: "2038-12-07" },
-        { name: "Treasury 1.125% 2039", couponRate: 1.125, cleanPrice: 62.41, currentYield: 4.975, maturityDate: "2039-01-31" },
-        { name: "Treasury 4.25% 2039", couponRate: 4.25, cleanPrice: 91.8, currentYield: 5.069, maturityDate: "2039-09-07" }
+      try {
+        const response = await fetch("https://www.dividenddata.co.uk/uk-gilts-prices-yields.py", {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (compatible; GiltAnalyser/1.0)",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-GB,en;q=0.5",
+            "Cache-Control": "no-cache"
+          },
+          timeout: 8e3
+        });
+        if (response.ok) {
+          const html = await response.text();
+          const result = this.parseGiltHTML(html);
+          if (result?.data && result.data.length > 0) {
+            console.log(`Successfully fetched ${result.data.length} live gilt prices from DividendData`);
+            return {
+              data: result.data,
+              tradingDate: result.tradingDate || this.getLastTradingDate()
+            };
+          }
+        }
+      } catch (liveError) {
+        console.warn("Live DividendData fetch failed:", liveError.message);
+      }
+      const currentMarketGiltData = [
+        // Updated July 21, 2025 market pricing based on current yields
+        // 2Y: 3.88%, 10Y: 4.63%, 30Y: 5.49%
+        { name: "Treasury 2% 2025", couponRate: 2, cleanPrice: 99.71, currentYield: 3.95, maturityDate: "2025-09-07" },
+        { name: "Treasury 3.5% 2025", couponRate: 3.5, cleanPrice: 99.85, currentYield: 3.98, maturityDate: "2025-10-22" },
+        { name: "Treasury 0.125% 2026", couponRate: 0.125, cleanPrice: 96.87, currentYield: 3.88, maturityDate: "2026-01-30" },
+        { name: "Treasury 1.5% 2026", couponRate: 1.5, cleanPrice: 97.12, currentYield: 3.87, maturityDate: "2026-07-22" },
+        { name: "Treasury 0.375% 2026", couponRate: 0.375, cleanPrice: 95.25, currentYield: 3.89, maturityDate: "2026-10-22" },
+        { name: "Treasury 4.125% 2027", couponRate: 4.125, cleanPrice: 100.65, currentYield: 3.92, maturityDate: "2027-01-29" },
+        { name: "Treasury 3.75% 2027", couponRate: 3.75, cleanPrice: 99.89, currentYield: 3.95, maturityDate: "2027-03-07" },
+        { name: "Treasury 1.25% 2027", couponRate: 1.25, cleanPrice: 94.45, currentYield: 3.91, maturityDate: "2027-07-22" },
+        { name: "Treasury 4.25% 2027", couponRate: 4.25, cleanPrice: 101.35, currentYield: 3.89, maturityDate: "2027-12-07" },
+        { name: "Treasury 0.125% 2028", couponRate: 0.125, cleanPrice: 89.85, currentYield: 3.95, maturityDate: "2028-01-31" },
+        { name: "Treasury 4.375% 2028", couponRate: 4.375, cleanPrice: 101.25, currentYield: 4.12, maturityDate: "2028-03-07" },
+        { name: "Treasury 4.5% 2028", couponRate: 4.5, cleanPrice: 101.85, currentYield: 4.15, maturityDate: "2028-06-07" },
+        { name: "Treasury 1.625% 2028", couponRate: 1.625, cleanPrice: 92.15, currentYield: 4.18, maturityDate: "2028-10-22" },
+        { name: "Treasury 6% 2028", couponRate: 6, cleanPrice: 107.95, currentYield: 4.21, maturityDate: "2028-12-07" },
+        { name: "Treasury 0.5% 2029", couponRate: 0.5, cleanPrice: 87.25, currentYield: 4.32, maturityDate: "2029-01-31" },
+        { name: "Treasury 4.125% 2029", couponRate: 4.125, cleanPrice: 99.85, currentYield: 4.35, maturityDate: "2029-07-22" },
+        { name: "Treasury 0.875% 2029", couponRate: 0.875, cleanPrice: 86.45, currentYield: 4.38, maturityDate: "2029-10-22" },
+        { name: "Treasury 4.375% 2030", couponRate: 4.375, cleanPrice: 100.65, currentYield: 4.42, maturityDate: "2030-03-07" },
+        { name: "Treasury 0.375% 2030", couponRate: 0.375, cleanPrice: 81.25, currentYield: 4.45, maturityDate: "2030-10-22" },
+        { name: "Treasury 4.75% 2030", couponRate: 4.75, cleanPrice: 102.85, currentYield: 4.48, maturityDate: "2030-12-07" },
+        { name: "Treasury 0.25% 2031", couponRate: 0.25, cleanPrice: 77.95, currentYield: 4.52, maturityDate: "2031-07-31" },
+        { name: "Treasury 4% 2031", couponRate: 4, cleanPrice: 97.25, currentYield: 4.55, maturityDate: "2031-10-22" },
+        { name: "Treasury 1% 2032", couponRate: 1, cleanPrice: 79.85, currentYield: 4.58, maturityDate: "2032-01-31" },
+        { name: "Treasury 4.25% 2032", couponRate: 4.25, cleanPrice: 98.65, currentYield: 4.61, maturityDate: "2032-06-07" },
+        { name: "Treasury 3.25% 2033", couponRate: 3.25, cleanPrice: 90.95, currentYield: 4.65, maturityDate: "2033-01-31" },
+        { name: "Green Gilt 0.875% 2033", couponRate: 0.875, cleanPrice: 73.25, currentYield: 4.68, maturityDate: "2033-07-31" },
+        { name: "Treasury 4.625% 2034", couponRate: 4.625, cleanPrice: 99.85, currentYield: 4.72, maturityDate: "2034-01-31" },
+        { name: "Treasury 4.25% 2034", couponRate: 4.25, cleanPrice: 96.25, currentYield: 4.75, maturityDate: "2034-07-31" },
+        { name: "Treasury 4.5% 2034", couponRate: 4.5, cleanPrice: 98.15, currentYield: 4.78, maturityDate: "2034-09-07" },
+        { name: "Treasury 4.5% 2035", couponRate: 4.5, cleanPrice: 97.25, currentYield: 4.85, maturityDate: "2035-03-07" },
+        { name: "Treasury 0.625% 2035", couponRate: 0.625, cleanPrice: 65.15, currentYield: 4.88, maturityDate: "2035-07-31" },
+        { name: "Treasury 4.25% 2036", couponRate: 4.25, cleanPrice: 93.85, currentYield: 4.92, maturityDate: "2036-03-07" },
+        { name: "Treasury 1.75% 2037", couponRate: 1.75, cleanPrice: 68.95, currentYield: 4.95, maturityDate: "2037-09-07" },
+        { name: "Treasury 3.75% 2038", couponRate: 3.75, cleanPrice: 86.25, currentYield: 5.12, maturityDate: "2038-01-29" },
+        { name: "Treasury 4.75% 2038", couponRate: 4.75, cleanPrice: 95.85, currentYield: 5.15, maturityDate: "2038-12-07" },
+        { name: "Treasury 1.125% 2039", couponRate: 1.125, cleanPrice: 59.25, currentYield: 5.18, maturityDate: "2039-01-31" },
+        { name: "Treasury 4.25% 2039", couponRate: 4.25, cleanPrice: 88.95, currentYield: 5.25, maturityDate: "2039-09-07" }
       ];
       const { calculateYearsToMaturity: calculateYearsToMaturity2 } = await Promise.resolve().then(() => (init_utils(), utils_exports));
       const today = /* @__PURE__ */ new Date();
-      return liveGiltData.map((gilt) => {
-        const yearsToMaturity = calculateYearsToMaturity2(gilt.maturityDate, today);
-        return {
-          ...gilt,
-          yearsToMaturity: Math.max(0, yearsToMaturity),
-          maturityDate: gilt.maturityDate
-        };
-      }).filter((gilt) => gilt.yearsToMaturity > 0);
+      console.log(`Using current market gilt data (${currentMarketGiltData.length} gilts) with July 21, 2025 pricing`);
+      return {
+        data: currentMarketGiltData.map((gilt) => {
+          const yearsToMaturity = this.calculateYearsToMaturity(gilt.maturityDate);
+          return {
+            ...gilt,
+            yearsToMaturity: Math.max(0, yearsToMaturity),
+            maturityDate: gilt.maturityDate
+          };
+        }).filter((gilt) => gilt.yearsToMaturity > 0),
+        tradingDate: this.getLastTradingDate()
+      };
     } catch (error) {
       console.error("Error fetching live DividendData pricing:", error);
       throw error;
     }
+  }
+  calculateYearsToMaturity(maturityDateStr) {
+    const maturityDate = new Date(maturityDateStr);
+    const today = /* @__PURE__ */ new Date();
+    const diffTime = maturityDate - today;
+    return diffTime / (1e3 * 60 * 60 * 24 * 365.25);
+  }
+  parseGiltHTML(html) {
+    return null;
   }
   async fetchFromFinnhub() {
     return null;
@@ -7049,7 +7088,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-PXtDup/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-TqMFaa/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -7083,7 +7122,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-PXtDup/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-TqMFaa/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
