@@ -705,6 +705,15 @@ This migration maintains all original functionality while dramatically improving
 - **Authentic Price Data**: All 37 gilts use real market prices from July 18, 2025 close-of-business data
 - **Daily Refresh Ready**: Architecture supports daily data refresh when API access is restored
 
+### July 24, 2025 - DividendData Access Blocked and Date Correction
+
+**Current Status**: DividendData is blocking automated access with 403 Forbidden errors
+- **Live Data Unavailable**: DividendData website returns 403 Forbidden for automated requests
+- **Static Data Active**: System using authentic market data from July 21, 2025 close-of-business
+- **Price Date Corrected**: Fixed date display to show accurate data capture date (21/07/2025)
+- **Comprehensive Coverage**: Still provides all 37 UK government bonds with authentic pricing
+- **Data Source Transparency**: Clear indication that static data is being used when live sources unavailable
+
 ### July 20, 2025 - Daily Caching System Implementation
 
 **Version ID**: c22303b3-9b5b-4f9e-bd22-951ee3091d03

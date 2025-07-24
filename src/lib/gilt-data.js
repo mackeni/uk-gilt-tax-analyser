@@ -129,27 +129,9 @@ export class GiltDataFetcher {
   }
 
   getLastTradingDate() {
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-    
-    let lastTradingDay = new Date(today);
-    
-    if (dayOfWeek === 0) { // Sunday - go back to Friday
-      lastTradingDay.setDate(today.getDate() - 2);
-    } else if (dayOfWeek === 6) { // Saturday - go back to Friday  
-      lastTradingDay.setDate(today.getDate() - 1);
-    } else if (dayOfWeek === 1) { // Monday - go back to Friday
-      lastTradingDay.setDate(today.getDate() - 3);
-    } else {
-      // Tuesday-Friday - go back to previous day
-      lastTradingDay.setDate(today.getDate() - 1);
-    }
-    
-    return lastTradingDay.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit', 
-      year: 'numeric'
-    });
+    // Since we're using static data from July 21, 2025 close-of-business
+    // Return the actual date when this data was captured
+    return '21/07/2025';
   }
   
   async addCouponPaymentDates(giltData) {
