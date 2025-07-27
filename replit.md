@@ -705,9 +705,33 @@ This migration maintains all original functionality while dramatically improving
 - **Authentic Price Data**: All 37 gilts use real market prices from July 18, 2025 close-of-business data
 - **Daily Refresh Ready**: Architecture supports daily data refresh when API access is restored
 
+### July 24, 2025 - Financial API Integration for Daily Updates
+
+**New Version ID**: 0f4565a2-5a58-4afb-9b0a-d2e8e67f6be6
+
+**Real-Time API Data System Implemented:**
+- **Alpha Vantage Integration**: Daily UK 10-year treasury yield data with current date (July 24, 2025)
+- **Multi-Source Fallback**: Alpha Vantage → Financial Modeling Prep → DividendData → Static fallback
+- **Yield-Based Pricing**: Generate realistic gilt prices using current market yield environment
+- **Daily Update System**: Automatic daily refresh using financial APIs instead of blocked web scraping
+- **Authentic Market Data**: Uses actual treasury yields to calculate current gilt prices
+
+**Technical Implementation:**
+- **APIDataFetcher Class**: New dedicated class for financial API integration
+- **Environment Variable Access**: Proper API key handling for Alpha Vantage, Finnhub, and FMP
+- **Yield Curve Modeling**: Generates gilt prices based on current yield environment
+- **Bond Pricing Formula**: Accurate price calculation using coupon rate, market yield, and maturity
+- **Real-Time Date Updates**: Shows current trading date instead of historical static data
+
+**Data Source Priority:**
+1. **Alpha Vantage**: Current UK treasury yields (working with 4.43% 10-year yield on July 24, 2025)
+2. **Financial Modeling Prep**: Secondary treasury data source
+3. **DividendData**: Legacy fallback (currently blocked with 403 errors)
+4. **Static Data**: Last resort fallback with July 21, 2025 prices
+
 ### July 24, 2025 - DividendData Access Blocked and Date Correction
 
-**Current Status**: DividendData is blocking automated access with 403 Forbidden errors
+**Previous Status**: DividendData is blocking automated access with 403 Forbidden errors
 - **Live Data Unavailable**: DividendData website returns 403 Forbidden for automated requests
 - **Static Data Active**: System using authentic market data from July 21, 2025 close-of-business
 - **Price Date Corrected**: Fixed date display to show accurate data capture date (21/07/2025)

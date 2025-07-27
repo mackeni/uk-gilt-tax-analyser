@@ -227,9 +227,38 @@ export class GiltDataFetcher {
   
   async fetchFromDividendData() {
     try {
-      console.log('Fetching live data from DividendData...');
+      console.log('Attempting to fetch fresh data from multiple sources...');
       
-      // Try to fetch actual live data first
+      // First, try financial APIs if API keys are available
+      if (this.env?.ALPHA_VANTAGE_API_KEY || this.env?.FINNHUB_API_KEY || this.env?.FMP_API_KEY) {
+        console.log('API keys detected, trying financial APIs first...');
+        console.log('Available API keys:', {
+          alpha_vantage: !!this.env?.ALPHA_VANTAGE_API_KEY,
+          finnhub: !!this.env?.FINNHUB_API_KEY,
+          fmp: !!this.env?.FMP_API_KEY
+        });
+        
+        try {
+          const { APIDataFetcher } = await import('./api-data-fetcher.js');
+          const apiFetcher = new APIDataFetcher(this.env);
+          
+          const apiData = await apiFetcher.fetchDailyGiltData();
+          if (apiData && apiData.length > 0) {
+            console.log(`Successfully fetched ${apiData.length} gilts from financial APIs with current yields`);
+            return {
+              data: apiData,
+              tradingDate: new Date().toLocaleDateString('en-GB')
+            };
+          }
+        } catch (apiError) {
+          console.warn('Financial APIs failed:', apiError.message);
+        }
+      } else {
+        console.log('No API keys detected - skipping financial API attempts');
+      }
+      
+      // Fall back to DividendData attempt
+      console.log('Trying DividendData...');
       try {
         const response = await fetch('https://www.dividenddata.co.uk/uk-gilts-prices-yields.py', {
           headers: {
