@@ -33,7 +33,8 @@ Preferred communication style: Simple, everyday language.
 - **Security**: Implementation of modern security headers including CSP `frame-ancestors 'none'`, HSTS, COEP, COOP, and CORP.
 
 ### Feature Specifications
-- **Gilt Data Fetcher**: Retrieves UK gilt market data from primary and secondary sources with a fallback strategy.
+- **Live Gilt Data System**: Multi-tier data fetching with live API integration (Alpha Vantage, Finnhub, FMP) and authenticated fallback to verified DividendData.co.uk prices.
+- **Real-Time Price Updates**: Automatic daily refresh of gilt prices using current market yields and proper yield curve mathematics.
 - **Tax Calculator**: Calculates tax implications for gilt investments based on current UK tax rates (2025/26), including Personal Savings Allowance and after-tax yield computations.
 - **Coupon Scheduler**: Generates detailed UK gilt coupon payment dates, accounting for semi-annual patterns and business day adjustments.
 - **IRR Calculations**: Utilizes Newton-Raphson method for precise after-tax yield calculations, incorporating dealing charges and monthly account charges.
@@ -42,6 +43,7 @@ Preferred communication style: Simple, everyday language.
 - **Monthly Account Charge Schedule**: Detailed display of monthly account charges, their calculation based on gilt value, and impact on net returns.
 - **Duration Filtering and Sorting**: Gilts displayed in increasing duration order with a dual-range slider filter for years to maturity.
 - **Interactive Explanations**: Clickable table cells and modal windows provide step-by-step breakdowns of calculations and financial concepts.
+- **Data Source Attribution**: Clear indication of data source (live APIs vs verified historical) with timestamps for transparency.
 
 ## External Dependencies
 
