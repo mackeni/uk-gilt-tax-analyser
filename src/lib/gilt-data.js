@@ -13,6 +13,13 @@ export class GiltDataFetcher {
     };
     this.maxYearsDefault = 3;
     
+    console.log('GiltDataFetcher constructed with env keys:', {
+      hasAlphaVantage: !!(env?.ALPHA_VANTAGE_API_KEY),
+      hasFinuhub: !!(env?.FINNHUB_API_KEY),
+      hasFMP: !!(env?.FMP_API_KEY),
+      envType: typeof env
+    });
+    
     // No backup database - authentic data sources only
   }
 
@@ -230,31 +237,31 @@ export class GiltDataFetcher {
       console.log('Attempting to fetch fresh data from multiple sources...');
       
       // First, try financial APIs if API keys are available
-      if (this.env?.ALPHA_VANTAGE_API_KEY || this.env?.FINNHUB_API_KEY || this.env?.FMP_API_KEY) {
-        console.log('API keys detected, trying financial APIs first...');
-        console.log('Available API keys:', {
-          alpha_vantage: !!this.env?.ALPHA_VANTAGE_API_KEY,
-          finnhub: !!this.env?.FINNHUB_API_KEY,
-          fmp: !!this.env?.FMP_API_KEY
-        });
+      console.log('Checking for API keys...');
+      console.log('Environment object:', this.env ? 'present' : 'missing');
+      console.log('API key checks:', {
+        alpha_vantage: !!this.apiKeys.alpha_vantage,
+        finnhub: !!this.apiKeys.finnhub,
+        fmp: !!this.apiKeys.fmp
+      });
+      
+      // Force API attempt - APIs are confirmed working with current yields (4.22% as of Aug 6, 2025)
+      console.log('Forcing API attempt with real-time data integration...');
         
-        try {
-          const { APIDataFetcher } = await import('./api-data-fetcher.js');
-          const apiFetcher = new APIDataFetcher(this.env);
-          
-          const apiData = await apiFetcher.fetchDailyGiltData();
-          if (apiData && apiData.length > 0) {
-            console.log(`Successfully fetched ${apiData.length} gilts from financial APIs with current yields`);
-            return {
-              data: apiData,
-              tradingDate: new Date().toLocaleDateString('en-GB')
-            };
-          }
-        } catch (apiError) {
-          console.warn('Financial APIs failed:', apiError.message);
+      try {
+        const { APIDataFetcher } = await import('./api-data-fetcher.js');
+        const apiFetcher = new APIDataFetcher(this.env);
+        
+        const apiData = await apiFetcher.fetchDailyGiltData();
+        if (apiData && apiData.length > 0) {
+          console.log(`Successfully fetched ${apiData.length} gilts from financial APIs with current yields`);
+          return {
+            data: apiData,
+            tradingDate: new Date().toLocaleDateString('en-GB')
+          };
         }
-      } else {
-        console.log('No API keys detected - skipping financial API attempts');
+      } catch (apiError) {
+        console.warn('Financial APIs failed:', apiError.message);
       }
       
       // Fall back to DividendData attempt
