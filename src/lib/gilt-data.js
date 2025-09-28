@@ -255,9 +255,11 @@ export class GiltDataFetcher {
         const apiData = await apiFetcher.fetchDailyGiltData();
         if (apiData && apiData.length > 0) {
           console.log(`Successfully fetched ${apiData.length} gilts from financial APIs with current yields`);
+          // Extract the actual data date from the static data
+          const dataDate = apiData[0]?.priceDate || '08/08/2025';
           return {
             data: apiData,
-            tradingDate: new Date().toLocaleDateString('en-GB')
+            tradingDate: dataDate
           };
         }
       } catch (apiError) {

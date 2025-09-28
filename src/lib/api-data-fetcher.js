@@ -20,7 +20,8 @@ export class APIDataFetcher {
     
     // Fall back to verified DividendData prices
     console.log('Using verified DividendData.co.uk prices (August 8, 2025)');
-    return this.getDividendDataPrices();
+    const staticData = this.getDividendDataPrices();
+    return staticData;
   }
 
   async attemptLiveDataFetch() {
@@ -197,7 +198,7 @@ export class APIDataFetcher {
     // This data comes directly from verified UK market sources
     console.log('Loading REAL gilt prices from DividendData.co.uk (August 8, 2025)...');
     
-    return [
+    const staticData = [
       // Real market data from DividendData as of August 8, 2025
       { name: 'Treasury 2% 2025', couponRate: 2.0, maturityDate: '2025-09-07', cleanPrice: 99.85, currentYield: 3.844, dataSource: 'DividendData.co.uk', authentic: true },
       { name: 'Treasury 3.5% 2025', couponRate: 3.5, maturityDate: '2025-10-22', cleanPrice: 99.88, currentYield: 4.073, dataSource: 'DividendData.co.uk', authentic: true },
@@ -237,6 +238,15 @@ export class APIDataFetcher {
       { name: 'Treasury 1.125% 2039', couponRate: 1.125, maturityDate: '2039-01-31', cleanPrice: 63.35, currentYield: 4.864, dataSource: 'DividendData.co.uk', authentic: true },
       { name: 'Treasury 4.25% 2039', couponRate: 4.25, maturityDate: '2039-09-07', cleanPrice: 92.90, currentYield: 4.956, dataSource: 'DividendData.co.uk', authentic: true }
     ];
+    
+    // Mark each item with correct metadata including the actual data date
+    return staticData.map(gilt => ({
+      ...gilt,
+      priceDate: '08/08/2025',  // Actual date when this data was captured
+      dataSource: 'DividendData.co.uk (Static)',
+      authentic: true,
+      timestamp: '2025-08-08T16:00:00.000Z'  // Close of business August 8, 2025
+    }));
   }
 
   async fetchAlphaVantageData() {
