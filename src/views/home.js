@@ -962,9 +962,8 @@ export async function renderHomePage(request, env) {
                 return 'N/A';
             }
             
-            // Format with max 3 decimal places, removing trailing zeros
-            const formatted = rate.toFixed(3).replace(/\\.?0+$/, '');
-            return formatted + '%';
+            // Format as decimal percentage with 3 decimal places (no trailing zero removal)
+            return rate.toFixed(3) + '%';
         }
         
         function getCurrentTaxRate() {
