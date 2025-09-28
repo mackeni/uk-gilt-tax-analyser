@@ -269,6 +269,30 @@ export class GiltDataFetcher {
       // Fall back to DividendData attempt
       console.log('Trying DividendData...');
       try {
+        // First try the dynamic data endpoint
+        const dataResponse = await fetch('https://www.dividenddata.co.uk/uk-gilts-prices-yields.py?showCompDetails=999&sort=0&order=0', {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; GiltAnalyser/1.0)',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-GB,en;q=0.5',
+            'Cache-Control': 'no-cache'
+          },
+          timeout: 8000
+        });
+        
+        if (dataResponse.ok) {
+          const dataHtml = await dataResponse.text();
+          const result = this.parseGiltHTML(dataHtml);
+          if (result?.data && result.data.length > 0) {
+            console.log(`Successfully fetched ${result.data.length} live gilt prices from DividendData`);
+            return {
+              data: result.data,
+              tradingDate: result.tradingDate || this.getTodaysDate()
+            };
+          }
+        }
+        
+        // Fallback to main page
         const response = await fetch('https://www.dividenddata.co.uk/uk-gilts-prices-yields.py', {
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; GiltAnalyser/1.0)',
@@ -367,9 +391,136 @@ export class GiltDataFetcher {
   }
 
   parseGiltHTML(html) {
-    // This would parse real HTML from DividendData
-    // For now, return null to trigger fallback to current market data
+    try {
+      const gilts = [];
+      let tradingDate = this.getTodaysDate();
+      
+      // Check for "Last updated" date in the HTML
+      const dateMatch = html.match(/Last updated:\s*(\d{1,2}\s+\w+\s+\d{4})/i);
+      if (dateMatch) {
+        tradingDate = this.convertDateFormat(dateMatch[1]);
+      }
+      
+      // Parse HTML table rows containing gilt data
+      const rowRegex = /<tr[^>]*data-index="(\d+)"[^>]*>(.*?)<\/tr>/gs;
+      let rowMatch;
+      
+      while ((rowMatch = rowRegex.exec(html)) !== null) {
+        const rowHtml = rowMatch[2];
+        
+        // Extract data from table cells
+        const cells = [];
+        const cellRegex = /<td[^>]*>(.*?)<\/td>/gs;
+        let cellMatch;
+        
+        while ((cellMatch = cellRegex.exec(rowHtml)) !== null) {
+          // Clean HTML tags and decode entities
+          const cellContent = cellMatch[1]
+            .replace(/<[^>]*>/g, '')
+            .replace(/&pound;/g, '£')
+            .replace(/&amp;/g, '&')
+            .trim();
+          cells.push(cellContent);
+        }
+        
+        // Parse gilt data if we have enough cells
+        if (cells.length >= 7) {
+          const ticker = cells[0];
+          const name = cells[1];
+          const couponText = cells[2];
+          const maturityText = cells[3];
+          const priceText = cells[5]; // Skip "days to maturity" column
+          const yieldText = cells[6];
+          
+          // Parse coupon rate
+          const couponMatch = couponText.match(/([\d.]+)%/);
+          if (!couponMatch) continue;
+          const couponRate = parseFloat(couponMatch[1]);
+          
+          // Parse maturity date
+          const maturityMatch = maturityText.match(/(\d{1,2})-(\w{3})-(\d{4})/);
+          if (!maturityMatch) continue;
+          const maturityDate = this.convertMaturityDate(maturityMatch[1], maturityMatch[2], maturityMatch[3]);
+          
+          // Parse clean price
+          const priceMatch = priceText.match(/£([\d.]+)/);
+          if (!priceMatch) continue;
+          const cleanPrice = parseFloat(priceMatch[1]);
+          
+          // Parse current yield
+          const yieldMatch = yieldText.match(/([\d.]+)%/);
+          if (!yieldMatch) continue;
+          const currentYield = parseFloat(yieldMatch[1]);
+          
+          // Create gilt object
+          gilts.push({
+            name: name,
+            ticker: ticker,
+            couponRate: couponRate,
+            maturityDate: maturityDate,
+            cleanPrice: cleanPrice,
+            currentYield: currentYield,
+            dataSource: 'DividendData.co.uk (Live)',
+            live: true
+          });
+        }
+      }
+      
+      console.log(`Parsed ${gilts.length} gilts from DividendData HTML`);
+      
+      if (gilts.length > 0) {
+        return {
+          data: gilts,
+          tradingDate: tradingDate
+        };
+      }
+      
+      return null;
+    } catch (error) {
+      console.warn('HTML parsing failed:', error);
+      return null;
+    }
+  }
+  
+  convertDateFormat(dateStr) {
+    // Convert "28 Sep 2025" to "28/09/2025"
+    const months = {
+      'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+      'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 
+      'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+    };
+    
+    const parts = dateStr.trim().split(/\s+/);
+    if (parts.length === 3) {
+      const day = parts[0].padStart(2, '0');
+      const month = months[parts[1]];
+      const year = parts[2];
+      if (month) {
+        return `${day}/${month}/${year}`;
+      }
+    }
+    
+    return this.getTodaysDate();
+  }
+  
+  convertMaturityDate(day, monthAbbr, year) {
+    // Convert "22-Oct-2025" format to "2025-10-22"
+    const months = {
+      'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+      'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08', 
+      'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+    };
+    
+    const month = months[monthAbbr];
+    if (month) {
+      return `${year}-${month}-${day.padStart(2, '0')}`;
+    }
+    
     return null;
+  }
+  
+  getTodaysDate() {
+    return new Date().toLocaleDateString('en-GB');
   }
 
   async fetchFromFinnhub() {

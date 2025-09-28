@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-Vh3imw/checked-fetch.js
+// .wrangler/tmp/bundle-TZV6nL/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-Vh3imw/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-TZV6nL/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -2517,9 +2517,8 @@ var init_api_data_fetcher = __esm({
           console.log(`\u2713 Retrieved ${liveData.length} live gilt prices from market APIs`);
           return liveData;
         }
-        console.log("Using verified DividendData.co.uk prices (August 8, 2025)");
-        const staticData = this.getDividendDataPrices();
-        return staticData;
+        console.log("No API keys available - returning null to enable web scraping fallback");
+        return null;
       }
       async attemptLiveDataFetch() {
         const hasAlphaVantage = !!this.env?.ALPHA_VANTAGE_API_KEY;
@@ -2988,11 +2987,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-Vh3imw/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-TZV6nL/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-Vh3imw/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-TZV6nL/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -3213,6 +3212,26 @@ var GiltDataFetcher = class {
       }
       console.log("Trying DividendData...");
       try {
+        const dataResponse = await fetch("https://www.dividenddata.co.uk/uk-gilts-prices-yields.py?showCompDetails=999&sort=0&order=0", {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (compatible; GiltAnalyser/1.0)",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-GB,en;q=0.5",
+            "Cache-Control": "no-cache"
+          },
+          timeout: 8e3
+        });
+        if (dataResponse.ok) {
+          const dataHtml = await dataResponse.text();
+          const result = this.parseGiltHTML(dataHtml);
+          if (result?.data && result.data.length > 0) {
+            console.log(`Successfully fetched ${result.data.length} live gilt prices from DividendData`);
+            return {
+              data: result.data,
+              tradingDate: result.tradingDate || this.getTodaysDate()
+            };
+          }
+        }
         const response = await fetch("https://www.dividenddata.co.uk/uk-gilts-prices-yields.py", {
           headers: {
             "User-Agent": "Mozilla/5.0 (compatible; GiltAnalyser/1.0)",
@@ -3301,7 +3320,117 @@ var GiltDataFetcher = class {
     return diffTime / (1e3 * 60 * 60 * 24 * 365.25);
   }
   parseGiltHTML(html) {
+    try {
+      const gilts = [];
+      let tradingDate = this.getTodaysDate();
+      const dateMatch = html.match(/Last updated:\s*(\d{1,2}\s+\w+\s+\d{4})/i);
+      if (dateMatch) {
+        tradingDate = this.convertDateFormat(dateMatch[1]);
+      }
+      const rowRegex = /<tr[^>]*data-index="(\d+)"[^>]*>(.*?)<\/tr>/gs;
+      let rowMatch;
+      while ((rowMatch = rowRegex.exec(html)) !== null) {
+        const rowHtml = rowMatch[2];
+        const cells = [];
+        const cellRegex = /<td[^>]*>(.*?)<\/td>/gs;
+        let cellMatch;
+        while ((cellMatch = cellRegex.exec(rowHtml)) !== null) {
+          const cellContent = cellMatch[1].replace(/<[^>]*>/g, "").replace(/&pound;/g, "\xA3").replace(/&amp;/g, "&").trim();
+          cells.push(cellContent);
+        }
+        if (cells.length >= 7) {
+          const ticker = cells[0];
+          const name = cells[1];
+          const couponText = cells[2];
+          const maturityText = cells[3];
+          const priceText = cells[5];
+          const yieldText = cells[6];
+          const couponMatch = couponText.match(/([\d.]+)%/);
+          if (!couponMatch) continue;
+          const couponRate = parseFloat(couponMatch[1]);
+          const maturityMatch = maturityText.match(/(\d{1,2})-(\w{3})-(\d{4})/);
+          if (!maturityMatch) continue;
+          const maturityDate = this.convertMaturityDate(maturityMatch[1], maturityMatch[2], maturityMatch[3]);
+          const priceMatch = priceText.match(/£([\d.]+)/);
+          if (!priceMatch) continue;
+          const cleanPrice = parseFloat(priceMatch[1]);
+          const yieldMatch = yieldText.match(/([\d.]+)%/);
+          if (!yieldMatch) continue;
+          const currentYield = parseFloat(yieldMatch[1]);
+          gilts.push({
+            name,
+            ticker,
+            couponRate,
+            maturityDate,
+            cleanPrice,
+            currentYield,
+            dataSource: "DividendData.co.uk (Live)",
+            live: true
+          });
+        }
+      }
+      console.log(`Parsed ${gilts.length} gilts from DividendData HTML`);
+      if (gilts.length > 0) {
+        return {
+          data: gilts,
+          tradingDate
+        };
+      }
+      return null;
+    } catch (error) {
+      console.warn("HTML parsing failed:", error);
+      return null;
+    }
+  }
+  convertDateFormat(dateStr) {
+    const months = {
+      "Jan": "01",
+      "Feb": "02",
+      "Mar": "03",
+      "Apr": "04",
+      "May": "05",
+      "Jun": "06",
+      "Jul": "07",
+      "Aug": "08",
+      "Sep": "09",
+      "Oct": "10",
+      "Nov": "11",
+      "Dec": "12"
+    };
+    const parts = dateStr.trim().split(/\s+/);
+    if (parts.length === 3) {
+      const day = parts[0].padStart(2, "0");
+      const month = months[parts[1]];
+      const year = parts[2];
+      if (month) {
+        return `${day}/${month}/${year}`;
+      }
+    }
+    return this.getTodaysDate();
+  }
+  convertMaturityDate(day, monthAbbr, year) {
+    const months = {
+      "Jan": "01",
+      "Feb": "02",
+      "Mar": "03",
+      "Apr": "04",
+      "May": "05",
+      "Jun": "06",
+      "Jul": "07",
+      "Aug": "08",
+      "Sep": "09",
+      "Oct": "10",
+      "Nov": "11",
+      "Dec": "12"
+    };
+    const month = months[monthAbbr];
+    if (month) {
+      return `${year}-${month}-${day.padStart(2, "0")}`;
+    }
     return null;
+  }
+  getTodaysDate() {
+    return (/* @__PURE__ */ new Date()).toLocaleDateString("en-GB");
   }
   async fetchFromFinnhub() {
     return null;
@@ -7330,7 +7459,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-Vh3imw/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-TZV6nL/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -7364,7 +7493,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-Vh3imw/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-TZV6nL/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

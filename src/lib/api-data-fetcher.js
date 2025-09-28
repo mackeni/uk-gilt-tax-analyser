@@ -18,10 +18,9 @@ export class APIDataFetcher {
       return liveData;
     }
     
-    // Fall back to verified DividendData prices
-    console.log('Using verified DividendData.co.uk prices (August 8, 2025)');
-    const staticData = this.getDividendDataPrices();
-    return staticData;
+    // If no API keys available, return null to allow web scraping fallback
+    console.log('No API keys available - returning null to enable web scraping fallback');
+    return null;
   }
 
   async attemptLiveDataFetch() {

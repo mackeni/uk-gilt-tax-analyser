@@ -38,5 +38,9 @@ exposeLocalhost = true
 localPort = 5001
 externalPort = 3000
 
+[[ports]]
+localPort = 39165
+externalPort = 3001
+
 [agent]
 integrations = ["web_scraper==1.0.0"]
