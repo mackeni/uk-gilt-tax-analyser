@@ -317,9 +317,35 @@ async function handleAPIRequest(request, env, path) {
   }
 }
 
+const GILT_CACHE_KEY = 'https://uk-gilt-tax-analyser.internal/gilt-data-cache-v1';
+const GILT_CACHE_TTL = 23 * 60 * 60; // 23 hours in seconds
+
+const JSON_HEADERS = {
+  'Content-Type': 'application/json; charset=utf-8',
+  'Access-Control-Allow-Origin': '*',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  'Cross-Origin-Resource-Policy': 'cross-origin',
+  'Origin-Agent-Cluster': '?1',
+  'X-Permitted-Cross-Domain-Policies': 'none'
+};
+
 async function getGiltData(request, env) {
   try {
     console.log('API endpoint called: /api/gilt-data');
+
+    // Check Cloudflare Cache API for a fresh result (avoids calling Alpha Vantage on every request)
+    const cache = caches.default;
+    const cacheRequest = new Request(GILT_CACHE_KEY);
+    const cached = await cache.match(cacheRequest);
+    if (cached) {
+      console.log('Serving gilt data from Cloudflare edge cache');
+      const body = await cached.text();
+      return new Response(body, { headers: { ...JSON_HEADERS, 'Cache-Control': 'no-cache', 'X-Cache': 'HIT' } });
+    }
+
+    // No cache hit — fetch fresh data
     const fetcher = new GiltDataFetcher(env);
     console.log('GiltDataFetcher created');
     
@@ -330,39 +356,34 @@ async function getGiltData(request, env) {
     if (!result?.data || result.data.length === 0) {
       throw new Error('No gilt data available from any source');
     }
+
+    const body = JSON.stringify(result);
+
+    // Only cache if the data is live/current (not stale fallback from July 2025)
+    const isLiveData = result.data[0]?.live === true;
+    if (isLiveData) {
+      const cacheResponse = new Response(body, {
+        headers: {
+          ...JSON_HEADERS,
+          'Cache-Control': `public, max-age=${GILT_CACHE_TTL}`,
+          'X-Cache': 'MISS'
+        }
+      });
+      await cache.put(cacheRequest, cacheResponse);
+      console.log(`Cached ${result.data.length} live gilt prices for ${GILT_CACHE_TTL}s`);
+    }
     
-    return new Response(JSON.stringify(result), {
-      headers: { 
-        'Content-Type': 'application/json; charset=utf-8',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-cache',
-        'X-Content-Type-Options': 'nosniff',
-        'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-        'Cross-Origin-Resource-Policy': 'cross-origin',
-        'Origin-Agent-Cluster': '?1',
-        'X-Permitted-Cross-Domain-Policies': 'none'
-      }
+    return new Response(body, {
+      headers: { ...JSON_HEADERS, 'Cache-Control': 'no-cache', 'X-Cache': 'MISS' }
     });
   } catch (error) {
     console.error('Error in getGiltData:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
-      timestamp: new Date().toISOString(),
-      debug: 'API endpoint /api/gilt-data failed'
+      timestamp: new Date().toISOString()
     }), {
       status: 500,
-      headers: { 
-        'Content-Type': 'application/json; charset=utf-8',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-cache',
-        'X-Content-Type-Options': 'nosniff',
-        'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-        'Cross-Origin-Resource-Policy': 'cross-origin',
-        'Origin-Agent-Cluster': '?1',
-        'X-Permitted-Cross-Domain-Policies': 'none'
-      }
+      headers: { ...JSON_HEADERS, 'Cache-Control': 'no-cache' }
     });
   }
 }

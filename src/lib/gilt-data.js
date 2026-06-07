@@ -48,7 +48,7 @@ export class GiltDataFetcher {
             
             return {
               data: processedData,
-              dataSource: 'live',
+              dataSource: result.isEstimated ? 'estimated' : 'live',
               lastUpdated: new Date().toISOString(),
               priceDate: result.tradingDate || this.getLastTradingDate()
             };
@@ -254,12 +254,13 @@ export class GiltDataFetcher {
         
         const apiData = await apiFetcher.fetchDailyGiltData();
         if (apiData && apiData.length > 0) {
-          console.log(`Successfully fetched ${apiData.length} gilts from financial APIs with current yields`);
-          // Extract the actual data date from the static data
-          const dataDate = apiData[0]?.priceDate || '08/08/2025';
+          console.log(`Successfully fetched ${apiData.length} gilts from financial APIs`);
+          const dataDate = apiData[0]?.priceDate || this.getTodaysDate();
+          const isEstimated = apiData[0]?.dataSource?.includes('Estimated');
           return {
             data: apiData,
-            tradingDate: dataDate
+            tradingDate: dataDate,
+            isEstimated: isEstimated
           };
         }
       } catch (apiError) {
@@ -270,15 +271,22 @@ export class GiltDataFetcher {
       console.log('Trying DividendData...');
       try {
         // First try the dynamic data endpoint
-        const dataResponse = await fetch('https://www.dividenddata.co.uk/uk-gilts-prices-yields.py?showCompDetails=999&sort=0&order=0', {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; GiltAnalyser/1.0)',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Cache-Control': 'no-cache'
-          },
-          timeout: 8000
-        });
+        const ddController = new AbortController();
+        const ddTimeout = setTimeout(() => ddController.abort(), 8000);
+        let dataResponse;
+        try {
+          dataResponse = await fetch('https://www.dividenddata.co.uk/uk-gilts-prices-yields.py?showCompDetails=999&sort=0&order=0', {
+            signal: ddController.signal,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (compatible; GiltAnalyser/1.0)',
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+              'Accept-Language': 'en-GB,en;q=0.5',
+              'Cache-Control': 'no-cache'
+            }
+          });
+        } finally {
+          clearTimeout(ddTimeout);
+        }
         
         if (dataResponse.ok) {
           const dataHtml = await dataResponse.text();

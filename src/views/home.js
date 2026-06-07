@@ -1480,6 +1480,11 @@ export async function renderHomePage(request, env) {
                     messageStyle = 'background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460;';
                     break;
                     
+                case 'estimated':
+                    messageText = \`📐 Estimated prices as of \${result.priceDate} — based on current yield curve (\${result.data.length} UK government bonds)\`;
+                    messageStyle = 'background: #e8f4fd; border: 1px solid #b8daff; color: #0c5460;';
+                    break;
+                    
                 case 'fallback':
                     messageText = \`⚠️ Static data - Prices from \${result.priceDate} (\${result.data.length} UK government bonds)\`;
                     messageStyle = 'background: #fff3cd; border: 1px solid #ffeaa7; color: #856404;';

@@ -1,0 +1,1 @@
+- [Gilt data sources and API limitations](gilt-data-sources.md) — why prices may be estimated, full fallback chain, critical CF Workers fetch gotchas
