@@ -283,6 +283,8 @@ async function handleAPIRequest(request, env, path) {
     switch (path) {
       case '/api/gilt-data':
         return await getGiltData(request, env);
+      case '/api/refresh-gilt-data':
+        return await refreshGiltData(request, env);
       case '/api/calculate-tax':
         return await calculateTax(request, env);
       case '/api/coupon-schedule':
@@ -384,6 +386,29 @@ async function getGiltData(request, env) {
     }), {
       status: 500,
       headers: { ...JSON_HEADERS, 'Cache-Control': 'no-cache' }
+    });
+  }
+}
+
+async function refreshGiltData(request, env) {
+  try {
+    const cache = caches.default;
+    await cache.delete(new Request(GILT_CACHE_KEY));
+    console.log('Cache cleared — fetching fresh data from APIs...');
+    const fetcher = new GiltDataFetcher(env);
+    const result = await fetcher.getGiltData();
+    if (!result?.data?.length) throw new Error('No data returned');
+    const body = JSON.stringify(result);
+    const isLiveData = result.data[0]?.live === true;
+    if (isLiveData) {
+      await cache.put(new Request(GILT_CACHE_KEY), new Response(body, {
+        headers: { ...JSON_HEADERS, 'Cache-Control': `public, max-age=${GILT_CACHE_TTL}` }
+      }));
+    }
+    return new Response(body, { headers: { ...JSON_HEADERS, 'Cache-Control': 'no-cache' } });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500, headers: { ...JSON_HEADERS, 'Cache-Control': 'no-cache' }
     });
   }
 }

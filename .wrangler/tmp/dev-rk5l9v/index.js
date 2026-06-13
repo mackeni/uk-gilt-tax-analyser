@@ -9,7 +9,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// .wrangler/tmp/bundle-dy7C3o/checked-fetch.js
+// .wrangler/tmp/bundle-nVtpT5/checked-fetch.js
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
     (typeof request === "string" ? new Request(request, init) : request).url
@@ -27,7 +27,7 @@ function checkURL(request, init) {
 }
 var urls;
 var init_checked_fetch = __esm({
-  ".wrangler/tmp/bundle-dy7C3o/checked-fetch.js"() {
+  ".wrangler/tmp/bundle-nVtpT5/checked-fetch.js"() {
     urls = /* @__PURE__ */ new Set();
     __name(checkURL, "checkURL");
     globalThis.fetch = new Proxy(globalThis.fetch, {
@@ -3073,11 +3073,11 @@ var init_utils = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-dy7C3o/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-nVtpT5/middleware-loader.entry.ts
 init_checked_fetch();
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-dy7C3o/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-nVtpT5/middleware-insertion-facade.js
 init_checked_fetch();
 init_modules_watch_stub();
 
@@ -7208,6 +7208,8 @@ async function handleAPIRequest(request, env, path) {
     switch (path) {
       case "/api/gilt-data":
         return await getGiltData(request, env);
+      case "/api/refresh-gilt-data":
+        return await refreshGiltData(request, env);
       case "/api/calculate-tax":
         return await calculateTax(request, env);
       case "/api/coupon-schedule":
@@ -7301,6 +7303,30 @@ async function getGiltData(request, env) {
   }
 }
 __name(getGiltData, "getGiltData");
+async function refreshGiltData(request, env) {
+  try {
+    const cache = caches.default;
+    await cache.delete(new Request(GILT_CACHE_KEY));
+    console.log("Cache cleared \u2014 fetching fresh data from APIs...");
+    const fetcher = new GiltDataFetcher(env);
+    const result = await fetcher.getGiltData();
+    if (!result?.data?.length) throw new Error("No data returned");
+    const body = JSON.stringify(result);
+    const isLiveData = result.data[0]?.live === true;
+    if (isLiveData) {
+      await cache.put(new Request(GILT_CACHE_KEY), new Response(body, {
+        headers: { ...JSON_HEADERS, "Cache-Control": `public, max-age=${GILT_CACHE_TTL}` }
+      }));
+    }
+    return new Response(body, { headers: { ...JSON_HEADERS, "Cache-Control": "no-cache" } });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...JSON_HEADERS, "Cache-Control": "no-cache" }
+    });
+  }
+}
+__name(refreshGiltData, "refreshGiltData");
 async function calculateTax(request, env) {
   if (request.method !== "POST") {
     return new Response("Method not allowed", {
@@ -7570,7 +7596,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-dy7C3o/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-nVtpT5/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -7604,7 +7630,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-dy7C3o/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-nVtpT5/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
