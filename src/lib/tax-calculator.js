@@ -1,6 +1,6 @@
 /**
  * UK Tax Calculator - Cloudflare Worker Version
- * Calculate tax implications for UK gilt investments
+ * Calculate tax implications for UK gilts
  */
 
 export class TaxCalculator {
@@ -216,19 +216,19 @@ export class TaxCalculator {
         name: 'Basic Rate (20%)',
         rate: 20,
         psa: 1000,
-        description: 'This tool helps UK basic rate taxpayers analyse the tax efficiency of UK gilt investments with your £1,000 Personal Savings Allowance.'
+        description: 'This tool helps UK basic rate taxpayers analyse the tax efficiency of UK gilts with your £1,000 Personal Savings Allowance.'
       },
       'higher_rate': {
         name: 'Higher Rate (40%)',
         rate: 40,
         psa: 500,
-        description: 'This tool helps UK higher rate taxpayers analyse the tax efficiency of UK gilt investments with your £500 Personal Savings Allowance.'
+        description: 'This tool helps UK higher rate taxpayers analyse the tax efficiency of UK gilts with your £500 Personal Savings Allowance.'
       },
       'additional_rate': {
         name: 'Additional Rate (45%)',
         rate: 45,
         psa: 0,
-        description: 'This tool helps UK additional rate taxpayers analyse the tax efficiency of UK gilt investments with no Personal Savings Allowance.'
+        description: 'This tool helps UK additional rate taxpayers analyse the tax efficiency of UK gilts with no Personal Savings Allowance.'
       }
     };
     

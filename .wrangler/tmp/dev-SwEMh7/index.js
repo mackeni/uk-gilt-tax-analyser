@@ -3728,19 +3728,19 @@ var TaxCalculator = class {
         name: "Basic Rate (20%)",
         rate: 20,
         psa: 1e3,
-        description: "This tool helps UK basic rate taxpayers analyse the tax efficiency of UK gilt investments with your \xA31,000 Personal Savings Allowance."
+        description: "This tool helps UK basic rate taxpayers analyse the tax efficiency of UK gilts with your \xA31,000 Personal Savings Allowance."
       },
       "higher_rate": {
         name: "Higher Rate (40%)",
         rate: 40,
         psa: 500,
-        description: "This tool helps UK higher rate taxpayers analyse the tax efficiency of UK gilt investments with your \xA3500 Personal Savings Allowance."
+        description: "This tool helps UK higher rate taxpayers analyse the tax efficiency of UK gilts with your \xA3500 Personal Savings Allowance."
       },
       "additional_rate": {
         name: "Additional Rate (45%)",
         rate: 45,
         psa: 0,
-        description: "This tool helps UK additional rate taxpayers analyse the tax efficiency of UK gilt investments with no Personal Savings Allowance."
+        description: "This tool helps UK additional rate taxpayers analyse the tax efficiency of UK gilts with no Personal Savings Allowance."
       }
     };
     return mapping[taxpayerType] || mapping["additional_rate"];
@@ -4612,7 +4612,7 @@ async function renderHomePage(request, env) {
     <div class="container">
         <header class="header">
             <h1>\u{1F4B7} UK Gilt Tax Efficiency Analyser</h1>
-            <p>Analyse the tax efficiency of UK gilt investments for your specific tax situation</p>
+            <p>Analyse the tax efficiency of UK gilts for your specific tax situation</p>
         </header>
         
         <div class="main-content">

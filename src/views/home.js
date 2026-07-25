@@ -819,7 +819,7 @@ export async function renderHomePage(request, env) {
     <div class="container">
         <header class="header">
             <h1>💷 UK Gilt Tax Efficiency Analyser</h1>
-            <p>Analyse the tax efficiency of UK gilt investments for your specific tax situation</p>
+            <p>Analyse the tax efficiency of UK gilts for your specific tax situation</p>
         </header>
         
         <div class="main-content">
