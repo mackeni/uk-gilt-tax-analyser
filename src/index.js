@@ -59,180 +59,300 @@ async function handleLibFile(request, env, path) {
   // Serve JavaScript module files
   if (path === '/lib/utils.js') {
     const utilsContent = `
-// UK Gilt Tax Efficiency Analyser - Utility Functions
-export function formatCurrency(amount, maxDigits = 2) {
-    if (amount === 0) return '£0.00';
-    if (!amount && amount !== 0) return 'N/A';
-    
-    const absAmount = Math.abs(amount);
-    const sign = amount < 0 ? '-' : '';
-    
-    if (absAmount >= 1e9) {
-        return \`\${sign}£\${(absAmount / 1e9).toFixed(maxDigits)}B\`;
-    } else if (absAmount >= 1e6) {
-        return \`\${sign}£\${(absAmount / 1e6).toFixed(maxDigits)}M\`;
-    } else if (absAmount >= 1e3 && maxDigits <= 2) {
-        return \`\${sign}£\${absAmount.toFixed(2).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',')}\`;
-    } else {
-        return \`\${sign}£\${absAmount.toFixed(2).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',')}\`;
-    }
+/**
+ * Utility functions - Cloudflare Worker Version
+ * Common formatting and calculation functions
+ */
+
+export function formatCurrency(amount, currency = '£') {
+  if (isNaN(amount) || amount === null || amount === undefined) {
+    return 'N/A';
+  }
+  
+  // Always show full amount with exactly 2 decimal places
+  return \`\${currency}\${amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\`;
 }
 
-export function formatPercentage(rate, digits = 2) {
-    if (rate === 0) return '0.00%';
-    if (!rate && rate !== 0) return 'N/A';
-    
-    const percentage = rate * 100;
-    return \`\${percentage.toFixed(digits)}%\`;
+export function formatPercentage(percentage, decimalPlaces = 2) {
+  if (isNaN(percentage) || percentage === null || percentage === undefined) {
+    return 'N/A';
+  }
+  
+  return \`\${percentage.toFixed(decimalPlaces)}%\`;
 }
 
 export function formatCouponRate(rate) {
-    if (!rate && rate !== 0) return 'N/A';
-    
-    // Show up to 3 decimal places but remove trailing zeros
-    const formatted = rate.toFixed(3).replace(/\\.?0+$/, '');
-    return \`\${formatted}%\`;
+  if (isNaN(rate) || rate === null || rate === undefined) {
+    return 'N/A';
+  }
+  
+  // Format as decimal percentage with 3 decimal places (no trailing zero removal)
+  return \`\${rate.toFixed(3)}%\`;
 }
 
 export function calculateYearsToMaturity(maturityDate, referenceDate = null) {
-    if (!referenceDate) {
-        referenceDate = new Date();
-    }
-    
-    const maturity = typeof maturityDate === 'string' ? new Date(maturityDate) : maturityDate;
-    
-    if (isNaN(maturity.getTime())) {
-        return NaN;
-    }
-    
-    const timeDifference = maturity - referenceDate;
-    const years = timeDifference / (1000 * 60 * 60 * 24 * 365.25);
-    
-    return Math.max(0, years);
+  if (!referenceDate) {
+    referenceDate = new Date();
+  }
+  
+  const maturity = typeof maturityDate === 'string' ? new Date(maturityDate) : maturityDate;
+  
+  if (isNaN(maturity.getTime())) {
+    return NaN;
+  }
+  
+  const timeDifference = maturity - referenceDate;
+  const years = timeDifference / (1000 * 60 * 60 * 24 * 365.25);
+  
+  return Math.max(0, years);
 }
 
 export function calculateDirtyPrice(cleanPrice, accruedInterest) {
-    if (isNaN(cleanPrice) || isNaN(accruedInterest)) {
-        return cleanPrice || 0;
-    }
-    return cleanPrice + accruedInterest;
+  if (isNaN(cleanPrice) || isNaN(accruedInterest)) {
+    return cleanPrice || 0;
+  }
+  return cleanPrice + accruedInterest;
 }
 
 export function calculateUnitsOwned(investmentAmount, dirtyPrice) {
-    if (isNaN(investmentAmount) || isNaN(dirtyPrice) || dirtyPrice === 0) {
-        return 0;
-    }
-    return (investmentAmount / dirtyPrice) * 100;
+  if (isNaN(investmentAmount) || isNaN(dirtyPrice) || dirtyPrice === 0) {
+    return 0;
+  }
+  // Round to 2 decimal places for consistent principal calculations
+  return Math.round(((investmentAmount / dirtyPrice) * 100) * 100) / 100;
 }
 
 export function calculateCouponPaymentDates(maturityDate, numPayments = 20) {
-    const maturity = new Date(maturityDate);
-    const paymentDates = [];
+  const maturity = new Date(maturityDate);
+  const paymentDates = [];
+  const cutoffTime = new Date('2020-01-01').getTime();
+  
+  // Pre-calculate dates in forward direction to avoid unshift operations
+  let currentTime = maturity.getTime();
+  const sixMonthsMs = 6 * 30.44 * 24 * 60 * 60 * 1000; // Average 6 months in ms
+  
+  for (let i = 0; i < numPayments; i++) {
+    if (currentTime <= cutoffTime) break;
     
-    // Calculate payments going backwards from maturity (more efficient than loop)
-    for (let i = 0; i < numPayments; i++) {
-        const paymentDate = new Date(maturity);
-        paymentDate.setMonth(maturity.getMonth() - (i * 6));
-        
-        if (paymentDate > new Date('2020-01-01')) {
-            paymentDates.unshift(paymentDate);
-        } else {
-            break;
-        }
-    }
-    
-    return paymentDates;
+    const paymentDate = new Date(currentTime);
+    paymentDates.push(paymentDate);
+    currentTime -= sixMonthsMs;
+  }
+  
+  // Reverse once instead of using unshift in loop
+  return paymentDates.reverse();
 }
 
 export function findLastCouponDate(maturityDate, referenceDate = null) {
-    if (!referenceDate) {
-        referenceDate = new Date();
+  if (!referenceDate) {
+    referenceDate = new Date();
+  }
+  
+  const paymentDates = calculateCouponPaymentDates(maturityDate);
+  
+  // Find last payment before reference date
+  for (let i = paymentDates.length - 1; i >= 0; i--) {
+    if (paymentDates[i] <= referenceDate) {
+      return paymentDates[i];
     }
-    
-    const paymentDates = calculateCouponPaymentDates(maturityDate);
-    
-    // Find last payment before reference date (more efficient than loop)
-    for (let i = paymentDates.length - 1; i >= 0; i--) {
-        if (paymentDates[i] <= referenceDate) {
-            return paymentDates[i];
-        }
-    }
-    
-    return null;
+  }
+  
+  return null;
 }
 
 export function findNextCouponDate(maturityDate, referenceDate = null) {
-    if (!referenceDate) {
-        referenceDate = new Date();
+  if (!referenceDate) {
+    referenceDate = new Date();
+  }
+  
+  const paymentDates = calculateCouponPaymentDates(maturityDate);
+  
+  // Find first payment after reference date
+  for (let i = 0; i < paymentDates.length; i++) {
+    if (paymentDates[i] > referenceDate) {
+      return paymentDates[i];
     }
-    
-    const paymentDates = calculateCouponPaymentDates(maturityDate);
-    
-    // Find first payment after reference date
-    for (let i = 0; i < paymentDates.length; i++) {
-        if (paymentDates[i] > referenceDate) {
-            return paymentDates[i];
-        }
-    }
-    
-    return new Date(maturityDate);
+  }
+  
+  return new Date(maturityDate);
 }
 
-export function calculateAccruedInterest(couponRate, lastPaymentDate, settlementDate = null) {
-    if (!settlementDate) {
-        settlementDate = new Date();
-    }
-    
-    const lastPayment = new Date(lastPaymentDate);
-    const daysSinceLastPayment = Math.floor((settlementDate - lastPayment) / (1000 * 60 * 60 * 24));
-    
-    // UK gilts use Actual/Actual day count convention with semi-annual payments
-    const daysInSemiAnnualPeriod = 184; // Approximate semi-annual period
-    const accruedFraction = daysSinceLastPayment / daysInSemiAnnualPeriod;
-    
-    // Return semi-annual coupon amount multiplied by accrued fraction
-    return (couponRate / 2) * accruedFraction;
+export function calculateAccruedInterest(couponRate, maturityDate, settlementDate = null) {
+  if (!settlementDate) {
+    settlementDate = new Date();
+  }
+  
+  // Find the last and next coupon payment dates
+  const lastPaymentDate = findLastCouponDate(maturityDate, settlementDate);
+  const nextPaymentDate = findNextCouponDate(maturityDate, settlementDate);
+  
+  if (!lastPaymentDate || !nextPaymentDate) {
+    return 0;
+  }
+  
+  // Calculate actual days using proper Actual/Actual day count convention
+  const daysSinceLastPayment = Math.floor((settlementDate - lastPaymentDate) / (1000 * 60 * 60 * 24));
+  const totalDaysInPeriod = Math.floor((nextPaymentDate - lastPaymentDate) / (1000 * 60 * 60 * 24));
+  
+  // UK gilts use Actual/Actual day count - exact days between actual coupon dates
+  const accruedFraction = daysSinceLastPayment / totalDaysInPeriod;
+  
+  // Return semi-annual coupon amount (couponRate/2) multiplied by accrued fraction
+  // This gives accrued interest as £ per £100 nominal
+  return (couponRate / 2) * accruedFraction;
 }
 
 export function getTaxRateInfo(taxBracket) {
-    const taxRates = {
-        'basic_rate': { income: 20, psa: 1000 },
-        'higher_rate': { income: 40, psa: 500 },
-        'additional_rate': { income: 45, psa: 0 }
-    };
-    
-    return taxRates[taxBracket] || taxRates['additional_rate'];
+  const taxRates = {
+    'basic_rate': { income: 20, psa: 1000 },
+    'higher_rate': { income: 40, psa: 500 },
+    'additional_rate': { income: 45, psa: 0 }
+  };
+  
+  return taxRates[taxBracket] || taxRates['additional_rate'];
 }
 
 export function calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate) {
-    if (incomeTaxRate >= 1) {
-        return 0;
-    }
-    return afterTaxYield / (1 - incomeTaxRate);
+  if (incomeTaxRate >= 1) {
+    return 0;
+  }
+  return afterTaxYield / (1 - incomeTaxRate);
 }
 
-// Memoization cache for expensive calculations
-const calculationCache = new Map();
-
-export function getCachedCalculation(key, calculationFn, ...args) {
-    const cacheKey = \`\${key}_\${JSON.stringify(args)}\`;
-    
-    if (calculationCache.has(cacheKey)) {
-        return calculationCache.get(cacheKey);
-    }
-    
-    const result = calculationFn(...args);
-    calculationCache.set(cacheKey, result);
-    
-    // Limit cache size to prevent memory issues
-    if (calculationCache.size > 1000) {
-        const firstKey = calculationCache.keys().next().value;
-        calculationCache.delete(firstKey);
-    }
-    
-    return result;
+// Simple utility functions
+export function roundToTwo(num) {
+  return Math.round(num * 100) / 100;
 }
-    `;
+
+export function sortData(data, sortBy, ascending = true) {
+  return [...data].sort((a, b) => {
+    let aVal = a[sortBy];
+    let bVal = b[sortBy];
+    
+    // Handle numeric values
+    if (typeof aVal === 'number' && typeof bVal === 'number') {
+      return ascending ? aVal - bVal : bVal - aVal;
+    }
+    
+    // Handle string values
+    if (typeof aVal === 'string' && typeof bVal === 'string') {
+      return ascending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+    }
+    
+    // Handle dates
+    if (aVal instanceof Date && bVal instanceof Date) {
+      return ascending ? aVal - bVal : bVal - aVal;
+    }
+    
+    return 0;
+  });
+}
+
+export function filterData(data, filters) {
+  return data.filter(item => {
+    return Object.entries(filters).every(([key, { min, max }]) => {
+      const value = item[key];
+      if (typeof value !== 'number') return true;
+      
+      if (min !== undefined && value < min) return false;
+      if (max !== undefined && value > max) return false;
+      
+      return true;
+    });
+  });
+}
+
+export function generateChartData(data, xField, yFields) {
+  const chartData = {
+    labels: data.map(item => item[xField]),
+    datasets: yFields.map(field => ({
+      label: field.label,
+      data: data.map(item => item[field.key]),
+      backgroundColor: field.color || '#3498db',
+      borderColor: field.borderColor || field.color || '#2980b9',
+      borderWidth: 1
+    }))
+  };
+  
+  return chartData;
+}
+
+export function calculateInvestmentMetrics(investmentAmount, dirtyPrice, couponRate, yearsToMaturity) {
+  const unitsOwned = (investmentAmount / dirtyPrice) * 100;
+  const annualCouponIncome = unitsOwned * couponRate;
+  const totalCouponIncome = annualCouponIncome * yearsToMaturity;
+  const principalRepayment = unitsOwned; // £100 per £100 nominal
+  const totalReturn = totalCouponIncome + principalRepayment;
+  
+  return {
+    unitsOwned,
+    annualCouponIncome,
+    totalCouponIncome,
+    principalRepayment,
+    totalReturn
+  };
+}
+
+export function validateGiltData(gilt) {
+  const required = ['name', 'couponRate', 'maturityDate', 'currentYield'];
+  
+  for (const field of required) {
+    if (gilt[field] === undefined || gilt[field] === null) {
+      return false;
+    }
+  }
+  
+  // Validate numeric fields
+  const numericFields = ['couponRate', 'currentYield', 'cleanPrice', 'dirtyPrice'];
+  for (const field of numericFields) {
+    if (gilt[field] !== undefined && (isNaN(gilt[field]) || gilt[field] < 0)) {
+      return false;
+    }
+  }
+  
+  // Validate date
+  const maturityDate = new Date(gilt.maturityDate);
+  if (isNaN(maturityDate.getTime())) {
+    return false;
+  }
+  
+  return true;
+}
+
+export function createDataTable(data, columns) {
+  const headers = columns.map(col => col.header);
+  const rows = data.map(item => 
+    columns.map(col => {
+      const value = item[col.key];
+      return col.formatter ? col.formatter(value) : value;
+    })
+  );
+  
+  return {
+    headers,
+    rows
+  };
+}
+
+export function debounce(func, delay) {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+export function throttle(func, limit) {
+  let inThrottle;
+  return function (...args) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
+}
+`;
     
     return new Response(utilsContent, {
       headers: {
