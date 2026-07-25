@@ -114,17 +114,19 @@ export class TaxCalculator {
   }
 
   calculateEquivalentSavingsRate(afterTaxYield, taxpayerType = 'additional_rate') {
-    const incomeTaxRate = this.taxRates[taxpayerType];
-    
+    const taxInfo = this.rates[taxpayerType] || this.rates['additional_rate'];
+    const incomeTaxRate = taxInfo.income;
+
     // Calculate the gross savings rate needed to match the gilt's after-tax return
     const equivalentSavingsRate = afterTaxYield / (1 - incomeTaxRate);
-    
+
     return equivalentSavingsRate;
   }
 
   calculateSavingsAfterTax(savingsRate, investmentAmount, taxpayerType = 'additional_rate') {
-    const incomeTaxRate = this.taxRates[taxpayerType];
-    const personalSavingsAllowance = this.psa[taxpayerType];
+    const taxInfo = this.rates[taxpayerType] || this.rates['additional_rate'];
+    const incomeTaxRate = taxInfo.income;
+    const personalSavingsAllowance = taxInfo.psa;
     
     // Calculate annual interest
     const annualInterest = investmentAmount * (savingsRate / 100);
@@ -280,8 +282,8 @@ export class TaxCalculator {
   }
 
   calculateCouponTax(couponPayment, taxpayerType) {
-    const incomeTaxRate = this.taxRates[taxpayerType];
-    return couponPayment * incomeTaxRate;
+    const taxInfo = this.rates[taxpayerType] || this.rates['additional_rate'];
+    return couponPayment * taxInfo.income;
   }
 
   calculateAfterTaxCoupon(couponPayment, taxpayerType) {
