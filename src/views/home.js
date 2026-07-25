@@ -950,6 +950,16 @@ export async function renderHomePage(request, env) {
             return formatCurrency(amount, '');
         }
 
+        // gilt.name is scraped external data inserted into innerHTML below
+        // in several places - escape it so a stray '<'/'&' in a name can't
+        // be interpreted as markup, even though the upstream scraper
+        // already strips tags.
+        function escapeHtml(value) {
+            const div = document.createElement('div');
+            div.textContent = String(value ?? '');
+            return div.innerHTML;
+        }
+
         function formatPercentage(percentage, decimalPlaces = 2) {
             if (isNaN(percentage) || percentage === null || percentage === undefined) {
                 return 'N/A';
@@ -1993,7 +2003,7 @@ export async function renderHomePage(request, env) {
                         <tbody>
                             \${sortedResults.map((gilt, index) => \`
                                 <tr style="border-bottom: 1px solid #e0e0e0;">
-                                    <td class="clickable-cell" data-type="name" data-index="\${index}" style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500; text-align: left;">\${gilt.name}</td>
+                                    <td class="clickable-cell" data-type="name" data-index="\${index}" style="padding: 12px; border-right: 1px solid #e0e0e0; font-weight: 500; text-align: left;">\${escapeHtml(gilt.name)}</td>
                                     <td class="clickable-cell" data-type="clean-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${formatMoney(gilt.cleanPrice || 0)}</td>
                                     <td class="clickable-cell" data-type="dirty-price" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0;">£\${formatMoney(gilt.dirtyPrice || gilt.cleanPrice || 0)}</td>
                                     <td class="clickable-cell" data-type="after-tax" data-index="\${index}" style="padding: 12px; text-align: right; border-right: 1px solid #e0e0e0; font-weight: bold; color: #27ae60;">\${(gilt.afterTaxYield || 0).toFixed(2)}%</td>
@@ -2090,7 +2100,7 @@ export async function renderHomePage(request, env) {
                         '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">' +
                         '<div>' +
                         '<h5 style="color: #2c3e50; margin-bottom: 8px;">📊 Bond Basics</h5>' +
-                        '<p style="margin: 3px 0;"><strong>Full Name:</strong> ' + gilt.name + '</p>' +
+                        '<p style="margin: 3px 0;"><strong>Full Name:</strong> ' + escapeHtml(gilt.name) + '</p>' +
                         '<p style="margin: 3px 0;"><strong>Coupon Rate:</strong> ' + formatCouponRate(gilt.couponRate) + '</p>' +
                         '<p style="margin: 3px 0;"><strong>Maturity Date:</strong> ' + formattedMaturityDate + '</p>' +
                         '<p style="margin: 3px 0;"><strong>Years to Maturity:</strong> ' + gilt.yearsToMaturity.toFixed(2) + ' years</p>' +
@@ -2143,7 +2153,7 @@ export async function renderHomePage(request, env) {
                             <p>The coupon rate is the annual interest rate paid by the gilt, expressed as a percentage of the nominal (face) value.</p>
                         </div>
                         <div class="calculation-step">
-                            <h4>For \${gilt.name}:</h4>
+                            <h4>For \${escapeHtml(gilt.name)}:</h4>
                             <div class="calculation-formula">
                                 Coupon Rate = \${formatCouponRate(gilt.couponRate)}
                             </div>
@@ -2161,7 +2171,7 @@ export async function renderHomePage(request, env) {
                             <p>The clean price is the market price of the gilt excluding accrued interest. This is the quoted price you see in markets.</p>
                         </div>
                         <div class="calculation-step">
-                            <h4>For \${gilt.name}:</h4>
+                            <h4>For \${escapeHtml(gilt.name)}:</h4>
                             <div class="calculation-formula">
                                 Clean Price = £\${formatMoney(gilt.cleanPrice)} per £100 nominal
                             </div>
@@ -2187,7 +2197,7 @@ export async function renderHomePage(request, env) {
                             </div>
                         </div>
                         <div class="calculation-step">
-                            <h4>For \${gilt.name}:</h4>
+                            <h4>For \${escapeHtml(gilt.name)}:</h4>
                             <div class="calculation-formula">
                                 Clean Price = £\${formatMoney(gilt.cleanPrice)}
                             </div>
@@ -2216,7 +2226,7 @@ export async function renderHomePage(request, env) {
                             </div>
                         </div>
                         <div class="calculation-step">
-                            <h4>For \${gilt.name}:</h4>
+                            <h4>For \${escapeHtml(gilt.name)}:</h4>
                             <div class="calculation-formula">
                                 Current Yield = (£\${formatMoney(gilt.couponRate)} ÷ £\${formatMoney(gilt.cleanPrice)}) × 100 = \${gilt.currentYield.toFixed(2)}%
                             </div>
@@ -2451,7 +2461,7 @@ export async function renderHomePage(request, env) {
                     
                     contentHTML = \`
                         <div class="calculation-step">
-                            <h4>After-Tax Yield for \${gilt.name}</h4>
+                            <h4>After-Tax Yield for \${escapeHtml(gilt.name)}</h4>
                             <p>This shows the Internal Rate of Return (IRR) calculated using actual payment dates, tax impacts, and dealing charges.</p>
                         </div>
                         \${scheduleHTML}
@@ -2522,7 +2532,7 @@ export async function renderHomePage(request, env) {
                             <p>Time remaining until the gilt matures and pays back the £100 nominal value.</p>
                         </div>
                         <div class="calculation-step">
-                            <h4>For \${gilt.name}:</h4>
+                            <h4>For \${escapeHtml(gilt.name)}:</h4>
                             <div class="calculation-formula">
                                 Maturity Date: \${maturityDate.toLocaleDateString('en-GB')}
                             </div>
@@ -2586,7 +2596,7 @@ export async function renderHomePage(request, env) {
                         
                         <div class="calculation-step">
                             <h4>Step 1: Total Cash from Gilt Investment (Including All Charges)</h4>
-                            <p><strong>Gilt:</strong> \${gilt.name}</p>
+                            <p><strong>Gilt:</strong> \${escapeHtml(gilt.name)}</p>
                             <p><strong>Initial Investment:</strong> £\${formatMoney(investmentAmount)}</p>
                             <p><strong>Dealing Charge:</strong> \${currentSettings.dealingCharge > 0 ? '£' + formatMoney(currentSettings.dealingCharge) : 'None (£0.00)'}</p>
                             \${currentSettings.accountChargeEnabled ? \`
