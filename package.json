@@ -10,7 +10,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@replit/connectors-sdk": "^0.4.1",
     "date-fns": "^4.1.0",
     "wrangler": "^4.25.0"
   }
