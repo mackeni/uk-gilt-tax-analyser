@@ -547,8 +547,17 @@ async function calculateTax(request, env) {
   try {
     const body = await request.json();
     const calculator = new TaxCalculator();
-    
+
     if (body.giltData && Array.isArray(body.giltData)) {
+      // Cap the batch size - this is an unauthenticated public endpoint,
+      // and each entry runs a schedule-based IRR calculation, so an
+      // unbounded array is a cheap CPU-amplification DoS vector.
+      if (body.giltData.length > 200) {
+        return new Response(JSON.stringify({ error: 'Too many gilts in one request (max 200)' }), {
+          status: 400, headers: { ...JSON_HEADERS, 'Cache-Control': 'no-cache' }
+        });
+      }
+
       // Calculate for multiple gilts using schedule-based approach
       const results = await Promise.all(body.giltData.map(async gilt => {
         try {

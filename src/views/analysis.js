@@ -175,8 +175,11 @@ export async function renderAnalysisPage(request, env) {
                 
                 displaySchedule(schedule);
             } catch (error) {
-                document.getElementById('scheduleTable').innerHTML = 
-                    '<p>Error loading analysis: ' + error.message + '</p>';
+                const container = document.getElementById('scheduleTable');
+                container.innerHTML = '';
+                const p = document.createElement('p');
+                p.textContent = 'Error loading analysis: ' + error.message;
+                container.appendChild(p);
             }
         }
         
