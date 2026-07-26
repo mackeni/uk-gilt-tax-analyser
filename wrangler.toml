@@ -10,9 +10,3 @@ routes = [
   { pattern = "gilts.monsters.org.uk", custom_domain = true }
 ]
 
-# Database configuration will be added after initial deployment
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "gilt-analyser-db"
-# database_id = "your-database-id"
-

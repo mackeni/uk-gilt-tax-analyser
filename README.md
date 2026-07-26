@@ -1,6 +1,6 @@
 # UK Gilt Tax Efficiency Analyser - Cloudflare Worker
 
-A high-performance web application for analysing UK gilt tax efficiency, converted from Python/Streamlit to JavaScript/Cloudflare Workers.
+A high-performance web application for analysing UK gilt tax efficiency, built on JavaScript/Cloudflare Workers.
 
 ## Features
 
@@ -80,12 +80,7 @@ npm install
 npx wrangler login
 ```
 
-3. **Create D1 Database (optional):**
-```bash
-npx wrangler d1 create gilt-analyser-db
-```
-
-4. **Deploy:**
+3. **Deploy:**
 ```bash
 npx wrangler deploy
 ```
@@ -100,13 +95,12 @@ npx wrangler dev
 
 ### Environment Variables
 - `ENVIRONMENT`: Production/development environment
-- `DATABASE_URL`: D1 database connection (optional)
 
 ### wrangler.toml
 ```toml
 name = "uk-gilt-tax-analyser"
 main = "src/index.js"
-compatibility_date = "2024-03-18"
+compatibility_date = "2024-07-01"
 
 [vars]
 ENVIRONMENT = "production"
@@ -130,7 +124,7 @@ ENVIRONMENT = "production"
 ### Primary Sources
 - UK Debt Management Office (DMO)
 - DividendData.co.uk
-- Financial market data providers
+- Financial market data providers: Alpha Vantage (primary), Finnhub (secondary), Financial Modeling Prep (tertiary)
 
 ### Data Integrity
 - No synthetic or mock data
@@ -161,20 +155,18 @@ ENVIRONMENT = "production"
 - Secure headers
 - Rate limiting
 
-## Migration from Streamlit
+### Security Headers
+- CSP `frame-ancestors 'none'`, HSTS, COEP, COOP, and CORP
 
-### Key Changes
-1. **Runtime**: Python → JavaScript (Node.js)
-2. **Hosting**: Server-based → Edge/Serverless
-3. **UI**: Streamlit components → Pure HTML/CSS/JS
-4. **Data**: Pandas → Native JavaScript arrays/objects
-5. **API**: Direct function calls → HTTP endpoints
+## Feature Highlights
 
-### Preserved Features
-- All original tax calculations
-- Coupon scheduling logic
-- Data fetching strategies
-- UI functionality and design principles
+- **Live Gilt Data System**: Multi-tier data fetching with live API integration (Alpha Vantage, Finnhub, FMP) and authenticated fallback to verified DividendData.co.uk prices
+- **PSA Confirmation System**: Allows users to confirm or customise their Personal Savings Allowance
+- **Dealing Charge Modeling**: Configurable dealing charge (default £5) affecting investment cost and IRR calculations
+- **Monthly Account Charge Schedule**: Detailed display of monthly account charges and their impact on net returns
+- **Duration Filtering and Sorting**: Gilts displayed in increasing duration order with a dual-range slider filter for years to maturity
+- **Interactive Explanations**: Clickable table cells and modal windows provide step-by-step breakdowns of calculations
+- **Data Source Attribution**: Clear indication of data source (live APIs vs verified historical) with timestamps
 
 ## Contributing
 
@@ -183,10 +175,6 @@ ENVIRONMENT = "production"
 3. Make your changes
 4. Test thoroughly
 5. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file for details
 
 ## Support
 

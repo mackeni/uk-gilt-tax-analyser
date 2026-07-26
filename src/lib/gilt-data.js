@@ -172,18 +172,14 @@ export class GiltDataFetcher {
 
   async getFallbackData() {
     try {
-      console.log('Using complete fallback gilt data (37 gilts)');
-      
+      console.log('Using complete fallback gilt data (33 gilts)');
+
       // Use a simple static fallback with the essential gilts
-      console.log('Using static 37-gilt fallback dataset');
-      
+      console.log('Using static 33-gilt fallback dataset');
+
       const staticGiltData = [
         // Short Term (0-5 years)
-        { name: 'Treasury 2% 2025', couponRate: 2.0, maturityDate: '2025-09-07', cleanPrice: 99.72, currentYield: 4.032 },
-        { name: 'Treasury 3.5% 2025', couponRate: 3.5, maturityDate: '2025-10-22', cleanPrice: 99.82, currentYield: 4.18 },
-        { name: 'Treasury 0.125% 2026', couponRate: 0.125, maturityDate: '2026-01-30', cleanPrice: 98.37, currentYield: 3.233 },
         { name: 'Treasury 0.375% 2026', couponRate: 0.375, maturityDate: '2026-10-22', cleanPrice: 96.02, currentYield: 3.629 },
-        { name: 'Treasury 1.5% 2026', couponRate: 1.5, maturityDate: '2026-07-22', cleanPrice: 97.74, currentYield: 3.8 },
         { name: 'Treasury 4.125% 2027', couponRate: 4.125, maturityDate: '2027-01-29', cleanPrice: 100.3, currentYield: 3.92 },
         { name: 'Treasury 3.75% 2027', couponRate: 3.75, maturityDate: '2027-03-07', cleanPrice: 99.75, currentYield: 3.907 },
         { name: 'Treasury 1.25% 2027', couponRate: 1.25, maturityDate: '2027-07-22', cleanPrice: 95.15, currentYield: 3.777 },
@@ -328,10 +324,6 @@ export class GiltDataFetcher {
       
       // Use authentic market prices from DividendData as of July 21, 2025 close
       const currentMarketGiltData = [
-        { name: "Treasury 2% 2025", couponRate: 2.0, cleanPrice: 99.74, currentYield: 4.046, maturityDate: "2025-09-07" },
-        { name: "Treasury 3.5% 2025", couponRate: 3.5, cleanPrice: 99.84, currentYield: 4.128, maturityDate: "2025-10-22" },
-        { name: "Treasury 0.125% 2026", couponRate: 0.125, cleanPrice: 98.42, currentYield: 3.201, maturityDate: "2026-01-30" },
-        { name: "Treasury 1.5% 2026", couponRate: 1.5, cleanPrice: 97.84, currentYield: 3.72, maturityDate: "2026-07-22" },
         { name: "Treasury 0.375% 2026", couponRate: 0.375, cleanPrice: 96.13, currentYield: 3.564, maturityDate: "2026-10-22" },
         { name: "Treasury 4.125% 2027", couponRate: 4.125, cleanPrice: 100.4, currentYield: 3.851, maturityDate: "2027-01-29" },
         { name: "Treasury 3.75% 2027", couponRate: 3.75, cleanPrice: 99.86, currentYield: 3.837, maturityDate: "2027-03-07" },

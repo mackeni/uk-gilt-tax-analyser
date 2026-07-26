@@ -1,6 +1,5 @@
 /**
  * UK Gilt Tax Efficiency Analyser - Cloudflare Worker
- * Converted from Streamlit application
  */
 
 import { GiltDataFetcher } from './lib/gilt-data.js';

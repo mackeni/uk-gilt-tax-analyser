@@ -37,7 +37,7 @@ Alpha Vantage returns ISO dates ("2026-06-04"). The `generateLiveGiltPrices()` f
 - `'fallback'` → "⚠️ Static data" (last resort, very old)
 
 ## Local Dev Limitation
-`wrangler dev` in the Replit sandbox fails ALL outbound HTTPS with "TLS peer's certificate is not trusted". APIs cannot be tested locally — must deploy to Cloudflare production to test API integrations.
+`wrangler dev` in some sandboxed dev environments fails ALL outbound HTTPS with "TLS peer's certificate is not trusted". APIs cannot be tested locally in those environments — must deploy to Cloudflare production to test API integrations.
 
 ## Key Files
 - `src/lib/api-data-fetcher.js`: `fetchDailyGiltData()`, `generateLiveGiltPrices()`, fetch calls with AbortController
