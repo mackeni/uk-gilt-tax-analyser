@@ -1,6 +1,6 @@
 # UK Gilt Tax Efficiency Analyser - Cloudflare Worker
 
-A high-performance web application for analysing UK gilt tax efficiency, converted from Python/Streamlit to JavaScript/Cloudflare Workers.
+A high-performance web application for analysing UK gilt tax efficiency, built on JavaScript/Cloudflare Workers.
 
 ## Features
 
@@ -173,21 +173,6 @@ ENVIRONMENT = "production"
 - **Duration Filtering and Sorting**: Gilts displayed in increasing duration order with a dual-range slider filter for years to maturity
 - **Interactive Explanations**: Clickable table cells and modal windows provide step-by-step breakdowns of calculations
 - **Data Source Attribution**: Clear indication of data source (live APIs vs verified historical) with timestamps
-
-## Migration from Streamlit
-
-### Key Changes
-1. **Runtime**: Python → JavaScript (Node.js)
-2. **Hosting**: Server-based → Edge/Serverless
-3. **UI**: Streamlit components → Pure HTML/CSS/JS
-4. **Data**: Pandas → Native JavaScript arrays/objects
-5. **API**: Direct function calls → HTTP endpoints
-
-### Preserved Features
-- All original tax calculations
-- Coupon scheduling logic
-- Data fetching strategies
-- UI functionality and design principles
 
 ## Contributing
 
