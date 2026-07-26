@@ -80,12 +80,7 @@ npm install
 npx wrangler login
 ```
 
-3. **Create D1 Database (optional):**
-```bash
-npx wrangler d1 create gilt-analyser-db
-```
-
-4. **Deploy:**
+3. **Deploy:**
 ```bash
 npx wrangler deploy
 ```
@@ -100,13 +95,12 @@ npx wrangler dev
 
 ### Environment Variables
 - `ENVIRONMENT`: Production/development environment
-- `DATABASE_URL`: D1 database connection (optional)
 
 ### wrangler.toml
 ```toml
 name = "uk-gilt-tax-analyser"
 main = "src/index.js"
-compatibility_date = "2024-03-18"
+compatibility_date = "2024-07-01"
 
 [vars]
 ENVIRONMENT = "production"
@@ -181,10 +175,6 @@ ENVIRONMENT = "production"
 3. Make your changes
 4. Test thoroughly
 5. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file for details
 
 ## Support
 
