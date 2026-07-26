@@ -130,7 +130,7 @@ ENVIRONMENT = "production"
 ### Primary Sources
 - UK Debt Management Office (DMO)
 - DividendData.co.uk
-- Financial market data providers
+- Financial market data providers: Alpha Vantage (primary), Finnhub (secondary), Financial Modeling Prep (tertiary)
 
 ### Data Integrity
 - No synthetic or mock data
@@ -160,6 +160,19 @@ ENVIRONMENT = "production"
 - Appropriate cross-origin policies
 - Secure headers
 - Rate limiting
+
+### Security Headers
+- CSP `frame-ancestors 'none'`, HSTS, COEP, COOP, and CORP
+
+## Feature Highlights
+
+- **Live Gilt Data System**: Multi-tier data fetching with live API integration (Alpha Vantage, Finnhub, FMP) and authenticated fallback to verified DividendData.co.uk prices
+- **PSA Confirmation System**: Allows users to confirm or customise their Personal Savings Allowance
+- **Dealing Charge Modeling**: Configurable dealing charge (default £5) affecting investment cost and IRR calculations
+- **Monthly Account Charge Schedule**: Detailed display of monthly account charges and their impact on net returns
+- **Duration Filtering and Sorting**: Gilts displayed in increasing duration order with a dual-range slider filter for years to maturity
+- **Interactive Explanations**: Clickable table cells and modal windows provide step-by-step breakdowns of calculations
+- **Data Source Attribution**: Clear indication of data source (live APIs vs verified historical) with timestamps
 
 ## Migration from Streamlit
 
