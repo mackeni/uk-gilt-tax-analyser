@@ -23,24 +23,27 @@ export class CouponScheduler {
     let currentDate = new Date(maturity);
     
     // Generate payment dates working backwards from maturity
-    // Use exact 6-month intervals based on the maturity date pattern
+    // Use exact 6-month intervals based on the maturity date pattern.
+    // Build newest-first via push (O(1) each) then reverse once at the
+    // end, instead of unshift-ing into the front on every iteration
+    // (which is O(n) per call and O(n^2) overall for long-dated gilts).
     while (currentDate > today) {
       const paymentDate = this.adjustForBusinessDay(new Date(currentDate));
       const daysToPayment = Math.floor((paymentDate - today) / (1000 * 60 * 60 * 24));
-      
-      schedule.unshift({
+
+      schedule.push({
         paymentDate: paymentDate,
         daysToPayment: daysToPayment,
         couponAmount: couponAmount,
         principalAmount: isSameDay(paymentDate, maturity) ? faceValue : 0,
         totalPayment: couponAmount + (isSameDay(paymentDate, maturity) ? faceValue : 0)
       });
-      
+
       // Move to exactly 6 months earlier (same day of month, 6 months prior)
       currentDate = addMonths(currentDate, -6);
     }
-    
-    return schedule;
+
+    return schedule.reverse();
   }
 
   calculateAfterTaxCashFlows(schedule, taxRate) {
@@ -115,28 +118,5 @@ export class CouponScheduler {
     const accruedInterest = semiAnnualCoupon * accruedFraction;
     
     return accruedInterest;
-  }
-
-  calculateDirtyPrice(cleanPrice, accruedInterest) {
-    return cleanPrice + accruedInterest;
-  }
-
-  calculateUnitsOwned(investmentAmount, dirtyPrice) {
-    return (investmentAmount / dirtyPrice) * 100;
-  }
-
-  scalePaymentsToInvestment(schedule, investmentAmount, dirtyPrice) {
-    const unitsOwned = this.calculateUnitsOwned(investmentAmount, dirtyPrice);
-    const scalingFactor = unitsOwned / 100;
-    
-    return schedule.map(payment => ({
-      ...payment,
-      couponAmount: payment.couponAmount * scalingFactor,
-      couponTax: payment.couponTax * scalingFactor,
-      afterTaxCoupon: payment.afterTaxCoupon * scalingFactor,
-      principalAmount: payment.principalAmount * scalingFactor,
-      afterTaxTotal: payment.afterTaxTotal * scalingFactor,
-      totalPayment: payment.totalPayment * scalingFactor
-    }));
   }
 }

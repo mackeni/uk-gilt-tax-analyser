@@ -1010,16 +1010,6 @@ export async function renderHomePage(request, env) {
             return utils.calculateDirtyPrice(cleanPrice, accruedInterest);
         }
         
-        function findLastCouponDate(maturityDate, referenceDate) {
-            if (!utilsLoaded) throw new Error('Utils not loaded yet');
-            return utils.findLastCouponDate(maturityDate, referenceDate);
-        }
-        
-        function findNextCouponDate(maturityDate, referenceDate) {
-            if (!utilsLoaded) throw new Error('Utils not loaded yet');
-            return utils.findNextCouponDate(maturityDate, referenceDate);
-        }
-        
         function getTaxRateInfo(taxBracket) {
             if (!utilsLoaded) throw new Error('Utils not loaded yet');
             return utils.getTaxRateInfo(taxBracket);
@@ -1071,16 +1061,6 @@ export async function renderHomePage(request, env) {
             return result;
         }
         
-        function getCacheStats() {
-            if (!utilsLoaded) return null;
-            const utilsStats = utils.getCacheStats ? utils.getCacheStats() : null;
-            return {
-                utilsCache: utilsStats,
-                complexCache: { size: complexCalculationCache.size },
-                total: (utilsStats?.cacheSize || 0) + complexCalculationCache.size
-            };
-        }
-        
         function clearAllCaches() {
             complexCalculationCache.clear();
             if (utilsLoaded && utils.clearCache) {
@@ -1126,48 +1106,6 @@ export async function renderHomePage(request, env) {
             }, 100);
         }
         
-        async function loadFallbackData() {
-            const loadingDiv = document.getElementById('loading');
-            const errorDiv = document.getElementById('error');
-            
-            if (loadingDiv) loadingDiv.style.display = 'block';
-            if (errorDiv) errorDiv.style.display = 'none';
-            
-            try {
-                currentGiltData = await getFallbackGiltData();
-
-                
-                if (!currentGiltData || currentGiltData.length === 0) {
-                    throw new Error('Fallback data is empty or null');
-                }
-                
-                if (loadingDiv) loadingDiv.style.display = 'none';
-                const filterControls = document.getElementById('filterControls');
-                if (filterControls) filterControls.style.display = 'block';
-                
-                // Create data freshness message for fallback data
-                const fallbackResult = {
-                    data: currentGiltData,
-                    dataSource: 'fallback',
-                    priceDate: '19/07/2025'
-                };
-                showDataFreshnessMessage(fallbackResult);
-                
-
-                calculateTaxEfficiency();
-            } catch (error) {
-                console.error('=== FALLBACK DATA FAILED ===');
-                console.error('Error details:', error);
-                console.error('Error stack:', error.stack);
-                
-                if (loadingDiv) loadingDiv.style.display = 'none';
-                if (errorDiv) {
-                    errorDiv.style.display = 'block';
-                    errorDiv.textContent = 'Unable to load gilt data: ' + error.message;
-                }
-            }
-        }
-        
         function setupEventListeners() {
             // Set up standard listeners
             document.getElementById('taxBracket').addEventListener('change', updateTaxSettings);
@@ -1185,19 +1123,6 @@ export async function renderHomePage(request, env) {
             document.getElementById('accountChargeMax').addEventListener('input', updateAccountChargeSettings);
         }
         
-        function updateDealingCharge() {
-            const value = document.getElementById('dealingCharge').value;
-            const dealingCharge = value === '' ? 5 : (parseFloat(value) || 5);
-            currentSettings.dealingCharge = Math.max(0, dealingCharge); // Ensure non-negative
-            
-            // Clear cache since dealing charge affects calculations
-            clearAllCaches();
-            
-            if (currentGiltData.length > 0) {
-                calculateTaxEfficiency();
-            }
-        }
-
         function updateInvestmentAmount() {
             const investmentAmount = parseFloat(document.getElementById('investmentAmount').value) || 10000;
             currentSettings.investmentAmount = investmentAmount;
@@ -1515,64 +1440,6 @@ export async function renderHomePage(request, env) {
             }
         }
         
-        async function getFallbackGiltData() {
-
-            
-            // Ensure utils are loaded before processing fallback data
-            await ensureUtilsLoaded();
-            
-            const today = new Date();
-
-            const fallbackData = [
-                { name: "Treasury 2% 2025", couponRate: 2.0, cleanPrice: 99.72, currentYield: 4.073, maturityDate: "2025-09-07" },
-                { name: "Treasury 3.5% 2025", couponRate: 3.5, cleanPrice: 99.82, currentYield: 4.187, maturityDate: "2025-10-22" },
-                { name: "Treasury 0.125% 2026", couponRate: 0.125, cleanPrice: 98.37, currentYield: 3.25, maturityDate: "2026-01-30" },
-                { name: "Treasury 1.5% 2026", couponRate: 1.5, cleanPrice: 97.74, currentYield: 3.806, maturityDate: "2026-07-22" },
-                { name: "Treasury 0.375% 2026", couponRate: 0.375, cleanPrice: 96.02, currentYield: 3.636, maturityDate: "2026-10-22" },
-                { name: "Treasury 4.125% 2027", couponRate: 4.125, cleanPrice: 100.3, currentYield: 3.92, maturityDate: "2027-01-29" },
-                { name: "Treasury 3.75% 2027", couponRate: 3.75, cleanPrice: 99.75, currentYield: 3.907, maturityDate: "2027-03-07" },
-                { name: "Treasury 1.25% 2027", couponRate: 1.25, cleanPrice: 95.15, currentYield: 3.781, maturityDate: "2027-07-22" },
-                { name: "Treasury 4.25% 2027", couponRate: 4.25, cleanPrice: 101.15, currentYield: 3.74, maturityDate: "2027-12-07" },
-                { name: "Treasury 0.125% 2028", couponRate: 0.125, cleanPrice: 91.41, currentYield: 3.709, maturityDate: "2028-01-31" },
-                { name: "Treasury 4.375% 2028", couponRate: 4.375, cleanPrice: 101.06, currentYield: 3.946, maturityDate: "2028-03-07" },
-                { name: "Treasury 4.5% 2028", couponRate: 4.5, cleanPrice: 101.57, currentYield: 3.918, maturityDate: "2028-06-07" },
-                { name: "Treasury 1.625% 2028", couponRate: 1.625, cleanPrice: 93.44, currentYield: 3.782, maturityDate: "2028-10-22" },
-                { name: "Treasury 6% 2028", couponRate: 6.0, cleanPrice: 106.94, currentYield: 3.794, maturityDate: "2028-12-07" },
-                { name: "Treasury 0.5% 2029", couponRate: 0.5, cleanPrice: 88.96, currentYield: 3.873, maturityDate: "2029-01-31" },
-                { name: "Treasury 4.125% 2029", couponRate: 4.125, cleanPrice: 100.42, currentYield: 4.01, maturityDate: "2029-07-22" },
-                { name: "Treasury 0.875% 2029", couponRate: 0.875, cleanPrice: 88.29, currentYield: 3.884, maturityDate: "2029-10-22" },
-                { name: "Treasury 4.375% 2030", couponRate: 4.375, cleanPrice: 101.17, currentYield: 4.094, maturityDate: "2030-03-07" },
-                { name: "Treasury 0.375% 2030", couponRate: 0.375, cleanPrice: 82.96, currentYield: 4.0, maturityDate: "2030-10-22" },
-                { name: "Treasury 4.75% 2030", couponRate: 4.75, cleanPrice: 103.37, currentYield: 4.046, maturityDate: "2030-12-07" }
-            ];
-            
-            const processedData = fallbackData.map(gilt => {
-                // Use cached calculations for fallback data processing
-                const yearsToMaturity = getCachedComplexCalculation('fallbackYears', calculateYearsToMaturity, gilt.maturityDate, today);
-                
-                // Calculate basic accrued interest using consolidated function with caching
-                const accruedInterest = getCachedComplexCalculation('fallbackAccrued', calculateAccruedInterest, gilt.couponRate, gilt.maturityDate, today);
-                const dirtyPrice = getCachedComplexCalculation('fallbackDirty', calculateDirtyPrice, gilt.cleanPrice, accruedInterest);
-                
-                const processedGilt = {
-                    ...gilt,
-                    yearsToMaturity: Math.max(0, yearsToMaturity),
-                    dirtyPrice: dirtyPrice,
-                    accruedInterest: accruedInterest
-                };
-                
-
-                return processedGilt;
-            }).filter(gilt => {
-                const isValid = gilt.yearsToMaturity > 0;
-
-                return isValid;
-            });
-            
-
-            return processedData;
-        }
-        
         async function calculateTaxEfficiency() {
             if (currentGiltData.length === 0) return;
             
@@ -1882,56 +1749,45 @@ export async function renderHomePage(request, env) {
             let rate = 0.05; // Initial guess (5%)
             const tolerance = 1e-7;
             const maxIterations = 100;
-            
+            const now = new Date(); // Fixed reference point for the whole calculation
+
             for (let i = 0; i < maxIterations; i++) {
                 let npv = -initialInvestment;
                 let npvDerivative = 0;
-                
+
                 cashFlows.forEach(cf => {
-                    const yearsFraction = (cf.date - new Date()) / (365.25 * 24 * 60 * 60 * 1000);
+                    const yearsFraction = (cf.date - now) / (365.25 * 24 * 60 * 60 * 1000);
                     if (yearsFraction > 0) {
                         const discountFactor = Math.pow(1 + rate, yearsFraction);
                         npv += cf.amount / discountFactor;
                         npvDerivative -= cf.amount * yearsFraction / (discountFactor * (1 + rate));
                     }
                 });
-                
+
                 if (Math.abs(npv) < tolerance) {
                     return rate;
                 }
-                
+
                 if (Math.abs(npvDerivative) < tolerance) {
                     break;
                 }
-                
+
                 rate = rate - npv / npvDerivative;
-                
+
                 // Keep rate within reasonable bounds
                 rate = Math.max(-0.99, Math.min(10, rate));
             }
-            
+
             // Fallback to simple calculation if IRR doesn't converge
             const totalCashFlow = cashFlows.reduce((sum, cf) => sum + cf.amount, 0);
             const avgYears = cashFlows.reduce((sum, cf) => {
-                const years = (cf.date - new Date()) / (365.25 * 24 * 60 * 60 * 1000);
+                const years = (cf.date - now) / (365.25 * 24 * 60 * 60 * 1000);
                 return sum + years;
             }, 0) / cashFlows.length;
-            
+
             return ((totalCashFlow - initialInvestment) / initialInvestment) / avgYears;
         }
-        
-        function calculateEquivalentSavingsRate(afterTaxYield, savingsRate, psaAmount, incomeTaxRate, investmentAmount) {
-            // Calculate what savings rate would give same after-tax return
-            const targetAfterTaxReturn = (afterTaxYield / 100) * investmentAmount;
-            
-            // Work backwards from desired after-tax return to required gross rate
-            const annualInterest = targetAfterTaxReturn;
-            const taxableInterest = Math.max(0, annualInterest - psaAmount);
-            const grossInterestNeeded = annualInterest + (taxableInterest * incomeTaxRate);
-            
-            return (grossInterestNeeded / investmentAmount) * 100;
-        }
-        
+
         function displayResults(results) {
             const dataDiv = document.getElementById('giltData');
             const metricsDiv = document.getElementById('metrics');

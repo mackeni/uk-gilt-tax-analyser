@@ -359,10 +359,6 @@ export class GiltDataFetcher {
         { name: "Treasury 4.25% 2039", couponRate: 4.25, cleanPrice: 92.79, currentYield: 4.966, maturityDate: "2039-09-07" }
       ];
 
-      // Calculate years to maturity for each gilt using consolidated utility
-      const { calculateYearsToMaturity } = await import('./utils.js');
-      const today = new Date();
-      
       console.log(`Using authentic DividendData gilt prices (${currentMarketGiltData.length} gilts) - July 21, 2025 close`);
       
       return {
@@ -521,21 +517,6 @@ export class GiltDataFetcher {
   
   getTodaysDate() {
     return new Date().toLocaleDateString('en-GB');
-  }
-
-  async fetchFromFinnhub() {
-    // Finnhub API implementation would go here
-    return null;
-  }
-
-  async fetchFromAlphaVantage() {
-    // Alpha Vantage API implementation would go here
-    return null;
-  }
-
-  async fetchFromFMP() {
-    // Financial Modeling Prep API implementation would go here
-    return null;
   }
 
   calculateLastCouponDate(maturityDate) {

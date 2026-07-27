@@ -5,10 +5,8 @@
 import { GiltDataFetcher } from './lib/gilt-data.js';
 import { TaxCalculator } from './lib/tax-calculator';
 import { CouponScheduler } from './lib/coupon-scheduler';
-import { formatCurrency, formatPercentage, calculateYearsToMaturity } from './lib/utils';
 import { renderHomePage } from './views/home';
 import { renderAnalysisPage } from './views/analysis';
-import { renderAPIResponse } from './views/api';
 
 export default {
   async fetch(request, env, ctx) {
@@ -218,139 +216,6 @@ export function calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate
   return afterTaxYield / (1 - incomeTaxRate);
 }
 
-// Simple utility functions
-export function roundToTwo(num) {
-  return Math.round(num * 100) / 100;
-}
-
-export function sortData(data, sortBy, ascending = true) {
-  return [...data].sort((a, b) => {
-    let aVal = a[sortBy];
-    let bVal = b[sortBy];
-    
-    // Handle numeric values
-    if (typeof aVal === 'number' && typeof bVal === 'number') {
-      return ascending ? aVal - bVal : bVal - aVal;
-    }
-    
-    // Handle string values
-    if (typeof aVal === 'string' && typeof bVal === 'string') {
-      return ascending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-    }
-    
-    // Handle dates
-    if (aVal instanceof Date && bVal instanceof Date) {
-      return ascending ? aVal - bVal : bVal - aVal;
-    }
-    
-    return 0;
-  });
-}
-
-export function filterData(data, filters) {
-  return data.filter(item => {
-    return Object.entries(filters).every(([key, { min, max }]) => {
-      const value = item[key];
-      if (typeof value !== 'number') return true;
-      
-      if (min !== undefined && value < min) return false;
-      if (max !== undefined && value > max) return false;
-      
-      return true;
-    });
-  });
-}
-
-export function generateChartData(data, xField, yFields) {
-  const chartData = {
-    labels: data.map(item => item[xField]),
-    datasets: yFields.map(field => ({
-      label: field.label,
-      data: data.map(item => item[field.key]),
-      backgroundColor: field.color || '#3498db',
-      borderColor: field.borderColor || field.color || '#2980b9',
-      borderWidth: 1
-    }))
-  };
-  
-  return chartData;
-}
-
-export function calculateInvestmentMetrics(investmentAmount, dirtyPrice, couponRate, yearsToMaturity) {
-  const unitsOwned = (investmentAmount / dirtyPrice) * 100;
-  const annualCouponIncome = unitsOwned * couponRate;
-  const totalCouponIncome = annualCouponIncome * yearsToMaturity;
-  const principalRepayment = unitsOwned; // £100 per £100 nominal
-  const totalReturn = totalCouponIncome + principalRepayment;
-  
-  return {
-    unitsOwned,
-    annualCouponIncome,
-    totalCouponIncome,
-    principalRepayment,
-    totalReturn
-  };
-}
-
-export function validateGiltData(gilt) {
-  const required = ['name', 'couponRate', 'maturityDate', 'currentYield'];
-  
-  for (const field of required) {
-    if (gilt[field] === undefined || gilt[field] === null) {
-      return false;
-    }
-  }
-  
-  // Validate numeric fields
-  const numericFields = ['couponRate', 'currentYield', 'cleanPrice', 'dirtyPrice'];
-  for (const field of numericFields) {
-    if (gilt[field] !== undefined && (isNaN(gilt[field]) || gilt[field] < 0)) {
-      return false;
-    }
-  }
-  
-  // Validate date
-  const maturityDate = new Date(gilt.maturityDate);
-  if (isNaN(maturityDate.getTime())) {
-    return false;
-  }
-  
-  return true;
-}
-
-export function createDataTable(data, columns) {
-  const headers = columns.map(col => col.header);
-  const rows = data.map(item => 
-    columns.map(col => {
-      const value = item[col.key];
-      return col.formatter ? col.formatter(value) : value;
-    })
-  );
-  
-  return {
-    headers,
-    rows
-  };
-}
-
-export function debounce(func, delay) {
-  let timeoutId;
-  return function (...args) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func.apply(this, args), delay);
-  };
-}
-
-export function throttle(func, limit) {
-  let inThrottle;
-  return function (...args) {
-    if (!inThrottle) {
-      func.apply(this, args);
-      inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
-    }
-  };
-}
 `;
     
     return new Response(utilsContent, {
@@ -624,17 +489,7 @@ async function calculateTax(request, env) {
       }));
       
       return new Response(JSON.stringify(results), {
-        headers: { 
-          'Content-Type': 'application/json; charset=utf-8',
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'no-cache',
-          'X-Content-Type-Options': 'nosniff',
-          'Referrer-Policy': 'strict-origin-when-cross-origin',
-          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-          'Cross-Origin-Resource-Policy': 'cross-origin',
-          'Origin-Agent-Cluster': '?1',
-          'X-Permitted-Cross-Domain-Policies': 'none'
-        }
+        headers: { ...JSON_HEADERS, 'Cache-Control': 'no-cache' }
       });
     } else {
       // Calculate for single gilt
@@ -648,33 +503,13 @@ async function calculateTax(request, env) {
       );
       
       return new Response(JSON.stringify({ afterTaxYield: result }), {
-        headers: { 
-          'Content-Type': 'application/json; charset=utf-8',
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'no-cache',
-          'X-Content-Type-Options': 'nosniff',
-          'Referrer-Policy': 'strict-origin-when-cross-origin',
-          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-          'Cross-Origin-Resource-Policy': 'cross-origin',
-          'Origin-Agent-Cluster': '?1',
-          'X-Permitted-Cross-Domain-Policies': 'none'
-        }
+        headers: { ...JSON_HEADERS, 'Cache-Control': 'no-cache' }
       });
     }
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { 
-        'Content-Type': 'application/json; charset=utf-8',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-cache',
-        'X-Content-Type-Options': 'nosniff',
-        'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-        'Cross-Origin-Resource-Policy': 'cross-origin',
-        'Origin-Agent-Cluster': '?1',
-        'X-Permitted-Cross-Domain-Policies': 'none'
-      }
+      headers: { ...JSON_HEADERS, 'Cache-Control': 'no-cache' }
     });
   }
 }

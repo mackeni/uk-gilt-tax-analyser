@@ -144,10 +144,6 @@ export class TaxCalculator {
     }
   }
 
-  calculateTaxAdvantage(giltAfterTaxYield, savingsAfterTaxRate) {
-    return giltAfterTaxYield - savingsAfterTaxRate;
-  }
-
   calculateAnnualAdvantage(taxAdvantage, investmentAmount) {
     return investmentAmount * (taxAdvantage / 100);
   }
