@@ -3,6 +3,19 @@
  * Fetches real UK gilt prices from verified financial data sources
  */
 
+// Cloudflare Workers' fetch doesn't support the `timeout` option (WHATWG
+// Fetch spec has no such field) — an AbortController is the only way to
+// bound a fetch call. This helper centralizes that pattern.
+async function fetchWithTimeout(url, timeoutMs) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export class APIDataFetcher {
   constructor(env) {
     this.env = env;
@@ -62,19 +75,11 @@ export class APIDataFetcher {
     try {
       console.log('Attempting live Alpha Vantage API call...');
       
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
-      
-      let response;
-      try {
-        response = await fetch(
-          `https://www.alphavantage.co/query?function=TREASURY_YIELD&interval=daily&maturity=10year&apikey=${this.env.ALPHA_VANTAGE_API_KEY}`,
-          { signal: controller.signal }
-        );
-      } finally {
-        clearTimeout(timeoutId);
-      }
-      
+      const response = await fetchWithTimeout(
+        `https://www.alphavantage.co/query?function=TREASURY_YIELD&interval=daily&maturity=10year&apikey=${this.env.ALPHA_VANTAGE_API_KEY}`,
+        12000
+      );
+
       if (!response.ok) {
         throw new Error(`Alpha Vantage HTTP ${response.status}`);
       }
@@ -108,18 +113,11 @@ export class APIDataFetcher {
     try {
       console.log('Attempting live Finnhub API call...');
       
-      const finnhubController = new AbortController();
-      const finnhubTimeout = setTimeout(() => finnhubController.abort(), 10000);
-      let response;
-      try {
-        response = await fetch(
-          `https://finnhub.io/api/v1/quote?symbol=GB10Y-GB&token=${this.env.FINNHUB_API_KEY}`,
-          { signal: finnhubController.signal }
-        );
-      } finally {
-        clearTimeout(finnhubTimeout);
-      }
-      
+      const response = await fetchWithTimeout(
+        `https://finnhub.io/api/v1/quote?symbol=GB10Y-GB&token=${this.env.FINNHUB_API_KEY}`,
+        10000
+      );
+
       if (response.ok) {
         const data = await response.json();
         
@@ -140,18 +138,11 @@ export class APIDataFetcher {
     try {
       console.log('Attempting live FMP API call...');
       
-      const fmpController = new AbortController();
-      const fmpTimeout = setTimeout(() => fmpController.abort(), 10000);
-      let response;
-      try {
-        response = await fetch(
-          `https://financialmodelingprep.com/api/v3/treasury?apikey=${this.env.FMP_API_KEY}`,
-          { signal: fmpController.signal }
-        );
-      } finally {
-        clearTimeout(fmpTimeout);
-      }
-      
+      const response = await fetchWithTimeout(
+        `https://financialmodelingprep.com/api/v3/treasury?apikey=${this.env.FMP_API_KEY}`,
+        10000
+      );
+
       if (response.ok) {
         const data = await response.json();
         
