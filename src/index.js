@@ -222,7 +222,7 @@ export function calculateEquivalentGrossSavingsRate(afterTaxYield, incomeTaxRate
       headers: {
         'Content-Type': 'application/javascript; charset=utf-8',
         'Cache-Control': 'public, max-age=31536000, immutable',
-        'ETag': '"utils-v1.0"',
+        'ETag': '"utils-v1.1"',
         'X-Content-Type-Options': 'nosniff',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',

@@ -3,18 +3,7 @@
  * Fetches real UK gilt prices from verified financial data sources
  */
 
-// Cloudflare Workers' fetch doesn't support the `timeout` option (WHATWG
-// Fetch spec has no such field) — an AbortController is the only way to
-// bound a fetch call. This helper centralizes that pattern.
-async function fetchWithTimeout(url, timeoutMs) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { signal: controller.signal });
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
+import { fetchWithTimeout } from './fetch-with-timeout.js';
 
 export class APIDataFetcher {
   constructor(env) {
