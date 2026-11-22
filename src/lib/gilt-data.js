@@ -3,6 +3,15 @@
  * Fetches real-time UK government bond data from authentic market sources
  */
 
+import { fetchWithTimeout } from './fetch-with-timeout.js';
+
+const DIVIDENDDATA_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (compatible; GiltAnalyser/1.0)',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+  'Accept-Language': 'en-GB,en;q=0.5',
+  'Cache-Control': 'no-cache'
+};
+
 export class GiltDataFetcher {
   constructor(env) {
     this.env = env;
@@ -267,22 +276,11 @@ export class GiltDataFetcher {
       console.log('Trying DividendData...');
       try {
         // First try the dynamic data endpoint
-        const ddController = new AbortController();
-        const ddTimeout = setTimeout(() => ddController.abort(), 8000);
-        let dataResponse;
-        try {
-          dataResponse = await fetch('https://www.dividenddata.co.uk/uk-gilts-prices-yields.py?showCompDetails=999&sort=0&order=0', {
-            signal: ddController.signal,
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (compatible; GiltAnalyser/1.0)',
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-              'Accept-Language': 'en-GB,en;q=0.5',
-              'Cache-Control': 'no-cache'
-            }
-          });
-        } finally {
-          clearTimeout(ddTimeout);
-        }
+        const dataResponse = await fetchWithTimeout(
+          'https://www.dividenddata.co.uk/uk-gilts-prices-yields.py?showCompDetails=999&sort=0&order=0',
+          8000,
+          { headers: DIVIDENDDATA_HEADERS }
+        );
         
         if (dataResponse.ok) {
           const dataHtml = await dataResponse.text();
@@ -297,15 +295,11 @@ export class GiltDataFetcher {
         }
         
         // Fallback to main page
-        const response = await fetch('https://www.dividenddata.co.uk/uk-gilts-prices-yields.py', {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; GiltAnalyser/1.0)',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-GB,en;q=0.5',
-            'Cache-Control': 'no-cache'
-          },
-          timeout: 8000
-        });
+        const response = await fetchWithTimeout(
+          'https://www.dividenddata.co.uk/uk-gilts-prices-yields.py',
+          8000,
+          { headers: DIVIDENDDATA_HEADERS }
+        );
         
         if (response.ok) {
           const html = await response.text();

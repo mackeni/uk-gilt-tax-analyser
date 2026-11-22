@@ -30,13 +30,16 @@ export class CouponScheduler {
     while (currentDate > today) {
       const paymentDate = this.adjustForBusinessDay(new Date(currentDate));
       const daysToPayment = Math.floor((paymentDate - today) / (1000 * 60 * 60 * 24));
+      // Compare the unadjusted date: paymentDate may have been rolled forward
+      // past a weekend maturity, which would otherwise drop the principal.
+      const principalAmount = isSameDay(currentDate, maturity) ? faceValue : 0;
 
       schedule.push({
         paymentDate: paymentDate,
         daysToPayment: daysToPayment,
         couponAmount: couponAmount,
-        principalAmount: isSameDay(paymentDate, maturity) ? faceValue : 0,
-        totalPayment: couponAmount + (isSameDay(paymentDate, maturity) ? faceValue : 0)
+        principalAmount: principalAmount,
+        totalPayment: couponAmount + principalAmount
       });
 
       // Move to exactly 6 months earlier (same day of month, 6 months prior)

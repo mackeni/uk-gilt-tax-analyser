@@ -987,7 +987,7 @@ export async function renderHomePage(request, env) {
         
         async function ensureUtilsLoaded() {
             if (!utilsLoaded) {
-                utils = await import('../lib/utils.js?v=1.0');
+                utils = await import('../lib/utils.js?v=1.1');
                 utilsLoaded = true;
 
             }
@@ -1778,12 +1778,19 @@ export async function renderHomePage(request, env) {
                 rate = Math.max(-0.99, Math.min(10, rate));
             }
 
-            // Fallback to simple calculation if IRR doesn't converge
-            const totalCashFlow = cashFlows.reduce((sum, cf) => sum + cf.amount, 0);
-            const avgYears = cashFlows.reduce((sum, cf) => {
-                const years = (cf.date - now) / (365.25 * 24 * 60 * 60 * 1000);
-                return sum + years;
-            }, 0) / cashFlows.length;
+            // Fallback to simple calculation if IRR doesn't converge.
+            // Only future cash flows count; with none (or a non-positive
+            // average horizon) there is no meaningful annualised yield.
+            const msPerYear = 365.25 * 24 * 60 * 60 * 1000;
+            const futureFlows = cashFlows.filter(cf => cf.date - now > 0);
+            if (futureFlows.length === 0 || !(initialInvestment > 0)) {
+                return 0;
+            }
+            const totalCashFlow = futureFlows.reduce((sum, cf) => sum + cf.amount, 0);
+            const avgYears = futureFlows.reduce((sum, cf) => sum + (cf.date - now) / msPerYear, 0) / futureFlows.length;
+            if (!(avgYears > 0)) {
+                return 0;
+            }
 
             return ((totalCashFlow - initialInvestment) / initialInvestment) / avgYears;
         }
