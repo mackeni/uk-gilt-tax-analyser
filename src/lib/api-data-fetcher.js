@@ -3,7 +3,7 @@
  * Fetches real UK gilt prices from verified financial data sources
  */
 
-import { fetchWithTimeout } from './fetch-with-timeout.js';
+import { fetchWithTimeout, readJson } from './fetch-with-timeout.js';
 
 export class APIDataFetcher {
   constructor(env) {
@@ -66,14 +66,16 @@ export class APIDataFetcher {
       
       const response = await fetchWithTimeout(
         `https://www.alphavantage.co/query?function=TREASURY_YIELD&interval=daily&maturity=10year&apikey=${this.env.ALPHA_VANTAGE_API_KEY}`,
-        12000
+        12000,
+        {},
+        readJson
       );
 
       if (!response.ok) {
         throw new Error(`Alpha Vantage HTTP ${response.status}`);
       }
       
-      const data = await response.json();
+      const data = response.body;
       
       if (data.Information || data.Note) {
         console.warn('Alpha Vantage rate limited:', data.Information || data.Note);
@@ -104,11 +106,13 @@ export class APIDataFetcher {
       
       const response = await fetchWithTimeout(
         `https://finnhub.io/api/v1/quote?symbol=GB10Y-GB&token=${this.env.FINNHUB_API_KEY}`,
-        10000
+        10000,
+        {},
+        readJson
       );
 
       if (response.ok) {
-        const data = await response.json();
+        const data = response.body;
         
         if (data.c && data.c > 0 && data.c < 15) {
           console.log(`✓ Live Finnhub: UK 10-year = ${data.c}%`);
@@ -129,11 +133,13 @@ export class APIDataFetcher {
       
       const response = await fetchWithTimeout(
         `https://financialmodelingprep.com/api/v3/treasury?apikey=${this.env.FMP_API_KEY}`,
-        10000
+        10000,
+        {},
+        readJson
       );
 
       if (response.ok) {
-        const data = await response.json();
+        const data = response.body;
         
         if (Array.isArray(data) && data.length > 0) {
           const ukTreasury = data.find(item => 

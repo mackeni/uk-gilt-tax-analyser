@@ -152,7 +152,7 @@ export class TaxCalculator {
     // IRR calculation using Newton-Raphson method
     // Finds the discount rate where NPV = 0
     
-    if (!cashFlowSchedule || cashFlowSchedule.length === 0) {
+    if (!cashFlowSchedule || cashFlowSchedule.length === 0 || !(initialInvestment > 0)) {
       return 0;
     }
     
@@ -200,11 +200,19 @@ export class TaxCalculator {
       if (rate > 10) rate = 10;
     }
     
-    // If IRR calculation fails, fallback to simple method
-    const totalCashFlow = cashFlows.slice(1).reduce((sum, cf) => sum + cf, 0);
+    // If IRR calculation fails, fallback to simple method using only
+    // future payments (matching the client-side calculateIRR fallback)
+    const future = [];
+    for (let j = 1; j < cashFlows.length; j++) {
+      if (timePoints[j] > 0) future.push(j);
+    }
+    if (future.length === 0) {
+      return 0;
+    }
+    const totalCashFlow = future.reduce((sum, j) => sum + cashFlows[j], 0);
     const totalReturn = (totalCashFlow - initialInvestment) / initialInvestment;
-    const avgTimeToPayment = timePoints.slice(1).reduce((sum, time) => sum + time, 0) / (timePoints.length - 1);
-    
+    const avgTimeToPayment = future.reduce((sum, j) => sum + timePoints[j], 0) / future.length;
+
     return avgTimeToPayment > 0 ? totalReturn / avgTimeToPayment : 0;
   }
 }
