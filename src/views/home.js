@@ -1517,6 +1517,12 @@ export async function renderHomePage(request, env) {
                 
                 // Calculate after-tax yield using IRR method with caching (includes dealing charge and account charges)
                 const afterTaxYield = getCachedComplexCalculation('afterTaxIRR_' + dealingCharge + '_' + gilt.name + accountChargeKey, calculateAfterTaxIRR, gilt, unitsOwned, incomeTaxRate);
+
+                // No meaningful yield (e.g. no future cash flows or a bad
+                // price): leave the gilt out rather than show a fake 0.00%
+                if (afterTaxYield === null || !Number.isFinite(afterTaxYield)) {
+                    return null;
+                }
                 
                 // Use cached equivalent rate calculation
                 const equivalentGrossSavingsRate = getCachedComplexCalculation('equivalentRate_' + afterTaxYield, calculateEquivalentGrossSavingsRate, afterTaxYield, incomeTaxRate);
@@ -1543,7 +1549,7 @@ export async function renderHomePage(request, env) {
                     extraIncome: extraIncome,
                     unitsOwned: unitsOwned
                 };
-            });
+            }).filter(result => result !== null);
         }
         
         function calculateAfterTaxIRR(gilt, unitsOwned, incomeTaxRate) {
@@ -1590,7 +1596,7 @@ export async function renderHomePage(request, env) {
             
             // Calculate IRR with dealing charge included in initial cost
             const irr = calculateIRR(initialInvestment, cashFlows);
-            return irr * 100; // Convert to percentage
+            return irr === null ? null : irr * 100; // Convert to percentage
         }
         
         function calculateTotalCashFromGilt(gilt, unitsOwned, incomeTaxRate) {
@@ -1656,42 +1662,38 @@ export async function renderHomePage(request, env) {
         }
         
         function generateCouponSchedule(gilt, unitsOwned, incomeTaxRate) {
-            const maturityTime = new Date(gilt.maturityDate).getTime();
+            const maturity = new Date(gilt.maturityDate);
             const todayTime = new Date().getTime();
             const semiAnnualCoupon = (gilt.couponRate / 2 / 100) * unitsOwned;
             const schedule = [];
-            
-            // Pre-calculate values to avoid repeated calculations
-            const sixMonthsMs = 6 * 30.44 * 24 * 60 * 60 * 1000; // Average 6 months
-            let currentTime = maturityTime;
-            
-            // Build schedule forward to avoid unshift operations
-            const tempSchedule = [];
-            while (currentTime > todayTime) {
-                const grossAmount = semiAnnualCoupon;
-                const roundedGrossAmount = roundToTwo(grossAmount);
-                const taxAmount = roundedGrossAmount * incomeTaxRate;
-                const roundedTaxAmount = roundToTwo(taxAmount);
-                const roundedAfterTaxAmount = roundedGrossAmount - roundedTaxAmount;
-                
-                tempSchedule.push({
-                    date: new Date(currentTime).toISOString().split('T')[0],
+
+            // k * 6 calendar months before maturity, computed from maturity
+            // itself so dates don't drift; day clamped to the month's length
+            // (e.g. 31 Mar -> 30 Sep, back to 31 Mar the next step).
+            function monthsBeforeMaturity(months) {
+                const y = maturity.getUTCFullYear();
+                const m = maturity.getUTCMonth() - months;
+                const lastDay = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+                return new Date(Date.UTC(y, m, Math.min(maturity.getUTCDate(), lastDay)));
+            }
+
+            // Collect newest-first, then reverse into date order
+            for (let k = 0; ; k++) {
+                const paymentDate = monthsBeforeMaturity(6 * k);
+                if (paymentDate.getTime() <= todayTime) break;
+
+                const roundedGrossAmount = roundToTwo(semiAnnualCoupon);
+                const roundedTaxAmount = roundToTwo(roundedGrossAmount * incomeTaxRate);
+
+                schedule.push({
+                    date: paymentDate.toISOString().split('T')[0],
                     grossAmount: roundedGrossAmount,
                     taxAmount: roundedTaxAmount,
-                    afterTaxAmount: roundedAfterTaxAmount
+                    afterTaxAmount: roundedGrossAmount - roundedTaxAmount
                 });
-                
-                currentTime -= sixMonthsMs;
             }
-            
-            // Reverse once and filter in single pass
-            for (let i = tempSchedule.length - 1; i >= 0; i--) {
-                const payment = tempSchedule[i];
-                if (new Date(payment.date).getTime() > todayTime) {
-                    schedule.push(payment);
-                }
-            }
-            
+
+            schedule.reverse();
             return schedule;
         }
         
@@ -1784,12 +1786,12 @@ export async function renderHomePage(request, env) {
             const msPerYear = 365.25 * 24 * 60 * 60 * 1000;
             const futureFlows = cashFlows.filter(cf => cf.date - now > 0);
             if (futureFlows.length === 0 || !(initialInvestment > 0)) {
-                return 0;
+                return null; // No meaningful yield
             }
             const totalCashFlow = futureFlows.reduce((sum, cf) => sum + cf.amount, 0);
             const avgYears = futureFlows.reduce((sum, cf) => sum + (cf.date - now) / msPerYear, 0) / futureFlows.length;
             if (!(avgYears > 0)) {
-                return 0;
+                return null;
             }
 
             return ((totalCashFlow - initialInvestment) / initialInvestment) / avgYears;

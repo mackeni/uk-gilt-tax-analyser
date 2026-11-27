@@ -3,7 +3,7 @@
  * Fetches real-time UK government bond data from authentic market sources
  */
 
-import { fetchWithTimeout } from './fetch-with-timeout.js';
+import { fetchWithTimeout, readText } from './fetch-with-timeout.js';
 
 const DIVIDENDDATA_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (compatible; GiltAnalyser/1.0)',
@@ -279,11 +279,12 @@ export class GiltDataFetcher {
         const dataResponse = await fetchWithTimeout(
           'https://www.dividenddata.co.uk/uk-gilts-prices-yields.py?showCompDetails=999&sort=0&order=0',
           8000,
-          { headers: DIVIDENDDATA_HEADERS }
+          { headers: DIVIDENDDATA_HEADERS },
+          readText
         );
         
         if (dataResponse.ok) {
-          const dataHtml = await dataResponse.text();
+          const dataHtml = dataResponse.body;
           const result = this.parseGiltHTML(dataHtml);
           if (result?.data && result.data.length > 0) {
             console.log(`Successfully fetched ${result.data.length} live gilt prices from DividendData`);
@@ -298,11 +299,12 @@ export class GiltDataFetcher {
         const response = await fetchWithTimeout(
           'https://www.dividenddata.co.uk/uk-gilts-prices-yields.py',
           8000,
-          { headers: DIVIDENDDATA_HEADERS }
+          { headers: DIVIDENDDATA_HEADERS },
+          readText
         );
         
         if (response.ok) {
-          const html = await response.text();
+          const html = response.body;
           const result = this.parseGiltHTML(html);
           if (result?.data && result.data.length > 0) {
             console.log(`Successfully fetched ${result.data.length} live gilt prices from DividendData`);

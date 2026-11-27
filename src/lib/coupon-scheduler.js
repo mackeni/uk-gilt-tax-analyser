@@ -3,7 +3,7 @@
  * Generate coupon payment schedules for UK gilts
  */
 
-import { addMonths, addDays, isSameDay, isWeekend } from 'date-fns';
+import { addMonths, addDays, isWeekend } from 'date-fns';
 
 export class CouponScheduler {
   constructor() {
@@ -20,19 +20,20 @@ export class CouponScheduler {
     const couponAmount = (couponRate / couponFrequency) * (faceValue / 100);
     
     const schedule = [];
-    let currentDate = new Date(maturity);
-    
-    // Generate payment dates working backwards from maturity
-    // Use exact 6-month intervals based on the maturity date pattern.
-    // Build newest-first via push (O(1) each) then reverse once at the
-    // end, instead of unshift-ing into the front on every iteration
-    // (which is O(n) per call and O(n^2) overall for long-dated gilts).
-    while (currentDate > today) {
-      const paymentDate = this.adjustForBusinessDay(new Date(currentDate));
+
+    // Generate payment dates working backwards from maturity. Each nominal
+    // date is computed from maturity itself (k * 6 months earlier) rather
+    // than from the previous date, so month-end maturities don't drift
+    // (31 Mar -> 30 Sep -> 30 Mar ...). Whether a payment is still due is
+    // judged on the business-day-adjusted date, which is when it's paid.
+    // Build newest-first via push, then reverse once at the end.
+    for (let k = 0; ; k++) {
+      const nominalDate = addMonths(maturity, -6 * k);
+      const paymentDate = this.adjustForBusinessDay(new Date(nominalDate));
+      if (paymentDate <= today) break;
+
       const daysToPayment = Math.floor((paymentDate - today) / (1000 * 60 * 60 * 24));
-      // Compare the unadjusted date: paymentDate may have been rolled forward
-      // past a weekend maturity, which would otherwise drop the principal.
-      const principalAmount = isSameDay(currentDate, maturity) ? faceValue : 0;
+      const principalAmount = k === 0 ? faceValue : 0;
 
       schedule.push({
         paymentDate: paymentDate,
@@ -41,9 +42,6 @@ export class CouponScheduler {
         principalAmount: principalAmount,
         totalPayment: couponAmount + principalAmount
       });
-
-      // Move to exactly 6 months earlier (same day of month, 6 months prior)
-      currentDate = addMonths(currentDate, -6);
     }
 
     return schedule.reverse();
